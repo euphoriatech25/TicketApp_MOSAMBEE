@@ -21,28 +21,17 @@ import android.widget.Toast;
 
 import com.hornet.dateconverter.DateConverter;
 import com.hornet.dateconverter.Model;
-import com.pax.dal.entity.EBeepMode;
-import com.pax.dal.entity.EDetectMode;
-import com.pax.dal.entity.EPiccType;
 import com.technosales.net.buslocationannouncement.APIToken.TokenManager;
-import com.technosales.net.buslocationannouncement.PrintListenerImpl;
 import com.technosales.net.buslocationannouncement.R;
 import com.technosales.net.buslocationannouncement.activity.CheckBalanceActivity;
 import com.technosales.net.buslocationannouncement.activity.HelperLogin;
 import com.technosales.net.buslocationannouncement.activity.TicketAndTracking;
 import com.technosales.net.buslocationannouncement.base.BaseActivity;
 import com.technosales.net.buslocationannouncement.helper.DatabaseHelper;
-import com.technosales.net.buslocationannouncement.paxsupport.printer.Device;
-import com.technosales.net.buslocationannouncement.paxsupport.printer.PrinterTester;
-import com.technosales.net.buslocationannouncement.paxsupport.printer.ReceiptPrintParam;
-import com.technosales.net.buslocationannouncement.picc.PiccTransaction;
 import com.technosales.net.buslocationannouncement.pojo.ApiError;
 import com.technosales.net.buslocationannouncement.pojo.BlockList;
 import com.technosales.net.buslocationannouncement.pojo.RouteStationList;
 import com.technosales.net.buslocationannouncement.pojo.TicketInfoList;
-import com.technosales.net.buslocationannouncement.printlib.Printer;
-import com.technosales.net.buslocationannouncement.printlib.RxUtils;
-import com.technosales.net.buslocationannouncement.printlib.SysTester;
 import com.technosales.net.buslocationannouncement.serverconn.RetrofitInterface;
 import com.technosales.net.buslocationannouncement.serverconn.ServerConfigNew;
 import com.technosales.net.buslocationannouncement.utils.GeneralUtils;
@@ -98,7 +87,7 @@ public class PayByCardActivity extends BaseActivity {
     boolean stopThread1, stopThread2, stopThread3, stopThread4;
 
     ProgressDialog pClick;
-    EPiccType piccType;
+//    EPiccType piccType;
     int[] customerDetailsBlock = {CUSTOMERID, CUSTOMER_AMT, CUSTOMER_HASH, CUSTOMER_TRANSACTION_NO};
     String status;
     private TokenManager tokenManager;
@@ -280,7 +269,7 @@ public class PayByCardActivity extends BaseActivity {
                         @Override
                         public void run() {
 //                            for (int i = 0; i < customerDetailsBlock.length; i++) {
-                            PiccTransaction.getInstance(piccType).readCustomerDetails(handlerTransaction, customerDetailsBlock);
+//                            PiccTransaction.getInstance(piccType).readCustomerDetails(handlerTransaction, customerDetailsBlock);
 //                            }
 
                         }
@@ -315,7 +304,7 @@ public class PayByCardActivity extends BaseActivity {
         tv_cardNum = findViewById(R.id.text_card_num);
         currentAmount = findViewById(R.id.currentAmount);
 
-        piccType = EPiccType.INTERNAL;
+//        piccType = EPiccType.INTERNAL;
         tv_amount = findViewById(R.id.amount);
         preferences = this.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0);
         databaseHelper = new DatabaseHelper(this);
@@ -451,7 +440,7 @@ public class PayByCardActivity extends BaseActivity {
         getOfflineTransactionExecuted = true;
 
         int[] firstOfflineTranBlock = {FIRST_TRANSACTION_ID, FIRST_TRANSACTION_AMT, FIRST_TRANSACTION_HASH};
-        PiccTransaction.getInstance(piccType).readCustomerFirstTrans(handlerTransaction, firstOfflineTranBlock);
+//        PiccTransaction.getInstance(piccType).readCustomerFirstTrans(handlerTransaction, firstOfflineTranBlock);
         thread2.start();
     }
 
@@ -499,7 +488,7 @@ public class PayByCardActivity extends BaseActivity {
                         } else if (passengerTranNo.equalsIgnoreCase("1")) {
                             transactionHash = hashFromFirstTransaction;
                             String newTranNo = Base64.encodeToString("0".getBytes(), Base64.DEFAULT);
-                            PiccTransaction.getInstance(piccType).writeData(handlerTransaction, newTranNo, CUSTOMER_TRANSACTION_NO);
+//                            PiccTransaction.getInstance(piccType).writeData(handlerTransaction, newTranNo, CUSTOMER_TRANSACTION_NO);
                             startTransactionProcess(hashFromFirstTransaction);
                         }
                     } else if (response.code() == 400) {
@@ -510,7 +499,7 @@ public class PayByCardActivity extends BaseActivity {
                             getSecondTransaction();
                         } else if (passengerTranNo.equalsIgnoreCase("1")) {
                             String newTranNo = Base64.encodeToString("0".getBytes(), Base64.DEFAULT);
-                            PiccTransaction.getInstance(piccType).writeData(handlerTransaction, newTranNo, CUSTOMER_TRANSACTION_NO);
+//                            PiccTransaction.getInstance(piccType).writeData(handlerTransaction, newTranNo, CUSTOMER_TRANSACTION_NO);
                             startTransactionProcess(latestTransHash);
                         }
                     } else if (response.code() == 404) {
@@ -519,7 +508,7 @@ public class PayByCardActivity extends BaseActivity {
                             getSecondTransaction();
                         } else if (passengerTranNo.equalsIgnoreCase("1")) {
                             String newTranNo = Base64.encodeToString("0".getBytes(), Base64.DEFAULT);
-                            PiccTransaction.getInstance(piccType).writeData(handlerTransaction, newTranNo, CUSTOMER_TRANSACTION_NO);
+//                            PiccTransaction.getInstance(piccType).writeData(handlerTransaction, newTranNo, CUSTOMER_TRANSACTION_NO);
                             startTransactionProcess(latestTransHash);
                         } else if (response.code() == 401) {
                             firstTransactionStatus=401;
@@ -540,7 +529,7 @@ public class PayByCardActivity extends BaseActivity {
 
     private void getSecondTransaction() {
         int[] secondOfflineTranBlock = {SECOND_TRANSACTION_ID, SECOND_TRANSACTION_AMT, SECOND_TRANSACTION_HASH};
-        PiccTransaction.getInstance(piccType).readCustomerSecondTrans(handlerTransaction, secondOfflineTranBlock);
+//        PiccTransaction.getInstance(piccType).readCustomerSecondTrans(handlerTransaction, secondOfflineTranBlock);
         thread3.start();
     }
 
@@ -593,21 +582,21 @@ public class PayByCardActivity extends BaseActivity {
                     if (response.isSuccessful()) {
                         TraModel transactionResponse = response.body();
                         String newTranNo = Base64.encodeToString("0".getBytes(), Base64.DEFAULT);
-                        PiccTransaction.getInstance(piccType).writeData(handlerTransaction, newTranNo, CUSTOMER_TRANSACTION_NO);
-                        transactionHash = transactionResponse.getData().getTransaction().getReferenceHash();
+//                        PiccTransaction.getInstance(piccType).writeData(handlerTransaction, newTranNo, CUSTOMER_TRANSACTION_NO);
+//                        transactionHash = transactionResponse.getData().getTransaction().getReferenceHash();
                         startTransactionProcess(transactionHash);
                     } else if (response.code() == 400) {
                         thread3.interrupt();
                         stopThread4 = true;
                         String newTranNo = Base64.encodeToString("0".getBytes(), Base64.DEFAULT);
-                        PiccTransaction.getInstance(piccType).writeData(handlerTransaction, newTranNo, CUSTOMER_TRANSACTION_NO);
-                        startTransactionProcess(latestTransHash);
+//                        PiccTransaction.getInstance(piccType).writeData(handlerTransaction, newTranNo, CUSTOMER_TRANSACTION_NO);
+//                        startTransactionProcess(latestTransHash);
                     } else if (response.code() == 404) {
                         thread3.interrupt();
                         stopThread4 = true;
                         String newTranNo = Base64.encodeToString("0".getBytes(), Base64.DEFAULT);
-                        PiccTransaction.getInstance(piccType).writeData(handlerTransaction, newTranNo, CUSTOMER_TRANSACTION_NO);
-//                        handleErrors(response.errorBody());
+//                        PiccTransaction.getInstance(piccType).writeData(handlerTransaction, newTranNo, CUSTOMER_TRANSACTION_NO);
+////                        handleErrors(response.errorBody());
                         startTransactionProcess(latestTransHash);
                     } else if (response.code() == 401) {
                         startActivity(new Intent(PayByCardActivity.this, HelperLogin.class));
@@ -662,7 +651,7 @@ public class PayByCardActivity extends BaseActivity {
                 String newBalance = Base64.encodeToString(String.valueOf(reducedValue).getBytes(), Base64.DEFAULT);
                         if (GeneralUtils.isNetworkAvailable(PayByCardActivity.this)) {
                             if (!isFinishing()) {
-                                SysTester.getInstance().beep(EBeepMode.FREQUENCE_LEVEL_6, 100);
+//                                SysTester.getInstance().beep(EBeepMode.FREQUENCE_LEVEL_6, 100);
                                 setNewTransaction(newBalance, newRefHash, ticketId, tranCurrentHash, pClick);
                             }
                         } else {
@@ -712,7 +701,7 @@ public class PayByCardActivity extends BaseActivity {
         String[] secondOfflineTran = {ticketId, passenserFare, offlineHash, newTranNo};
 
         for (int i = 0; i < secondOfflineTran.length; i++) {
-            PiccTransaction.getInstance(piccType).writeData(handlerTransaction, secondOfflineTran[i], secondOfflineTranBlock[i]);
+//            PiccTransaction.getInstance(piccType).writeData(handlerTransaction, secondOfflineTran[i], secondOfflineTranBlock[i]);
             Log.i(TAG, "setSecondOfflineTransaction: " + i);
             if (i == 3) {
                 setNewTransaction(newBalance, newWritableHash, ticketId, tranCurrentHash, pClick);
@@ -728,7 +717,7 @@ public class PayByCardActivity extends BaseActivity {
         int[] firstOfflineTranBlock = {FIRST_TRANSACTION_ID, FIRST_TRANSACTION_AMT, FIRST_TRANSACTION_HASH, CUSTOMER_TRANSACTION_NO};
 
         for (int i = 0; i < firstOfflineTranBlock.length; i++) {
-            PiccTransaction.getInstance(piccType).writeData(handlerTransaction, firstOfflineTran[i], firstOfflineTranBlock[i]);
+//            PiccTransaction.getInstance(piccType).writeData(handlerTransaction, firstOfflineTran[i], firstOfflineTranBlock[i]);
             if (i == 3) {
                 setNewTransaction(newBalance, newRefHash, ticketId, tranCurrentHash, pClick);
             }
@@ -739,7 +728,7 @@ public class PayByCardActivity extends BaseActivity {
         String[] customerUpdatedDetails = {reducedBalance, trimmedHash};
         int[] customerUpdatedDetailsBlock = {CUSTOMER_AMT, CUSTOMER_HASH};
         for (int i = 0; i < customerUpdatedDetails.length; i++) {
-            PiccTransaction.getInstance(piccType).writeData(handlerTransaction,customerUpdatedDetails[i],customerUpdatedDetailsBlock[i]);
+//            PiccTransaction.getInstance(piccType).writeData(handlerTransaction,customerUpdatedDetails[i],customerUpdatedDetailsBlock[i]);
         }
     }
 
@@ -1014,18 +1003,18 @@ public class PayByCardActivity extends BaseActivity {
 
 
             if (!printTransaction.equalsIgnoreCase("")) {
-                status = PrinterTester.getInstance().getStatus();
-                if (status.equalsIgnoreCase("Out of paper ")) {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(PayByCardActivity.this, "मुद्रण कागज समाप्त भयो।", Toast.LENGTH_SHORT).show();
-                        }
-                    });
-
-                } else {
-                    paraPrint(printTransaction);
-                }
+//                status = PrinterTester.getInstance().getStatus();
+//                if (status.equalsIgnoreCase("Out of paper ")) {
+//                    runOnUiThread(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            Toast.makeText(PayByCardActivity.this, "मुद्रण कागज समाप्त भयो।", Toast.LENGTH_SHORT).show();
+//                        }
+//                    });
+//
+//                } else {
+//                    paraPrint(printTransaction);
+//                }
 
                 startActivity(new Intent(PayByCardActivity.this, TicketAndTracking.class));
                 finish();
@@ -1104,24 +1093,24 @@ public class PayByCardActivity extends BaseActivity {
 
             pClick.dismiss();
 
-            if (!printTransaction.equalsIgnoreCase("")) {
-                status = PrinterTester.getInstance().getStatus();
-                if (status.equalsIgnoreCase("Out of paper ")) {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(PayByCardActivity.this, "मुद्रण कागज समाप्त भयो।", Toast.LENGTH_SHORT).show();
-                        }
-                    });
-                } else {
-                    paraPrint(printTransaction);
-                }
+//            if (!printTransaction.equalsIgnoreCase("")) {
+//                status = PrinterTester.getInstance().getStatus();
+//                if (status.equalsIgnoreCase("Out of paper ")) {
+//                    runOnUiThread(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            Toast.makeText(PayByCardActivity.this, "मुद्रण कागज समाप्त भयो।", Toast.LENGTH_SHORT).show();
+//                        }
+//                    });
+//                } else {
+//                    paraPrint(printTransaction);
+//                }
 
-                startActivity(new Intent(PayByCardActivity.this, TicketAndTracking.class));
-                finish();
-            } else {
-                Log.i("TAG", "onActivate: " + "rrrr");
-            }
+//                startActivity(new Intent(PayByCardActivity.this, TicketAndTracking.class));
+//                finish();
+//            } else {
+//                Log.i("TAG", "onActivate: " + "rrrr");
+//            }
         } else {
             runOnUiThread(new Runnable() {
                 @Override
@@ -1205,24 +1194,24 @@ public class PayByCardActivity extends BaseActivity {
                     + GeneralUtils.getUnicodeNumber(String.valueOf(day)) + " " +
                     GeneralUtils.getUnicodeNumber(GeneralUtils.getTime());
 
-            if (!printTransaction.equalsIgnoreCase("")) {
-                status = PrinterTester.getInstance().getStatus();
-                if (status.equalsIgnoreCase("Out of paper ")) {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(PayByCardActivity.this, "मुद्रण कागज समाप्त भयो।", Toast.LENGTH_SHORT).show();
-                        }
-                    });
-
-                } else {
-                    paraPrint(printTransaction);
-                }
-                startActivity(new Intent(PayByCardActivity.this, TicketAndTracking.class));
-                finish();
-            } else {
-                Log.i("TAG", "onActivate: " + "rrrr");
-            }
+//            if (!printTransaction.equalsIgnoreCase("")) {
+//                status = PrinterTester.getInstance().getStatus();
+//                if (status.equalsIgnoreCase("Out of paper ")) {
+//                    runOnUiThread(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            Toast.makeText(PayByCardActivity.this, "मुद्रण कागज समाप्त भयो।", Toast.LENGTH_SHORT).show();
+//                        }
+//                    });
+//
+//                } else {
+//                    paraPrint(printTransaction);
+//                }
+//                startActivity(new Intent(PayByCardActivity.this, TicketAndTracking.class));
+//                finish();
+//            } else {
+//                Log.i("TAG", "onActivate: " + "rrrr");
+//            }
             finish();
         } else {
             runOnUiThread(new Runnable() {
@@ -1238,20 +1227,20 @@ public class PayByCardActivity extends BaseActivity {
         }
     }
 
-    private void paraPrint(String printData) {
-        RxUtils.runInBackgroud(new Runnable() {
-            @Override
-            public void run() {
-                ReceiptPrintParam receiptPrintParam = new ReceiptPrintParam();
-                String printType = "error";
-                if (GeneralUtils.needBtPrint()) {
-                    Printer.printA60Receipt("", "", printType);
-                } else {
-                    receiptPrintParam.print(printData, new PrintListenerImpl(PayByCardActivity.this));
-                    Device.beepOk();
-                }
-            }
-        });
-    }
+//    private void paraPrint(String printData) {
+//        RxUtils.runInBackgroud(new Runnable() {
+//            @Override
+//            public void run() {
+//                ReceiptPrintParam receiptPrintParam = new ReceiptPrintParam();
+//                String printType = "error";
+//                if (GeneralUtils.needBtPrint()) {
+//                    Printer.printA60Receipt("", "", printType);
+//                } else {
+//                    receiptPrintParam.print(printData, new PrintListenerImpl(PayByCardActivity.this));
+//                    Device.beepOk();
+//                }
+//            }
+//        });
+//    }
 
 }

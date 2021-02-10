@@ -15,18 +15,7 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 
-import com.pax.dal.entity.EBeepMode;
-import com.pax.dal.entity.EPiccType;
 import com.technosales.net.buslocationannouncement.APIToken.TokenManager;
-import com.technosales.net.buslocationannouncement.PrintListenerImpl;
-import com.technosales.net.buslocationannouncement.paxsupport.picc.PiccTester;
-import com.technosales.net.buslocationannouncement.paxsupport.printer.Device;
-import com.technosales.net.buslocationannouncement.paxsupport.printer.PrinterTester;
-import com.technosales.net.buslocationannouncement.paxsupport.printer.ReceiptPrintParam;
-import com.technosales.net.buslocationannouncement.picc.PiccTransaction;
-import com.technosales.net.buslocationannouncement.printlib.Printer;
-import com.technosales.net.buslocationannouncement.printlib.RxUtils;
-import com.technosales.net.buslocationannouncement.printlib.SysTester;
 import com.technosales.net.buslocationannouncement.R;
 import com.technosales.net.buslocationannouncement.serverconn.RetrofitInterface;
 import com.technosales.net.buslocationannouncement.serverconn.ServerConfigNew;
@@ -52,7 +41,7 @@ public class ReIssueCard extends BaseActivity implements View.OnClickListener {
     private String customer_card_no;
     private TextView card_num;
     private Button btn_submit, btn_cancel;
-    private EPiccType piccType;
+//    private EPiccType piccType;
     public DetectMThread detectMThread;
     private EditText customer_mob_no;
     private ReIssueCardResponse reIssueCardResponse;
@@ -78,7 +67,7 @@ public class ReIssueCard extends BaseActivity implements View.OnClickListener {
                                 detectMThread.interrupt();
                                 detectMThread = null;
                             }
-                            PiccTester.getInstance(piccType).open();
+//                            PiccTester.getInstance(piccType).open();
                             detectMThread = new DetectMThread();
                             detectMThread.start();
                         }
@@ -100,7 +89,7 @@ public class ReIssueCard extends BaseActivity implements View.OnClickListener {
         progressBar = findViewById(R.id.progressBar);
         btn_submit = findViewById(R.id.btn_submit);
         setUpToolbar("जानकारी अपडेट गर्नुहोस्", true);
-        piccType = EPiccType.INTERNAL;
+//        piccType = EPiccType.INTERNAL;
         preferences =getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0);
 
         tokenManager = TokenManager.getInstance(getSharedPreferences("prefs", MODE_PRIVATE));
@@ -127,12 +116,12 @@ public class ReIssueCard extends BaseActivity implements View.OnClickListener {
                         Log.i("TAG", "handleMessage: "+successStatus);
                         successStatus=successStatus+Integer.valueOf(msg.obj.toString());
                         if(successStatus==4) {
-                            String  status = PrinterTester.getInstance().getStatus();
-                            if(status.equalsIgnoreCase("Out of paper ")){
-                                Toast.makeText(ReIssueCard.this, "मुद्रण कागज समाप्त भयो।", Toast.LENGTH_SHORT).show();
-                            }else {
-                                paraPrint(printData);
-                            }
+//                            String  status = PrinterTester.getInstance().getStatus();
+//                            if(status.equalsIgnoreCase("Out of paper ")){
+//                                Toast.makeText(ReIssueCard.this, "मुद्रण कागज समाप्त भयो।", Toast.LENGTH_SHORT).show();
+//                            }else {
+//                                paraPrint(printData);
+//                            }
 
                             Toast.makeText(ReIssueCard.this, "ग्राहक सफलतापूर्वक दर्ता गरियो।", Toast.LENGTH_SHORT).show();
                             startActivity(new Intent(ReIssueCard.this, TicketAndTracking.class));
@@ -155,13 +144,13 @@ public class ReIssueCard extends BaseActivity implements View.OnClickListener {
                 if (databaseHelper.listBlockList().get(i).identificationId.equalsIgnoreCase(toString)) {
                     Toast.makeText(ReIssueCard.this, "यो कार्ड ब्लक गरिएको छ।", Toast.LENGTH_SHORT).show();
                 } else {
-                    SysTester.getInstance().beep(EBeepMode.FREQUENCE_LEVEL_6, 100);
+//                    SysTester.getInstance().beep(EBeepMode.FREQUENCE_LEVEL_6, 100);
                     customer_card_no = toString;
                     card_num.setText(toString);
                 }
             }
         } else {
-            SysTester.getInstance().beep(EBeepMode.FREQUENCE_LEVEL_6, 100);
+//            SysTester.getInstance().beep(EBeepMode.FREQUENCE_LEVEL_6, 100);
             customer_card_no = toString;
             card_num.setText(toString);
         }
@@ -170,7 +159,6 @@ public class ReIssueCard extends BaseActivity implements View.OnClickListener {
     @Override
     protected void onResume() {
         super.onResume();
-        PiccTester.getInstance(piccType).close();
         if (detectMThread != null) {
             detectMThread.interrupt();
             detectMThread = null;
@@ -180,8 +168,7 @@ public class ReIssueCard extends BaseActivity implements View.OnClickListener {
     @Override
     protected void onPause() {
         super.onPause();
-        PiccTester.getInstance(piccType).close();
-        if (detectMThread != null) {
+         if (detectMThread != null) {
             detectMThread.interrupt();
             detectMThread = null;
         }
@@ -196,7 +183,6 @@ public class ReIssueCard extends BaseActivity implements View.OnClickListener {
     @Override
     protected void onDestroy() {
         stopThread = true;
-        PiccTester.getInstance(piccType).close();
         if (detectMThread != null) {
             detectMThread.interrupt();
             detectMThread = null;
@@ -257,7 +243,7 @@ public class ReIssueCard extends BaseActivity implements View.OnClickListener {
                         String[] customerDetails={customerId,customerAmt,customerHash,customerTranNo};
                         int[] customerDetailsBlock={CUSTOMERID,CUSTOMER_AMT,CUSTOMER_HASH,CUSTOMER_TRANSACTION_NO};
                         for (int i = 0; i < customerDetails.length; i++) {
-                            PiccTransaction.getInstance(piccType).registerTranBlock(handler,customerDetails[i],customerDetailsBlock[i]);
+//                            PiccTransaction.getInstance(piccType).registerTranBlock(handler,customerDetails[i],customerDetailsBlock[i]);
                         }
                     }
                 }).show();
@@ -293,24 +279,24 @@ public class ReIssueCard extends BaseActivity implements View.OnClickListener {
         @Override
         public void run() {
             super.run();
-            PiccTester.getInstance(piccType).getId(handler);
+//            PiccTester.getInstance(piccType).getId(handler);
         }
     }
 
-    private void paraPrint(String printData) {
-        RxUtils.runInBackgroud(new Runnable() {
-            @Override
-            public void run() {
-                ReceiptPrintParam receiptPrintParam = new ReceiptPrintParam();
-                String printType = "error";
-                if (GeneralUtils.needBtPrint()) {
-                    Printer.printA60Receipt("", "", printType);
-                } else {
-                    receiptPrintParam.print(printData, new PrintListenerImpl(ReIssueCard.this));
-                    Device.beepOk();
-                }
-            }
-        });
-    }
+//    private void paraPrint(String printData) {
+//        RxUtils.runInBackgroud(new Runnable() {
+//            @Override
+//            public void run() {
+////                ReceiptPrintParam receiptPrintParam = new ReceiptPrintParam();
+//                String printType = "error";
+//                if (GeneralUtils.needBtPrint()) {
+//                    Printer.printA60Receipt("", "", printType);
+//                } else {
+////                    receiptPrintParam.print(printData, new PrintListenerImpl(ReIssueCard.this));
+////                    Device.beepOk();
+//                }
+//            }
+//        });
+//    }
 
 }

@@ -1,7 +1,6 @@
 package com.technosales.net.buslocationannouncement.serverconn;
 
 import com.technosales.net.buslocationannouncement.additionalfeatures.TraModel;
-import com.technosales.net.buslocationannouncement.transactionstatement.TransactionStatementModel;
 import com.technosales.net.buslocationannouncement.userregistration.CreateAccountModel;
 import com.technosales.net.buslocationannouncement.pojo.BlockList;
 import com.technosales.net.buslocationannouncement.pojo.CheckBalanceModel;
@@ -48,15 +47,6 @@ public interface RetrofitInterface {
 
     @POST(UtilStrings.NEW_PASSENGER_REGISTER)
     Call<CreateAccountModel.CreateAccountResponse> issueCard(@Body CreateAccountModel createAccountModel);
-
-
-    @FormUrlEncoded
-    @POST(UtilStrings.TRANSATION_STATEMENT)
-    Call<TransactionStatementModel> getTransactionStatement(
-            @Field("mobileNo") String identificationId,
-            @Field("fromDate") String fromDate,
-            @Field("toDate") String toDate);
-
 
     @FormUrlEncoded
     @POST(UtilStrings.NEW_TRANSACTION)

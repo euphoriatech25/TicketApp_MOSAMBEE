@@ -25,18 +25,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.ActivityCompat;
 
-import com.pax.dal.entity.EBeepMode;
-import com.pax.dal.entity.EM1KeyType;
-import com.pax.dal.entity.EPiccType;
-import com.technosales.net.buslocationannouncement.paxsupport.printer.Device;
-import com.technosales.net.buslocationannouncement.paxsupport.printer.PrinterTester;
-import com.technosales.net.buslocationannouncement.paxsupport.printer.ReceiptPrintParam;
 import com.technosales.net.buslocationannouncement.callcontrol.IncomingCallReceiver;
-import com.technosales.net.buslocationannouncement.picc.PiccTransaction;
-import com.technosales.net.buslocationannouncement.printlib.Printer;
-import com.technosales.net.buslocationannouncement.printlib.RxUtils;
-import com.technosales.net.buslocationannouncement.printlib.SysTester;
-import com.technosales.net.buslocationannouncement.PrintListenerImpl;
 import com.technosales.net.buslocationannouncement.R;
 import com.technosales.net.buslocationannouncement.activity.TicketAndTracking;
 import com.technosales.net.buslocationannouncement.base.BaseActivity;
@@ -76,14 +65,14 @@ public class IssueCardActivity extends BaseActivity implements ICreateAccount.Vi
     private TextView tv_phoneNum;
     private TextView tv_cardNum;
     private Button submitButton, btn_cancel;
-    private EPiccType piccType;
+//    private EPiccType piccType;
     private Button acctype;
     private RegisterImplPresenter presenter;
     private SharedPreferences preferences,preferencesHelper;
     private ProgressDialog progressDialog;
     private ScrollView registerScroll;
     private String success, customerId, cusmoterMobile, customerAmount;
-    private EM1KeyType m1KeyType = EM1KeyType.TYPE_B;
+//    private EM1KeyType m1KeyType = EM1KeyType.TYPE_B;
     private int TIME_DELAY = 1000;
     private String ticketId;
     private String valueOfTickets = "";
@@ -104,14 +93,14 @@ public class IssueCardActivity extends BaseActivity implements ICreateAccount.Vi
                     {
                         @Override
                         public void run() {
-                            PiccTransaction.getInstance(piccType).readId(handler);
+//                            PiccTransaction.getInstance(piccType).readId(handler);
                             for (int i = 0; i < authBlock.length; i++) {
                                 int finalI = i;
                                 final Handler handler = new Handler();
                                 handler.postDelayed(new Runnable() {
                                     @Override
                                     public void run() {
-                                        PiccTransaction.getInstance(piccType).authSector(handler,authBlock[finalI]);
+//                                        PiccTransaction.getInstance(piccType).authSector(handler,authBlock[finalI]);
                                     }
                                 }, 1000);
 
@@ -139,12 +128,12 @@ public class IssueCardActivity extends BaseActivity implements ICreateAccount.Vi
                         Log.i("TAG", "handleMessage: "+successStatus);
                         successStatus=successStatus+Integer.valueOf(msg.obj.toString());
                         if(successStatus==4) {
-                          String  status = PrinterTester.getInstance().getStatus();
-                            if(status.equalsIgnoreCase("Out of paper ")){
-                                Toast.makeText(IssueCardActivity.this, "मुद्रण कागज समाप्त भयो।", Toast.LENGTH_SHORT).show();
-                            }else {
-                                paraPrint(printData);
-                            }
+//                          String  status = PrinterTester.getInstance().getStatus();
+//                            if(status.equalsIgnoreCase("Out of paper ")){
+//                                Toast.makeText(IssueCardActivity.this, "मुद्रण कागज समाप्त भयो।", Toast.LENGTH_SHORT).show();
+//                            }else {
+//                                paraPrint(printData);
+//                            }
 
 
                             Toast.makeText(IssueCardActivity.this, "ग्राहक सफलतापूर्वक दर्ता गरियो।", Toast.LENGTH_SHORT).show();
@@ -170,7 +159,7 @@ public class IssueCardActivity extends BaseActivity implements ICreateAccount.Vi
         setUpToolbar("ग्राहक कार्ड दर्ता", true);
         userNumber = getIntent().getStringExtra("phone_number");
         progressDialog = new ProgressDialog(IssueCardActivity.this);
-        piccType = EPiccType.INTERNAL;
+//        piccType = EPiccType.INTERNAL;
 
         SharedPreferences sharedPreferences = getSharedPreferences("User_NUM", MODE_PRIVATE);
         user_num = sharedPreferences.getString("userNum", "0");
@@ -347,7 +336,7 @@ public class IssueCardActivity extends BaseActivity implements ICreateAccount.Vi
             if (databaseHelper.listBlockList().size() != 0) {
                 for (int i = 0; i < databaseHelper.listBlockList().size(); i++) {
                     if (!databaseHelper.listBlockList().get(i).identificationId.equalsIgnoreCase(num)) {
-                        SysTester.getInstance().beep(EBeepMode.FREQUENCE_LEVEL_6, 100);
+//                        SysTester.getInstance().beep(EBeepMode.FREQUENCE_LEVEL_6, 100);
                         cardNUmber = num;
                         tv_cardNum.setText(num);
                     } else {
@@ -355,7 +344,7 @@ public class IssueCardActivity extends BaseActivity implements ICreateAccount.Vi
                     }
                 }
             } else {
-                SysTester.getInstance().beep(EBeepMode.FREQUENCE_LEVEL_6, 100);
+//                SysTester.getInstance().beep(EBeepMode.FREQUENCE_LEVEL_6, 100);
                 cardNUmber = num;
                 tv_cardNum.setText(num);
             }
@@ -492,7 +481,7 @@ public class IssueCardActivity extends BaseActivity implements ICreateAccount.Vi
                         int[] customerDetailsBlock={CUSTOMERID,CUSTOMER_AMT,CUSTOMER_HASH,CUSTOMER_TRANSACTION_NO};
 //                        PiccTransaction.getInstance(piccType).registerCustomerCard(handler,customerDetails,customerDetailsBlock);
                         for (int i = 0; i < customerDetails.length; i++) {
-                            PiccTransaction.getInstance(piccType).registerTranBlock(handler,customerDetails[i],customerDetailsBlock[i]);
+//                            PiccTransaction.getInstance(piccType).registerTranBlock(handler,customerDetails[i],customerDetailsBlock[i]);
                         }
                     }
                 }).show();
@@ -586,21 +575,21 @@ public class IssueCardActivity extends BaseActivity implements ICreateAccount.Vi
         super.onBackPressed();
     }
 
-    private void paraPrint(String printData) {
-        RxUtils.runInBackgroud(new Runnable() {
-            @Override
-            public void run() {
-                ReceiptPrintParam receiptPrintParam = new ReceiptPrintParam();
-                String printType = "error";
-                if (GeneralUtils.needBtPrint()) {
-                    Printer.printA60Receipt("", "", printType);
-                } else {
-                    receiptPrintParam.print(printData, new PrintListenerImpl(IssueCardActivity.this));
-                    Device.beepOk();
-                }
-            }
-        });
-    }
+//    private void paraPrint(String printData) {
+//        RxUtils.runInBackgroud(new Runnable() {
+//            @Override
+//            public void run() {
+////                ReceiptPrintParam receiptPrintParam = new ReceiptPrintParam();
+//                String printType = "error";
+//                if (GeneralUtils.needBtPrint()) {
+//                    Printer.printA60Receipt("", "", printType);
+//                } else {
+////                    receiptPrintParam.print(printData, new PrintListenerImpl(IssueCardActivity.this));
+////                    Device.beepOk();
+//                }
+//            }
+//        });
+//    }
 
     class DetectMThread extends Thread {
         @Override

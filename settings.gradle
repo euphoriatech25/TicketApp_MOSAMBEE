@@ -1,1 +1,1 @@
-include ':app' ,':glwrapper'
+include ':app'

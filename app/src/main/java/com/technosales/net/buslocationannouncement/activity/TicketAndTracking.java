@@ -55,20 +55,10 @@ import com.mikepenz.materialdrawer.model.DividerDrawerItem;
 import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
 import com.mikepenz.materialdrawer.model.SecondaryDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
-import com.pax.market.android.app.sdk.LocationService;
-import com.pax.market.android.app.sdk.StoreSdk;
-import com.pax.market.android.app.sdk.dto.LocationInfo;
 import com.technosales.net.buslocationannouncement.APIToken.TokenManager;
-import com.technosales.net.buslocationannouncement.NCF.EncrptDecrypt;
-import com.technosales.net.buslocationannouncement.paxsupport.printer.Device;
-import com.technosales.net.buslocationannouncement.paxsupport.printer.ReceiptPrintParam;
-import com.technosales.net.buslocationannouncement.printlib.Printer;
-import com.technosales.net.buslocationannouncement.printlib.RxUtils;
-import com.technosales.net.buslocationannouncement.PrintListenerImpl;
 import com.technosales.net.buslocationannouncement.R;
 import com.technosales.net.buslocationannouncement.serverconn.RetrofitInterface;
 import com.technosales.net.buslocationannouncement.serverconn.ServerConfigNew;
-import com.technosales.net.buslocationannouncement.transactionstatement.TransactionStatement;
 import com.technosales.net.buslocationannouncement.userregistration.IssueCardActivity;
 import com.technosales.net.buslocationannouncement.adapter.PriceAdapter;
 import com.technosales.net.buslocationannouncement.adapter.PriceAdapterPlaces;
@@ -1158,29 +1148,29 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
         return "";
     }
 
-    public void paraPrint(String printData) {
-        RxUtils.runInBackgroud(new Runnable() {
-            @Override
-            public void run() {
-                ReceiptPrintParam receiptPrintParam = new ReceiptPrintParam();
-                String printType = "error";
-                if (GeneralUtils.needBtPrint()) {
-                    Printer.printA60Receipt("", "", printType);
-                } else {
-                    receiptPrintParam.print(printData, new PrintListenerImpl(TicketAndTracking.this));
-                    Device.beepOk();
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            recreate();
-                        }
-                    });
-
+//    public void paraPrint(String printData) {
+//        RxUtils.runInBackgroud(new Runnable() {
+//            @Override
+//            public void run() {
+//                ReceiptPrintParam receiptPrintParam = new ReceiptPrintParam();
+//                String printType = "error";
+//                if (GeneralUtils.needBtPrint()) {
+//                    Printer.printA60Receipt("", "", printType);
+//                } else {
+//                    receiptPrintParam.print(printData, new PrintListenerImpl(TicketAndTracking.this));
+//                    Device.beepOk();
+//                    runOnUiThread(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            recreate();
+//                        }
+//                    });
+//
+////                    overridePendingTransition(0, 0);
+////                    startActivity(getIntent());
 //                    overridePendingTransition(0, 0);
-//                    startActivity(getIntent());
-                    overridePendingTransition(0, 0);
-                }
-            }
-        });
-    }
+//                }
+//            }
+//        });
+//    }
 }

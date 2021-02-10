@@ -23,23 +23,13 @@ import androidx.appcompat.app.AlertDialog;
 
 import com.hornet.dateconverter.DateConverter;
 import com.hornet.dateconverter.Model;
-import com.pax.dal.entity.EBeepMode;
-import com.pax.dal.entity.EPiccType;
 import com.technosales.net.buslocationannouncement.APIToken.TokenManager;
-import com.technosales.net.buslocationannouncement.additionalfeatures.PayByCardActivity;
-import com.technosales.net.buslocationannouncement.paxsupport.printer.Device;
-import com.technosales.net.buslocationannouncement.paxsupport.printer.ReceiptPrintParam;
 import com.technosales.net.buslocationannouncement.pojo.ApiError;
-import com.technosales.net.buslocationannouncement.printlib.Printer;
-import com.technosales.net.buslocationannouncement.printlib.RxUtils;
-import com.technosales.net.buslocationannouncement.printlib.SysTester;
-import com.technosales.net.buslocationannouncement.PrintListenerImpl;
 import com.technosales.net.buslocationannouncement.R;
 import com.technosales.net.buslocationannouncement.serverconn.RetrofitInterface;
 import com.technosales.net.buslocationannouncement.serverconn.ServerConfigNew;
 import com.technosales.net.buslocationannouncement.base.BaseActivity;
 import com.technosales.net.buslocationannouncement.helper.DatabaseHelper;
-import com.technosales.net.buslocationannouncement.picc.PiccTransaction;
 import com.technosales.net.buslocationannouncement.pojo.CheckBalanceModel;
 import com.technosales.net.buslocationannouncement.pojo.Passenger;
 import com.technosales.net.buslocationannouncement.pojo.Recharge;
@@ -87,7 +77,7 @@ public class CheckBalanceActivity extends BaseActivity {
     private String deviceID = "";
     private SharedPreferences preferences, preferencesHelper;
     private String helperString = "";
-    private EPiccType piccType;
+//    private EPiccType piccType;
     private String isOnlineCheck;
     private int TIME_DELAY = 500;
     private DatabaseHelper databaseHelper;
@@ -129,7 +119,7 @@ public class CheckBalanceActivity extends BaseActivity {
                         successStatus = successStatus + Integer.valueOf(msg.obj.toString());
                         if (successStatus == 2) {
                             Toast.makeText(CheckBalanceActivity.this, "Recharged Successfully!!!", Toast.LENGTH_SHORT).show();
-                            paraPrint(rechargeBill);
+//                            paraPrint(rechargeBill);
                             startActivity(new Intent(CheckBalanceActivity.this, TicketAndTracking.class));
                             finish();
                         }
@@ -156,7 +146,7 @@ public class CheckBalanceActivity extends BaseActivity {
                         @Override
                         public void run() {
 //                            for (int i = 0; i < customerDetailsRead.length; i++) {
-                            PiccTransaction.getInstance(piccType).read(rechargeHandler, customerDetailsRead);
+//                            PiccTransaction.getInstance(piccType).read(rechargeHandler, customerDetailsRead);
 //                                Log.i("TAG", "run: "+i);
 //                            }
 
@@ -176,7 +166,7 @@ public class CheckBalanceActivity extends BaseActivity {
         databaseHelper = new DatabaseHelper(this);
         setUpToolbar("ब्यालेन्स जाँच", true);
         setupUI();
-        piccType = EPiccType.INTERNAL;
+//        piccType = EPiccType.INTERNAL;
 
         tokenManager = TokenManager.getInstance(getSharedPreferences("prefs", MODE_PRIVATE));
         stopThread = false;
@@ -301,7 +291,7 @@ public class CheckBalanceActivity extends BaseActivity {
                                                 String customerHash = Base64.encodeToString(newHash.getBytes(), Base64.DEFAULT);
                                                 String[] customerUpdatedDetails = {customerAmt, customerHash};
                                                 for (int i = 0; i < customerUpdatedDetails.length; i++) {
-                                                    PiccTransaction.getInstance(piccType).writeData(rechargeHandler, customerUpdatedDetails[i], customerUpdatedDetailsBlock[i]);
+//                                                    PiccTransaction.getInstance(piccType).writeData(rechargeHandler, customerUpdatedDetails[i], customerUpdatedDetailsBlock[i]);
                                                     if (i == 1) {
                                                         sDialog.dismiss();
                                                     }
@@ -459,19 +449,17 @@ public class CheckBalanceActivity extends BaseActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        PiccTransaction.getInstance(piccType).close();
 
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        PiccTransaction.getInstance(piccType).close();
+
     }
 
     @Override
     protected void onDestroy() {
-        PiccTransaction.getInstance(piccType).close();
         super.onDestroy();
     }
 
@@ -490,7 +478,7 @@ public class CheckBalanceActivity extends BaseActivity {
                     Toast.makeText(CheckBalanceActivity.this, "यो कार्ड ब्लक गरिएको छ।", Toast.LENGTH_SHORT).show();
                 } else {
                     if (GeneralUtils.isNetworkAvailable(CheckBalanceActivity.this)) {
-                        SysTester.getInstance().beep(EBeepMode.FREQUENCE_LEVEL_6, 100);
+//                        SysTester.getInstance().beep(EBeepMode.FREQUENCE_LEVEL_6, 100);
                         cardNum = toString;
                         tv_amount.setText("");
                         btn_recharge.setVisibility(View.VISIBLE);
@@ -585,21 +573,21 @@ public class CheckBalanceActivity extends BaseActivity {
 
     }
 
-    private void paraPrint(String printData) {
-        RxUtils.runInBackgroud(new Runnable() {
-            @Override
-            public void run() {
-                ReceiptPrintParam receiptPrintParam = new ReceiptPrintParam();
-                String printType = "error";
-                if (GeneralUtils.needBtPrint()) {
-                    Printer.printA60Receipt("", "", printType);
-                } else {
-                    receiptPrintParam.print(printData, new PrintListenerImpl(CheckBalanceActivity.this));
-                    Device.beepOk();
-                }
-            }
-        });
-    }
+//    private void paraPrint(String printData) {
+//        RxUtils.runInBackgroud(new Runnable() {
+//            @Override
+//            public void run() {
+////                ReceiptPrintParam receiptPrintParam = new ReceiptPrintParam();
+//                String printType = "error";
+//                if (GeneralUtils.needBtPrint()) {
+//                    Printer.printA60Receipt("", "", printType);
+//                } else {
+////                    receiptPrintParam.print(printData, new PrintListenerImpl(CheckBalanceActivity.this));
+////                    Device.beepOk();
+//                }
+//            }
+//        });
+//    }
 
     @Override
     public void onBackPressed() {

@@ -18,15 +18,11 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.bumptech.glide.Glide;
-import com.pax.dal.entity.EPiccType;
 import com.technosales.net.buslocationannouncement.APIToken.TokenManager;
-import com.technosales.net.buslocationannouncement.paxsupport.picc.PiccTester;
 import com.technosales.net.buslocationannouncement.R;
-import com.technosales.net.buslocationannouncement.picc.PiccTransaction;
 import com.technosales.net.buslocationannouncement.pojo.ApiError;
 import com.technosales.net.buslocationannouncement.serverconn.RetrofitInterface;
 import com.technosales.net.buslocationannouncement.serverconn.ServerConfigNew;
-import com.technosales.net.buslocationannouncement.base.BaseActivity;
 import com.technosales.net.buslocationannouncement.helper.DatabaseHelper;
 import com.technosales.net.buslocationannouncement.pojo.HelperModel;
 import com.technosales.net.buslocationannouncement.utils.GeneralUtils;
@@ -50,7 +46,7 @@ public class HelperLogin extends AppCompatActivity {
     private String deviceId;
     SharedPreferences preferences;
     HelperModel helperDetails;
-    private EPiccType piccType;
+//    private EPiccType piccType;
     private ImageView helperLogin;
     private int TIME_DELAY = 500;
     private boolean stopThread;
@@ -63,7 +59,7 @@ Thread thread=new Thread(new Runnable() {
         while (!Thread.interrupted() && !stopThread)
             try {
                 Thread.sleep(TIME_DELAY);
-                PiccTransaction.getInstance(piccType).readId(handler);
+//                PiccTransaction.getInstance(piccType).readId(handler);
             } catch (InterruptedException e) {
             }
     }
@@ -85,7 +81,7 @@ Thread thread=new Thread(new Runnable() {
 
         Glide.with(this).asGif().load(R.drawable.helper).into(helperLogin);
         tokenManager = TokenManager.getInstance(getSharedPreferences("prefs", MODE_PRIVATE));
-        piccType = EPiccType.INTERNAL;
+//        piccType = EPiccType.INTERNAL;
         stopThread = false;
         (thread).start();
     }

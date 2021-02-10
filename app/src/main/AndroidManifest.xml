@@ -47,9 +47,6 @@
         <activity
             android:name=".additionalfeatures.PayByCardActivity"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
-        <activity
-            android:name=".activity.IncomeToRecharge"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
 
         <activity
             android:name=".additionalfeatures.QrCodeScanner"

@@ -20,7 +20,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.hornet.dateconverter.DateConverter;
 import com.hornet.dateconverter.Model;
-import com.technosales.net.buslocationannouncement.paxsupport.printer.PrinterTester;
 import com.technosales.net.buslocationannouncement.additionalfeatures.PayByCardActivity;
 import com.technosales.net.buslocationannouncement.additionalfeatures.QrCodeScanner;
 import com.technosales.net.buslocationannouncement.R;
@@ -263,12 +262,12 @@ public class PriceAdapter extends RecyclerView.Adapter<PriceAdapter.MyViewHolder
                                     + GeneralUtils.getUnicodeNumber(String.valueOf(day)) + " " +
                                     GeneralUtils.getUnicodeNumber(GeneralUtils.getTime());
 
-                            String status = PrinterTester.getInstance().getStatus();
-                            if(status.equalsIgnoreCase("Out of paper ")){
-                                Toast.makeText(context, "मुद्रण कागज समाप्त भयो।", Toast.LENGTH_SHORT).show();
-                            }else {
-                                ((TicketAndTracking) context).paraPrint(printTransaction);
-                            }
+//                            String status = PrinterTester.getInstance().getStatus();
+//                            if(status.equalsIgnoreCase("Out of paper ")){
+//                                Toast.makeText(context, "मुद्रण कागज समाप्त भयो।", Toast.LENGTH_SHORT).show();
+//                            }else {
+//                                ((TicketAndTracking) context).paraPrint(printTransaction);
+//                            }
 
 
                         } else {

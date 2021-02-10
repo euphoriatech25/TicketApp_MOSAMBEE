@@ -14,14 +14,7 @@ import android.widget.Toast;
 
 import com.hornet.dateconverter.DateConverter;
 import com.hornet.dateconverter.Model;
-import com.pax.dal.entity.EScannerType;
-import com.technosales.net.buslocationannouncement.paxsupport.printer.Device;
-import com.technosales.net.buslocationannouncement.paxsupport.printer.PrinterTester;
-import com.technosales.net.buslocationannouncement.paxsupport.printer.ReceiptPrintParam;
-import com.technosales.net.buslocationannouncement.paxsupport.scanner.ScannerPax;
-import com.technosales.net.buslocationannouncement.printlib.Printer;
-import com.technosales.net.buslocationannouncement.printlib.RxUtils;
-import com.technosales.net.buslocationannouncement.PrintListenerImpl;
+
 import com.technosales.net.buslocationannouncement.R;
 import com.technosales.net.buslocationannouncement.activity.TicketAndTracking;
 import com.technosales.net.buslocationannouncement.base.BaseActivity;
@@ -101,7 +94,7 @@ public class QrCodeScanner extends BaseActivity implements View.OnClickListener 
         station_name = getIntent().getStringExtra(UtilStrings.STATION_NAME);
         POSITION = getIntent().getIntExtra(UtilStrings.POSITION,0);
         passenserId="1";
-        ScannerPax.getInstance(EScannerType.FRONT).scan(handler, 15000);
+//        ScannerPax.getInstance(EScannerType.FRONT).scan(handler, 15000);
 
         if (GeneralUtils.isNetworkAvailable(this)) {
             isOnlineCheck = "true";
@@ -283,12 +276,12 @@ public class QrCodeScanner extends BaseActivity implements View.OnClickListener 
                     GeneralUtils.getUnicodeNumber(GeneralUtils.getTime());
 //            printTransaction(printTransaction);
 
-            String status = PrinterTester.getInstance().getStatus();
-            if(status.equalsIgnoreCase("Out of paper ")){
-                Toast.makeText(QrCodeScanner.this, "मुद्रण कागज समाप्त भयो।", Toast.LENGTH_SHORT).show();
-            }else {
-                paraPrint(printTransaction);
-            }
+//            String status = PrinterTester.getInstance().getStatus();
+//            if(status.equalsIgnoreCase("Out of paper ")){
+//                Toast.makeText(QrCodeScanner.this, "मुद्रण कागज समाप्त भयो।", Toast.LENGTH_SHORT).show();
+//            }else {
+//                paraPrint(printTransaction);
+//            }
 
             startActivity(new Intent(QrCodeScanner.this, TicketAndTracking.class));
             finish();
@@ -365,13 +358,13 @@ public class QrCodeScanner extends BaseActivity implements View.OnClickListener 
                     GeneralUtils.getNepaliMonth(String.valueOf(month)) + " "
                     + GeneralUtils.getUnicodeNumber(String.valueOf(day)) + " " +
                     GeneralUtils.getUnicodeNumber(GeneralUtils.getTime());
-//            printTransaction(printTransaction);
-            String status = PrinterTester.getInstance().getStatus();
-            if(status.equalsIgnoreCase("Out of paper ")){
-                Toast.makeText(QrCodeScanner.this, "मुद्रण कागज समाप्त भयो।", Toast.LENGTH_SHORT).show();
-            }else {
-                paraPrint(printTransaction);
-            }
+
+//            String status = PrinterTester.getInstance().getStatus();
+//            if(status.equalsIgnoreCase("Out of paper ")){
+//                Toast.makeText(QrCodeScanner.this, "मुद्रण कागज समाप्त भयो।", Toast.LENGTH_SHORT).show();
+//            }else {
+//                paraPrint(printTransaction);
+//            }
             startActivity(new Intent(this, TicketAndTracking.class));
         } else {
             Toast.makeText(this, "सहयोगी लग ईन छैन ।", Toast.LENGTH_SHORT).show();
@@ -450,13 +443,13 @@ public class QrCodeScanner extends BaseActivity implements View.OnClickListener 
                     + GeneralUtils.getUnicodeNumber(String.valueOf(day)) + " " +
                     GeneralUtils.getUnicodeNumber(GeneralUtils.getTime());
 
-            String status = PrinterTester.getInstance().getStatus();
+//            String status = PrinterTester.getInstance().getStatus();
 
-            if(status.equalsIgnoreCase("Out of paper ")){
-                Toast.makeText(QrCodeScanner.this, "मुद्रण कागज समाप्त भयो।", Toast.LENGTH_SHORT).show();
-            }else {
-                paraPrint(printTransaction);
-            }
+//            if(status.equalsIgnoreCase("Out of paper ")){
+//                Toast.makeText(QrCodeScanner.this, "मुद्रण कागज समाप्त भयो।", Toast.LENGTH_SHORT).show();
+//            }else {
+//                paraPrint(printTransaction);
+//            }
             startActivity(new Intent(this, TicketAndTracking.class));
             finish();
         } else {
@@ -468,21 +461,21 @@ public class QrCodeScanner extends BaseActivity implements View.OnClickListener 
     }
 
 
-    private void paraPrint(String printData) {
-        RxUtils.runInBackgroud(new Runnable() {
-            @Override
-            public void run() {
-                ReceiptPrintParam receiptPrintParam = new ReceiptPrintParam();
-                String printType = "error";
-                if (GeneralUtils.needBtPrint()) {
-                    Printer.printA60Receipt("", "", printType);
-                } else {
-                    receiptPrintParam.print(printData, new PrintListenerImpl(QrCodeScanner.this));
-                    Device.beepOk();
-                }
-            }
-        });
-    }
+//    private void paraPrint(String printData) {
+//        RxUtils.runInBackgroud(new Runnable() {
+//            @Override
+//            public void run() {
+//                ReceiptPrintParam receiptPrintParam = new ReceiptPrintParam();
+//                String printType = "error";
+//                if (GeneralUtils.needBtPrint()) {
+//                    Printer.printA60Receipt("", "", printType);
+//                } else {
+//                    receiptPrintParam.print(printData, new PrintListenerImpl(QrCodeScanner.this));
+//                    Device.beepOk();
+//                }
+//            }
+//        });
+//    }
 
 
 }

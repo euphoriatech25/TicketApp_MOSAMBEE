@@ -6,12 +6,9 @@ import android.os.Handler;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.pax.dal.IDAL;
-import com.pax.glwrapper.impl.GL;
-import com.pax.neptunelite.api.NeptuneLiteUser;
 
 public class TicketBusApp extends Application {
-    private static IDAL dal;
+
     private static TicketBusApp appContext;
     private static Handler handler;
 
@@ -39,9 +36,9 @@ public class TicketBusApp extends Application {
     public void onCreate() {
         super.onCreate();
         appContext = this;
-        dal = getDal();
         handler = new Handler();
-        GL.init(appContext);
+        SDKManager.getInstance().bindService(getApplicationContext());
+
 
     }
 
@@ -50,19 +47,7 @@ public class TicketBusApp extends Application {
         return appContext;
     }
 
-    public static IDAL getDal() {
-        if (dal == null) {
-            try {
-                long start = System.currentTimeMillis();
-                dal = NeptuneLiteUser.getInstance().getDal(appContext);
-                Log.i("Test", "get dal cost:" + (System.currentTimeMillis() - start) + " ms");
-            } catch (Exception e) {
-                e.printStackTrace();
-                Toast.makeText(appContext, "error occurred,DAL is null.", Toast.LENGTH_LONG).show();
-            }
-        }
-        return dal;
-    }
+
     public void runOnUiThread(final Runnable runnable) {
         handler.post(runnable);
     }
