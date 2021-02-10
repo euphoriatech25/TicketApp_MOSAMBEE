@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:orientation="vertical"
+    android:layout_height="wrap_content"
+    android:fitsSystemWindows="true">
+    <include
+        android:id="@+id/toolbar"
+        layout="@layout/toolbar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <include
+        android:id="@+id/progressBar"
+        layout="@layout/progress_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/linearLayout"
+        app:layout_constraintStart_toStartOf="@+id/linearLayout"
+        app:layout_constraintTop_toBottomOf="@+id/toolbar"
+        tools:visibility="visible" />
+
+    <LinearLayout
+        android:id="@+id/linearLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="10dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/toolbar">
+
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="100dp"
+                android:layout_height="50dp"
+                app:srcCompat="@android:drawable/stat_sys_phone_call"
+                android:tint="#100909"
+                android:visibility="visible"
+                tools:srcCompat="?attr/actionModeSelectAllDrawable"
+                tools:visibility="visible" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:textSize="15sp"
+                    android:gravity="left"
+                    android:layout_margin="5dp"
+                    android:textColor="@color/main_blue_color"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="ग्राहक मोबाइल नम्बर"/>
+
+                <EditText
+                    android:id="@+id/customer_mob_no"
+                    android:background="@drawable/edit_stoke"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="left"
+                    android:inputType="number"
+                    android:maxLength="10"
+                    android:textSize="25sp"
+                    android:padding="7dp"/>
+            </LinearLayout>
+
+        </LinearLayout>
+
+          <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="100dp"
+                android:layout_height="50dp"
+                android:src="@drawable/ic_baseline_card_membership_24"
+                android:tint="#100909"
+                android:visibility="visible"
+                tools:srcCompat="?attr/actionModeSelectAllDrawable"
+                tools:visibility="visible" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:textSize="15sp"
+                    android:gravity="left"
+                    android:layout_margin="5dp"
+                    android:textColor="@color/main_blue_color"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="ग्राहक नयाँ कार्ड"/>
+
+                <TextView
+                    android:id="@+id/card_num"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="left"
+                    android:textSize="20sp"
+                    android:padding="5dp"
+                    android:text="कार्ड देखाउनु होस्" />
+            </LinearLayout>
+
+        </LinearLayout>
+
+<!--        <LinearLayout-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="45dp"-->
+<!--            android:layout_marginTop="40dp"-->
+<!--            android:orientation="horizontal">-->
+
+<!--            <ImageView-->
+<!--                android:layout_width="85dp"-->
+<!--                android:layout_height="match_parent"-->
+<!--                android:tint="#100909"-->
+<!--                android:visibility="visible"-->
+<!--                app:srcCompat="@android:drawable/stat_sys_phone_call"-->
+<!--                tools:srcCompat="?attr/actionModeSelectAllDrawable"-->
+<!--                tools:visibility="visible" />-->
+
+
+<!--            <EditText-->
+<!--                android:id="@+id/customer_mob_no"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:hint="ग्राहक मोबाइल नम्बर"-->
+<!--                android:inputType="number"-->
+<!--                android:maxLines="1"-->
+<!--                android:textSize="20sp" />-->
+
+<!--        </LinearLayout>-->
+
+<!--        <LinearLayout-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="45dp"-->
+<!--            android:layout_marginTop="40dp"-->
+<!--            android:orientation="horizontal">-->
+
+<!--            <ImageView-->
+<!--                android:layout_width="85dp"-->
+<!--                android:layout_height="match_parent"-->
+<!--                android:src="@drawable/ic_baseline_card_membership_24"-->
+<!--                android:tint="#100909"-->
+<!--                android:visibility="visible"-->
+<!--                tools:srcCompat="?attr/actionModeSelectAllDrawable"-->
+<!--                tools:visibility="visible" />-->
+
+<!--            <TextView-->
+<!--                android:id="@+id/card_num"-->
+<!--                android:layout_width="fill_parent"-->
+<!--                android:layout_height="match_parent"-->
+<!--                android:gravity="start"-->
+<!--                android:padding="7dp"-->
+<!--                android:text="कार्ड देखाउनु होस्"-->
+<!--                android:textSize="20sp" />-->
+<!--        </LinearLayout>-->
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="40dp"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btn_cancel"
+                style="@style/buttonStyle"
+                android:layout_width="150dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="24dp"
+                android:layout_marginBottom="24dp"
+                android:padding="15dp"
+                android:text="रद्द गर्नुहोस्"
+                android:textSize="20sp" />
+
+            <Button
+                android:id="@+id/btn_submit"
+                style="@style/buttonStyle"
+                android:layout_width="150dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginLeft="10dp"
+                android:layout_marginTop="24dp"
+                android:layout_marginBottom="24dp"
+                android:padding="15dp"
+                android:text="बुझाउनुहोस्"
+                android:textSize="20sp" />
+        </LinearLayout>
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
