@@ -8,6 +8,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.RemoteException;
 import android.text.InputFilter;
 import android.text.InputType;
 import android.util.Base64;
@@ -24,6 +25,8 @@ import androidx.appcompat.app.AlertDialog;
 import com.hornet.dateconverter.DateConverter;
 import com.hornet.dateconverter.Model;
 import com.technosales.net.buslocationannouncement.APIToken.TokenManager;
+import com.technosales.net.buslocationannouncement.additionalfeatures.PayByCardActivity;
+import com.technosales.net.buslocationannouncement.mosambeesupport.Printer;
 import com.technosales.net.buslocationannouncement.pojo.ApiError;
 import com.technosales.net.buslocationannouncement.R;
 import com.technosales.net.buslocationannouncement.serverconn.RetrofitInterface;
@@ -118,8 +121,15 @@ public class CheckBalanceActivity extends BaseActivity {
                     if (msg.obj.toString() != null) {
                         successStatus = successStatus + Integer.valueOf(msg.obj.toString());
                         if (successStatus == 2) {
+                            if (!rechargeBill.equalsIgnoreCase("")) {
+                                try {
+                                    Printer.Print(CheckBalanceActivity.this, rechargeBill);
+                                } catch (RemoteException e) {
+                                    e.printStackTrace();
+                                }
+                            } else {
+                            }
                             Toast.makeText(CheckBalanceActivity.this, "Recharged Successfully!!!", Toast.LENGTH_SHORT).show();
-//                            paraPrint(rechargeBill);
                             startActivity(new Intent(CheckBalanceActivity.this, TicketAndTracking.class));
                             finish();
                         }
@@ -572,22 +582,6 @@ public class CheckBalanceActivity extends BaseActivity {
         }
 
     }
-
-//    private void paraPrint(String printData) {
-//        RxUtils.runInBackgroud(new Runnable() {
-//            @Override
-//            public void run() {
-////                ReceiptPrintParam receiptPrintParam = new ReceiptPrintParam();
-//                String printType = "error";
-//                if (GeneralUtils.needBtPrint()) {
-//                    Printer.printA60Receipt("", "", printType);
-//                } else {
-////                    receiptPrintParam.print(printData, new PrintListenerImpl(CheckBalanceActivity.this));
-////                    Device.beepOk();
-//                }
-//            }
-//        });
-//    }
 
     @Override
     public void onBackPressed() {

@@ -48,13 +48,14 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:padding="5dp"
-        app:layout_constraintBottom_toTopOf="@+id/guideline2"
-        app:layout_constraintEnd_toEndOf="parent"
         android:visibility="gone"
-        app:layout_constraintHorizontal_bias="0.069"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.08"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="parent"
-        app:layout_constraintVertical_bias="0.304">
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0">
+
         <ImageButton
             android:id="@+id/helper_login"
             android:layout_width="55dp"
@@ -64,44 +65,44 @@
             android:background="@drawable/circle_background"
             android:src="@mipmap/helper_choose" />
 
-            <TextView
-                android:layout_marginTop="5dp"
-                android:id="@+id/helperName"
-                android:layout_width="wrap_content"
-                android:drawableStart="@drawable/ic_baseline_person_24"
-                android:layout_height="wrap_content"
-                android:padding="3dp"
-                android:textColor="@color/white_color"
-                android:layout_marginStart="5dp" />
+        <TextView
+            android:id="@+id/helperName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:layout_marginTop="5dp"
+            android:drawableStart="@drawable/ic_baseline_person_24"
+            android:padding="3dp"
+            android:textColor="@color/white_color" />
 
-            <TextView
-                android:id="@+id/helperContact"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:padding="3dp"
-                android:drawableStart="@drawable/ic_baseline_phone_24"
-                android:layout_marginStart="5dp"
-                android:textColor="@color/white_color" />
+        <TextView
+            android:id="@+id/helperContact"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:drawableStart="@drawable/ic_baseline_phone_24"
+            android:padding="3dp"
+            android:textColor="@color/white_color" />
 
-            <TextView
-                android:id="@+id/helperEmail"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:padding="3dp"
-                android:drawableStart="@drawable/ic_baseline_email_24"
-                android:layout_marginStart="5dp"
-                android:textColor="@color/white_color" />
+        <TextView
+            android:id="@+id/helperEmail"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:drawableStart="@drawable/ic_baseline_email_24"
+            android:padding="3dp"
+            android:textColor="@color/white_color" />
 
         <Button
             android:id="@+id/todaysincome"
-            android:text="@string/todaysincome"
-            android:textColor="@color/white_color"
-            android:padding="3dp"
-            android:gravity="center"
-            android:drawableStart="@android:drawable/ic_menu_view"
-            android:background="@color/colorPrimaryDark"
             android:layout_width="match_parent"
-            android:layout_height="35dp"/>
+            android:layout_height="35dp"
+            android:background="@color/colorPrimaryDark"
+            android:drawableStart="@android:drawable/ic_menu_view"
+            android:gravity="center"
+            android:padding="3dp"
+            android:text="@string/todaysincome"
+            android:textColor="@color/white_color" />
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

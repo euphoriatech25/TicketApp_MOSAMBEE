@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -20,6 +21,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.bumptech.glide.Glide;
 import com.technosales.net.buslocationannouncement.APIToken.TokenManager;
 import com.technosales.net.buslocationannouncement.R;
+import com.technosales.net.buslocationannouncement.mosambeesupport.M1CardHandlerTest;
 import com.technosales.net.buslocationannouncement.pojo.ApiError;
 import com.technosales.net.buslocationannouncement.serverconn.RetrofitInterface;
 import com.technosales.net.buslocationannouncement.serverconn.ServerConfigNew;
@@ -42,28 +44,48 @@ import static com.technosales.net.buslocationannouncement.utils.UtilStrings.SHAR
 public class HelperLogin extends AppCompatActivity {
     String card_helper_id;
     TextView card_num;
-//    Button btn_submit, btn_cancel;
-    private String deviceId;
     SharedPreferences preferences;
     HelperModel helperDetails;
-//    private EPiccType piccType;
+    ProgressDialog pClick;
+    //    Button btn_submit, btn_cancel;
+    private String deviceId;
+    //    private EPiccType piccType;
     private ImageView helperLogin;
     private int TIME_DELAY = 500;
     private boolean stopThread;
-   private TokenManager tokenManager;
-    private DatabaseHelper databaseHelper;
-    ProgressDialog pClick;
-Thread thread=new Thread(new Runnable() {
-    @Override
-    public void run() {
-        while (!Thread.interrupted() && !stopThread)
-            try {
-                Thread.sleep(TIME_DELAY);
+    Thread thread = new Thread(new Runnable() {
+        @Override
+        public void run() {
+            while (!Thread.interrupted() && !stopThread)
+                try {
+                    Thread.sleep(TIME_DELAY);
 //                PiccTransaction.getInstance(piccType).readId(handler);
-            } catch (InterruptedException e) {
+                } catch (InterruptedException e) {
+                }
+        }
+    });
+    private TokenManager tokenManager;
+    private DatabaseHelper databaseHelper;
+    private Handler handler = new Handler() {
+        public void handleMessage(android.os.Message msg) {
+            switch (msg.what) {
+                case 100:
+                    if (msg.obj.toString() != null) {
+                        setHelperId(msg.obj.toString());
+                        Log.i("TAG", "handleMessage: "+ msg.obj.toString());
+                        stopThread = true;
+                        thread.interrupt();
+
+                    } else {
+                        Toast.makeText(HelperLogin.this, "Timeout Please restart", Toast.LENGTH_SHORT).show();
+                    }
+                    break;
+                default:
+                    break;
             }
-    }
-});
+        }
+    };
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -74,7 +96,7 @@ Thread thread=new Thread(new Runnable() {
         pClick = new ProgressDialog(this); //Your Activity.this
 
         databaseHelper = new DatabaseHelper(this);
-        helperLogin=findViewById(R.id.helperIcon);
+        helperLogin = findViewById(R.id.helperIcon);
 
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
@@ -84,27 +106,9 @@ Thread thread=new Thread(new Runnable() {
 //        piccType = EPiccType.INTERNAL;
         stopThread = false;
         (thread).start();
+        M1CardHandlerTest.test_m1card(handler);
+
     }
-
-    private Handler handler = new Handler() {
-        public void handleMessage(android.os.Message msg) {
-            switch (msg.what) {
-                case 100:
-                    if (msg.obj.toString() != null) {
-                        setHelperId(msg.obj.toString());
-                        stopThread=true;
-                        thread.interrupt();
-
-                    } else {
-                        Toast.makeText(HelperLogin.this, "Timeout Please restart", Toast.LENGTH_SHORT).show();
-                    }
-                    break;
-
-                default:
-                    break;
-            }
-        }
-    };
 
     private void setHelperId(String toString) {
         if (databaseHelper.listBlockList().size() != 0) {
@@ -130,7 +134,7 @@ Thread thread=new Thread(new Runnable() {
                 }
             }
         } else {
-            card_helper_id =toString;
+            card_helper_id = toString;
             card_num.setText(toString);
 
             if (GeneralUtils.isNetworkAvailable(HelperLogin.this)) {
@@ -189,13 +193,13 @@ Thread thread=new Thread(new Runnable() {
                         myEdit.putString(UtilStrings.NAME_HELPER, helperDetails.getData().getHelper().getFirstName() + " " + helperDetails.getData().getHelper().getLastName());
                     }
                     myEdit.apply();
-                        Toast.makeText(HelperLogin.this, "Helper Successfully logged in", Toast.LENGTH_SHORT).show();
-                        startActivity(new Intent(HelperLogin.this, TicketAndTracking.class));
-                        finish();
+                    Toast.makeText(HelperLogin.this, "Helper Successfully logged in", Toast.LENGTH_SHORT).show();
+                    startActivity(new Intent(HelperLogin.this, TicketAndTracking.class));
+                    finish();
                 } else if (response.code() == 400) {
                     pClick.dismiss();
                     Toast.makeText(HelperLogin.this, "Helper not Registered", Toast.LENGTH_SHORT).show();
-                } else if(response.code()==404) {
+                } else if (response.code() == 404) {
                     pClick.dismiss();
                     handleErrors(response.errorBody());
 
@@ -211,6 +215,7 @@ Thread thread=new Thread(new Runnable() {
             }
         });
     }
+
     private void handleErrors(ResponseBody responseBody) {
         ApiError apiErrors = GeneralUtils.convertErrors(responseBody);
         if (responseBody != null) {

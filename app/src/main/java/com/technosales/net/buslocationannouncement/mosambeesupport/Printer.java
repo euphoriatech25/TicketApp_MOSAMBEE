@@ -1,153 +1,107 @@
 package com.technosales.net.buslocationannouncement.mosambeesupport;
 
 import android.content.Context;
-import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.os.Build;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.RemoteException;
-import android.text.TextUtils;
+import android.text.Layout;
+import android.text.StaticLayout;
+import android.text.TextPaint;
 import android.util.Log;
 
-import com.morefun.yapi.ServiceResult;
-import com.morefun.yapi.device.printer.FontFamily;
-import com.morefun.yapi.device.printer.MulPrintStrEntity;
 import com.morefun.yapi.device.printer.MultipleAppPrinter;
 import com.morefun.yapi.device.printer.OnPrintListener;
 import com.morefun.yapi.device.printer.PrinterConfig;
 import com.morefun.yapi.engine.DeviceServiceEngine;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
+import com.technosales.net.buslocationannouncement.R;
+import com.technosales.net.buslocationannouncement.SDKManager;
+import com.technosales.net.buslocationannouncement.utils.GeneralUtils;
 
 public class Printer {
     private static final String TAG = "PrinterTest";
 
-    /**
-     * Get TypeFacePath
-     *
-     * @return if  Build.VERSION.SDK_INT below SDK_VERSION 26  return
-     * else return path /data/morefun/
-     */
-    public static String initTypeFacePath() {
-//        String namePath = "Roboto-Ligth";
-//        String namePath = "Roboto-Medium";
-        String namePath = "wawa";
-        String mTypefacePath = null;
-        if (Build.VERSION.SDK_INT >= 23) {
-//            mTypefacePath = FileUtils.getExternalCacheDir(MainActivity.getContext(), namePath + ".ttf");
-        } else {
-//            String filePath = FileUtils.createTmpDir(MainActivity.getContext());
-//            Log.d(TAG, "filePath = " + filePath);
-//            mTypefacePath = filePath + namePath + ".ttf";
+    public static void Print( Context context, String path) throws RemoteException {
+        DeviceServiceEngine mSDKManager;
+        mSDKManager = SDKManager.getInstance().getDeviceServiceEngine();
+        if (mSDKManager == null) {
+            Log.e("TAG", "ServiceEngine is Null");
+            return;
         }
-        Log.d(TAG, "mTypefacePath = " + mTypefacePath);
-//        try {
-//            FileUtils.copyFromAssets(MainActivity.getContext().getAssets(), namePath, mTypefacePath, true);
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//        Utils.chmod("777", mTypefacePath);
-        Log.d(TAG, "mTypefacePath = " + mTypefacePath);
-        return mTypefacePath;
+        String heading = context.getString(R.string.heading);
+        Bitmap bmpHeader = drawTextBitmap(heading, 20, false,Layout.Alignment.ALIGN_CENTER);
+
+        String newString =path + "\n\n\n";
+        Bitmap bmp = drawTextBitmap(newString, 25, false, Layout.Alignment.ALIGN_NORMAL);
+
+        Bitmap icon = BitmapFactory.decodeResource(context.getResources(), R.drawable.person);
+        Bitmap smallIcon = GeneralUtils.getResizedBitmap(icon, 60);
+
+        PrintImage(mSDKManager, smallIcon,bmpHeader,bmp);
     }
 
-    private static String getprintitem(String head, String val) {
-        StringBuffer sb = new StringBuffer();
-        sb.append(head);
-        sb.append("\r\n");
 
-        sb.append(val);
-        sb.append("\r\n");
-        return sb.toString();
+    public static Bitmap drawTextBitmap(String text, int textSize, boolean isBold, Layout.Alignment align) {
+
+        TextPaint textPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG | Paint.LINEAR_TEXT_FLAG);
+        textPaint.setStyle(Paint.Style.FILL);
+//        textPaint.setColor(Color.parseColor("#ffffff"));
+        textPaint.setColor(Color.parseColor("#000000"));
+        textPaint.setTextSize(textSize);
+
+        if (isBold)
+            textPaint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
+
+
+        StaticLayout mTextLayout = new StaticLayout(text, textPaint, 380, align, 1.0f, 0.0f, false);
+
+        // Create bitmap and canvas to draw to
+        Bitmap b = Bitmap.createBitmap(380, mTextLayout.getHeight(), Bitmap.Config.ARGB_4444);
+        Canvas c = new Canvas(b);
+
+        // Draw background
+        Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.LINEAR_TEXT_FLAG);
+        paint.setStyle(Paint.Style.FILL);
+//        paint.setColor(Color.parseColor("#000000"));
+        paint.setColor(Color.parseColor("#ffffff"));
+        c.drawPaint(paint);
+
+        // Draw text
+        c.save();
+        c.translate(0, 0);
+        mTextLayout.draw(c);
+        c.restore();
+        return b;
     }
 
-    public static void Print(DeviceServiceEngine engine, Context context, String path) throws RemoteException {
+
+    public static void PrintImage(DeviceServiceEngine engine, Bitmap icon, Bitmap header, Bitmap value) throws RemoteException {
         MultipleAppPrinter printer = engine.getMultipleAppPrinter();
-         PrintDataEn(printer, context, path);
-//        PrintImage(engine, context, listener);
-    }
-
-
-    public static void PrintDataEn(MultipleAppPrinter printer, final Context context, String path) {
-        try {
-            int fontSize = FontFamily.MIDDLE;
-            Bundle config = new Bundle();
-//            path = initTypeFacePath();
-            if (!TextUtils.isEmpty(path)) {
-                config.putString(PrinterConfig.COMMON_TYPEFACE_PATH, path);
-            }
-            config.putInt(PrinterConfig.COMMON_GRAYLEVEL, 15);
-
-            List<MulPrintStrEntity> list = new ArrayList<>();
-            MulPrintStrEntity entity = new MulPrintStrEntity("POS purchase order", fontSize);
-//            entity.setGravity(Gravity.CENTER);
-            entity.setMarginX(50);
-            entity.setUnderline(true);
-            entity.setYspace(30);
-            list.add(entity);
-            MulPrintStrEntity mulPrintStrEntity = new MulPrintStrEntity("=====================", fontSize);
-            list.add(mulPrintStrEntity);
-            list.add(new MulPrintStrEntity("MERCHANT NAME：Demo shop name", fontSize));
-            list.add(new MulPrintStrEntity("MERCHANT NO.：20321545656687", fontSize));
-            list.add(new MulPrintStrEntity("TERMINAL NO.：25689753", fontSize));
-            list.add(new MulPrintStrEntity("CARD NUMBER", fontSize));
-            list.add(new MulPrintStrEntity("62179390*****3426", fontSize));
-            list.add(new MulPrintStrEntity("TRANS TYPE", fontSize));
-            list.add(new MulPrintStrEntity("SALE", fontSize));
-            list.add(new MulPrintStrEntity("EXP DATE：2029", fontSize));
-            list.add(new MulPrintStrEntity("BATCH NO：000012", fontSize));
-            list.add(new MulPrintStrEntity("VOUCHER NO：000001", fontSize));
-            list.add(new MulPrintStrEntity("DATE/TIME：2016-05-23 16:50:32", fontSize));
-            list.add(new MulPrintStrEntity("AMOUNT", fontSize));
-            list.add(new MulPrintStrEntity("==========================", fontSize));
-            //feed pager one line
-            list.add(new MulPrintStrEntity("\n", fontSize));
-            list.add(new MulPrintStrEntity("CARD HOLDER SIGNATURE", fontSize));
-            list.add(new MulPrintStrEntity("\n", fontSize));
-            list.add(new MulPrintStrEntity("--------------------------------------", fontSize));
-            list.add(new MulPrintStrEntity(" I ACKNOWLEDGE	SATISFACTORY RECEIPT OF RELATIVE GOODS/SERVICES", fontSize));
-            list.add(new MulPrintStrEntity(" MERCHANT COPY ", fontSize));
-            list.add(new MulPrintStrEntity("---X---X---X---X---X--X--X--X--X--X--\n", fontSize));
-            printer.printStr(list, new OnPrintListener.Stub() {
-                @Override
-                public void onPrintResult(int result) throws RemoteException {
-                    Log.d(TAG, "onPrintResult = " + result);
-//                    listener.showMessage(result == ServiceResult.Success ? context.getString(R.string.msg_succ) : context.getString(R.string.msg_fail));
-                }
-            }, config);
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static void PrintImage(DeviceServiceEngine engine, final Context context) throws RemoteException {
-        MultipleAppPrinter printer = engine.getMultipleAppPrinter();
-        Bitmap bitmap = getImageFromAssetsFile(context, "china_union_pay.bmp.");
         Bundle config = new Bundle();
         config.putInt(PrinterConfig.COMMON_GRAYLEVEL, 30);
-        printer.printImage(bitmap, new OnPrintListener.Stub() {
+        printer.printImage(icon, new OnPrintListener.Stub() {
             @Override
             public void onPrintResult(int result) throws RemoteException {
                 Log.d(TAG, "onPrintResult = " + result);
+                printer.printImage(header, new OnPrintListener.Stub() {
+                    @Override
+                    public void onPrintResult(int result) throws RemoteException {
+                        Log.d(TAG, "onPrintResult = " + result);
+                        printer.printImage(value, new OnPrintListener.Stub() {
+                            @Override
+                            public void onPrintResult(int result) throws RemoteException {
+                                Log.d(TAG, "onPrintResult = " + result);
+                            }
+                        }, config);
+                    }
+                }, config);
 //                listener.showMessage(result == ServiceResult.Success ? context.getString(R.string.msg_succ) : context.getString(R.string.msg_fail));
             }
         }, config);
-    }
 
-    private static Bitmap getImageFromAssetsFile(Context context, String fileName) {
-        Bitmap image = null;
-        AssetManager am = context.getResources().getAssets();
-        try {
-            InputStream is = am.open(fileName);
-            image = BitmapFactory.decodeStream(is);
-            is.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return image;
     }
 }

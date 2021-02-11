@@ -10,6 +10,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.RemoteException;
 import android.telephony.TelephonyManager;
 import android.util.Base64;
 import android.util.Log;
@@ -25,11 +26,14 @@ import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.ActivityCompat;
 
+import com.technosales.net.buslocationannouncement.activity.CheckBalanceActivity;
+import com.technosales.net.buslocationannouncement.additionalfeatures.PayByCardActivity;
 import com.technosales.net.buslocationannouncement.callcontrol.IncomingCallReceiver;
 import com.technosales.net.buslocationannouncement.R;
 import com.technosales.net.buslocationannouncement.activity.TicketAndTracking;
 import com.technosales.net.buslocationannouncement.base.BaseActivity;
 import com.technosales.net.buslocationannouncement.helper.DatabaseHelper;
+import com.technosales.net.buslocationannouncement.mosambeesupport.Printer;
 import com.technosales.net.buslocationannouncement.pojo.ApiError;
 import com.technosales.net.buslocationannouncement.utils.GeneralUtils;
 import com.technosales.net.buslocationannouncement.utils.UtilStrings;
@@ -134,7 +138,11 @@ public class IssueCardActivity extends BaseActivity implements ICreateAccount.Vi
 //                            }else {
 //                                paraPrint(printData);
 //                            }
-
+                            try {
+                                Printer.Print(IssueCardActivity.this, printData);
+                            } catch (RemoteException e) {
+                                e.printStackTrace();
+                            }
 
                             Toast.makeText(IssueCardActivity.this, "ग्राहक सफलतापूर्वक दर्ता गरियो।", Toast.LENGTH_SHORT).show();
                             startActivity(new Intent(IssueCardActivity.this, TicketAndTracking.class));

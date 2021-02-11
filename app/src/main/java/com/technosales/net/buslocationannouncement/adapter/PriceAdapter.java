@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
+import android.os.RemoteException;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,11 +21,14 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.hornet.dateconverter.DateConverter;
 import com.hornet.dateconverter.Model;
+import com.morefun.yapi.engine.DeviceServiceEngine;
+import com.technosales.net.buslocationannouncement.SDKManager;
 import com.technosales.net.buslocationannouncement.additionalfeatures.PayByCardActivity;
 import com.technosales.net.buslocationannouncement.additionalfeatures.QrCodeScanner;
 import com.technosales.net.buslocationannouncement.R;
 import com.technosales.net.buslocationannouncement.activity.TicketAndTracking;
 import com.technosales.net.buslocationannouncement.helper.DatabaseHelper;
+import com.technosales.net.buslocationannouncement.mosambeesupport.Printer;
 import com.technosales.net.buslocationannouncement.pojo.PriceList;
 import com.technosales.net.buslocationannouncement.pojo.RouteStationList;
 import com.technosales.net.buslocationannouncement.pojo.TicketInfoList;
@@ -69,9 +73,7 @@ public class PriceAdapter extends RecyclerView.Adapter<PriceAdapter.MyViewHolder
 
     @Override
     public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.price_item_layout, parent, false);
-
         return new MyViewHolder(view);
     }
 
@@ -80,6 +82,7 @@ public class PriceAdapter extends RecyclerView.Adapter<PriceAdapter.MyViewHolder
         preferences = context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0);
         preferencesHelper = context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES_HELPER, 0);
         helperId = preferencesHelper.getString(UtilStrings.ID_HELPER, "");
+
 
         final PriceList priceList = priceLists.get(position);
         if (((TicketAndTracking) context).normalDiscountToggle.isOn()) {
@@ -268,7 +271,11 @@ public class PriceAdapter extends RecyclerView.Adapter<PriceAdapter.MyViewHolder
 //                            }else {
 //                                ((TicketAndTracking) context).paraPrint(printTransaction);
 //                            }
-
+                            try {
+                                Printer.Print(context, printTransaction);
+                            } catch (RemoteException e) {
+                                e.printStackTrace();
+                            }
 
                         } else {
                             Toast.makeText(context, "सहायक छान्नुहोस् ।", Toast.LENGTH_SHORT).show();

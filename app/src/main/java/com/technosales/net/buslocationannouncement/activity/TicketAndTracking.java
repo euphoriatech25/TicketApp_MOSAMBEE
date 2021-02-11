@@ -16,6 +16,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.RemoteException;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.text.InputFilter;
@@ -26,14 +27,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -55,8 +54,11 @@ import com.mikepenz.materialdrawer.model.DividerDrawerItem;
 import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
 import com.mikepenz.materialdrawer.model.SecondaryDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
+import com.morefun.yapi.engine.DeviceServiceEngine;
 import com.technosales.net.buslocationannouncement.APIToken.TokenManager;
 import com.technosales.net.buslocationannouncement.R;
+import com.technosales.net.buslocationannouncement.SDKManager;
+import com.technosales.net.buslocationannouncement.mosambeesupport.Printer;
 import com.technosales.net.buslocationannouncement.serverconn.RetrofitInterface;
 import com.technosales.net.buslocationannouncement.serverconn.ServerConfigNew;
 import com.technosales.net.buslocationannouncement.userregistration.IssueCardActivity;
@@ -375,10 +377,11 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
         isToday();
         GeneralUtils.createTicketFolder();
 
-
         totalCollectionTickets.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+
 
          /* AlertDialog alertDialog = new AlertDialog.Builder(TicketAndTracking.this).create();
                 alertDialog.setTitle("Clear Data");
@@ -397,6 +400,9 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
 
             }
         });
+
+
+
 
         totalCollectionTickets.setOnLongClickListener(new View.OnLongClickListener() {
             @Override

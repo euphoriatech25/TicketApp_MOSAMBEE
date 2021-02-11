@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.RemoteException;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -15,10 +16,14 @@ import android.widget.Toast;
 import com.hornet.dateconverter.DateConverter;
 import com.hornet.dateconverter.Model;
 
+import com.morefun.yapi.engine.DeviceServiceEngine;
 import com.technosales.net.buslocationannouncement.R;
+import com.technosales.net.buslocationannouncement.SDKManager;
 import com.technosales.net.buslocationannouncement.activity.TicketAndTracking;
 import com.technosales.net.buslocationannouncement.base.BaseActivity;
 import com.technosales.net.buslocationannouncement.helper.DatabaseHelper;
+import com.technosales.net.buslocationannouncement.mosambeesupport.Printer;
+import com.technosales.net.buslocationannouncement.mosambeesupport.ScannerApi;
 import com.technosales.net.buslocationannouncement.pojo.RouteStationList;
 import com.technosales.net.buslocationannouncement.pojo.TicketInfoList;
 import com.technosales.net.buslocationannouncement.utils.GeneralUtils;
@@ -35,19 +40,11 @@ import static com.technosales.net.buslocationannouncement.utils.UtilStrings.TRAN
 public class QrCodeScanner extends BaseActivity implements View.OnClickListener {
     TextView tv_amount, text_qr_num;
     LinearLayout withQR;
-    //new
-    private Button submitButton;
     String card_id = "";
-    private SharedPreferences preferences,preferencesHelper;
-    private String helperId, deviceId, amount, busName, toGetOff, source;
-    private String nearest_name = "";
-    private DatabaseHelper databaseHelper;
-    private DateConverter dateConverter;
-    private List<RouteStationList> routeStationLists = new ArrayList<>();
     Context context;
     String ticketType;
     String discountType;
-    String  station_name;
+    String station_name;
     Float totalDistance;
     String strTotal;
     String isOnlineCheck;
@@ -57,12 +54,54 @@ public class QrCodeScanner extends BaseActivity implements View.OnClickListener 
     String longitude;
     int POSITION;
     String passenserId;
+    DeviceServiceEngine mSDKManager;
+    //new
+    private Button submitButton;
+    private SharedPreferences preferences, preferencesHelper;
+    private String helperId, deviceId, amount, busName, toGetOff, source;
+    private String nearest_name = "";
+    private DatabaseHelper databaseHelper;
+    private DateConverter dateConverter;
+    private List<RouteStationList> routeStationLists = new ArrayList<>();
+    private Handler handler = new Handler() {
+        public void handleMessage(android.os.Message msg) {
+            switch (msg.what) {
+                case 100:
+                    if (msg.obj.toString() != null) {
+                        if (databaseHelper.listBlockList().size() > 0) {
+                            for (int i = 0; i < databaseHelper.listBlockList().size(); i++) {
+                                if (databaseHelper.listBlockList().get(i).identificationId.equalsIgnoreCase(msg.obj.toString())) {
+                                    Toast.makeText(QrCodeScanner.this, "यो कार्ड ब्लक गरिएको छ।", Toast.LENGTH_SHORT).show();
+                                } else {
+                                    getCardId(msg.obj.toString());
+                                }
+                            }
+                        } else {
+                            getCardId(msg.obj.toString());
+                        }
+                    } else {
+                        Toast.makeText(QrCodeScanner.this, "Please show card properly", Toast.LENGTH_SHORT).show();
+                    }
+
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        ;
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_scan_barcode);
         setUpToolbar("कार्ड बाट तिर्नुहोस", true);
+        mSDKManager = SDKManager.getInstance().getDeviceServiceEngine();
+        if (mSDKManager == null) {
+            Log.e("TAG", "ServiceEngine is Null");
+            return;
+        }
 
         initViews();
     }
@@ -90,47 +129,18 @@ public class QrCodeScanner extends BaseActivity implements View.OnClickListener 
         toGetOff = getIntent().getStringExtra(UtilStrings.TOGETOFF);
         nearest_name = getIntent().getStringExtra(UtilStrings.NEAREST_PLACE);
         source = getIntent().getStringExtra(UtilStrings.SOURCE);
-        totalDistance = getIntent().getFloatExtra(UtilStrings.TOTAL_DISTANCE,0);
+        totalDistance = getIntent().getFloatExtra(UtilStrings.TOTAL_DISTANCE, 0);
         station_name = getIntent().getStringExtra(UtilStrings.STATION_NAME);
-        POSITION = getIntent().getIntExtra(UtilStrings.POSITION,0);
-        passenserId="1";
-//        ScannerPax.getInstance(EScannerType.FRONT).scan(handler, 15000);
+        POSITION = getIntent().getIntExtra(UtilStrings.POSITION, 0);
+        passenserId = "4";
 
+        ScannerApi.ScannerApi(handler, mSDKManager);
         if (GeneralUtils.isNetworkAvailable(this)) {
             isOnlineCheck = "true";
         } else {
             isOnlineCheck = "false";
         }
     }
-
-    private Handler handler = new Handler() {
-        public void handleMessage(android.os.Message msg) {
-            switch (msg.what) {
-                case 0:
-                    if(msg.obj.toString()!=null) {
-                        if (databaseHelper.listBlockList().size() > 0) {
-                            for (int i = 0; i < databaseHelper.listBlockList().size(); i++) {
-                                if (databaseHelper.listBlockList().get(i).identificationId.equalsIgnoreCase(msg.obj.toString())) {
-                                    Toast.makeText(QrCodeScanner.this, "यो कार्ड ब्लक गरिएको छ।", Toast.LENGTH_SHORT).show();
-                                } else {
-                                    getCardId(msg.obj.toString());
-                                }
-                            }
-                        } else {
-                            getCardId(msg.obj.toString());
-                        }
-                    }else {
-                        Toast.makeText(QrCodeScanner.this, "Please show card properly", Toast.LENGTH_SHORT).show();
-                    }
-
-                    break;
-                default:
-                    break;
-            }
-        }
-
-        ;
-    };
 
     private void getCardId(String toString) {
         if (!toString.equalsIgnoreCase("Empty")) {
@@ -244,22 +254,22 @@ public class QrCodeScanner extends BaseActivity implements View.OnClickListener 
             Log.i("getNepaliDate", "year=" + year + ",month:" + month + ",day:" + day);
 
             TicketInfoList ticketInfoList = new TicketInfoList();
-            ticketInfoList.ticket_id = deviceId.substring(deviceId.length() - 4) + GeneralUtils.getDate()  + GeneralUtils.getTicketTime()+ "" + valueOfTickets;
+            ticketInfoList.ticket_id = deviceId.substring(deviceId.length() - 4) + GeneralUtils.getDate() + GeneralUtils.getTicketTime() + "" + valueOfTickets;
             ticketInfoList.transactionAmount = String.valueOf(Integer.parseInt(amount));
             ticketInfoList.helper_id = helperId;
             ticketInfoList.device_id = deviceId;
-            ticketInfoList.device_time = GeneralUtils.getFullDate()+" "+GeneralUtils.getTime();
+            ticketInfoList.device_time = GeneralUtils.getFullDate() + " " + GeneralUtils.getTime();
             ticketInfoList.transactionMedium = PAYMENT_QR;
             ticketInfoList.transactionType = TRANSACTION_TYPE_PAYMENT;
-            ticketInfoList.lat =  routeStationLists.get(POSITION).station_lat;
-            ticketInfoList.lng =  routeStationLists.get(POSITION).station_lng;
+            ticketInfoList.lat = routeStationLists.get(POSITION).station_lat;
+            ticketInfoList.lng = routeStationLists.get(POSITION).station_lng;
             ticketInfoList.userType = ticketType;
             ticketInfoList.transactionFee = "null";
             ticketInfoList.transactionCommission = "null";
-            ticketInfoList.isOnline =isOnlineCheck;
+            ticketInfoList.isOnline = isOnlineCheck;
             ticketInfoList.offlineRefId = "null";
             ticketInfoList.status = STATUS;
-            ticketInfoList.passenger_id=passenserId;
+            ticketInfoList.passenger_id = passenserId;
             ticketInfoList.referenceHash = "null";
             ticketInfoList.referenceId = "null";
             databaseHelper.insertTicketInfo(ticketInfoList);
@@ -269,12 +279,16 @@ public class QrCodeScanner extends BaseActivity implements View.OnClickListener 
 
 
             String printTransaction = busName + "\n" +
-                    GeneralUtils.getUnicodeNumber(ticketInfoList.ticket_id) +"क्यू आर"+ "\n" +
+                    GeneralUtils.getUnicodeNumber(ticketInfoList.ticket_id) + "क्यू आर" + "\n" +
                     "रु." + GeneralUtils.getUnicodeNumber(ticketInfoList.transactionAmount) + discountType + "\n" +
                     GeneralUtils.getNepaliMonth(String.valueOf(month)) + " "
                     + GeneralUtils.getUnicodeNumber(String.valueOf(day)) + " " +
                     GeneralUtils.getUnicodeNumber(GeneralUtils.getTime());
-//            printTransaction(printTransaction);
+            try {
+                Printer.Print(QrCodeScanner.this, printTransaction);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
 
 //            String status = PrinterTester.getInstance().getStatus();
 //            if(status.equalsIgnoreCase("Out of paper ")){
@@ -330,35 +344,39 @@ public class QrCodeScanner extends BaseActivity implements View.OnClickListener 
 
 
             TicketInfoList ticketInfoList = new TicketInfoList();
-            ticketInfoList.ticket_id = deviceId.substring(deviceId.length() - 4) + GeneralUtils.getDate()  + GeneralUtils.getTicketTime()+ "" + valueOfTickets;
+            ticketInfoList.ticket_id = deviceId.substring(deviceId.length() - 4) + GeneralUtils.getDate() + GeneralUtils.getTicketTime() + "" + valueOfTickets;
             ticketInfoList.transactionAmount = String.valueOf(Integer.parseInt(amount));
             ticketInfoList.helper_id = helperId;
             ticketInfoList.device_id = deviceId;
-            ticketInfoList.device_time = GeneralUtils.getFullDate()+" "+GeneralUtils.getTime();
+            ticketInfoList.device_time = GeneralUtils.getFullDate() + " " + GeneralUtils.getTime();
             ticketInfoList.transactionMedium = PAYMENT_QR;
             ticketInfoList.transactionType = TRANSACTION_TYPE_PAYMENT;
-            ticketInfoList.lat =  routeStationLists.get(POSITION).station_lat;
-            ticketInfoList.lng =  routeStationLists.get(POSITION).station_lng;
+            ticketInfoList.lat = routeStationLists.get(POSITION).station_lat;
+            ticketInfoList.lng = routeStationLists.get(POSITION).station_lng;
             ticketInfoList.userType = ticketType;
             ticketInfoList.transactionFee = "null";
             ticketInfoList.transactionCommission = "null";
-            ticketInfoList.isOnline =isOnlineCheck;
+            ticketInfoList.isOnline = isOnlineCheck;
             ticketInfoList.offlineRefId = "null";
             ticketInfoList.status = STATUS;
-            ticketInfoList.passenger_id=passenserId;
+            ticketInfoList.passenger_id = passenserId;
             ticketInfoList.referenceHash = "null";
             ticketInfoList.referenceId = "null";
             databaseHelper.insertTicketInfo(ticketInfoList);
 
 
             String printTransaction = busName + "\n" +
-                    GeneralUtils.getUnicodeNumber(ticketInfoList.ticket_id)+"क्यू आर"+ "\n" +
+                    GeneralUtils.getUnicodeNumber(ticketInfoList.ticket_id) + "क्यू आर" + "\n" +
                     "रु." + GeneralUtils.getUnicodeNumber(ticketInfoList.transactionAmount) + discountType + "\n" +
                     nearest_name + "-" + toGetOff + "\n" +
                     GeneralUtils.getNepaliMonth(String.valueOf(month)) + " "
                     + GeneralUtils.getUnicodeNumber(String.valueOf(day)) + " " +
                     GeneralUtils.getUnicodeNumber(GeneralUtils.getTime());
-
+            try {
+                Printer.Print(QrCodeScanner.this, printTransaction);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
 //            String status = PrinterTester.getInstance().getStatus();
 //            if(status.equalsIgnoreCase("Out of paper ")){
 //                Toast.makeText(QrCodeScanner.this, "मुद्रण कागज समाप्त भयो।", Toast.LENGTH_SHORT).show();
@@ -405,15 +423,15 @@ public class QrCodeScanner extends BaseActivity implements View.OnClickListener 
             Log.i("getNepaliDate", "year=" + year + ",month:" + month + ",day:" + day);
 
             TicketInfoList ticketInfoList = new TicketInfoList();
-            ticketInfoList.ticket_id = deviceId.substring(deviceId.length() - 4) + GeneralUtils.getDate()  + GeneralUtils.getTicketTime()+ "" + valueOfTickets;
+            ticketInfoList.ticket_id = deviceId.substring(deviceId.length() - 4) + GeneralUtils.getDate() + GeneralUtils.getTicketTime() + "" + valueOfTickets;
             ticketInfoList.transactionAmount = String.valueOf(Integer.parseInt(amount));
             ticketInfoList.helper_id = helperId;
             ticketInfoList.device_id = deviceId;
-            ticketInfoList.device_time = GeneralUtils.getFullDate()+" "+GeneralUtils.getTime();
+            ticketInfoList.device_time = GeneralUtils.getFullDate() + " " + GeneralUtils.getTime();
             ticketInfoList.transactionMedium = UtilStrings.PAYMENT_CASH;
             ticketInfoList.transactionType = TRANSACTION_TYPE_PAYMENT;
-            ticketInfoList.lat =  routeStationLists.get(POSITION).station_lat;
-            ticketInfoList.lng =  routeStationLists.get(POSITION).station_lng;
+            ticketInfoList.lat = routeStationLists.get(POSITION).station_lat;
+            ticketInfoList.lng = routeStationLists.get(POSITION).station_lng;
             ticketInfoList.userType = ticketType;
             ticketInfoList.isOnline = isOnlineCheck;
             ticketInfoList.status = STATUS;
@@ -421,13 +439,13 @@ public class QrCodeScanner extends BaseActivity implements View.OnClickListener 
             ticketInfoList.transactionFee = "null";
             ticketInfoList.transactionCommission = "null";
             ticketInfoList.offlineRefId = "null";
-            ticketInfoList.passenger_id=passenserId;
+            ticketInfoList.passenger_id = passenserId;
             ticketInfoList.referenceHash = "null";
             ticketInfoList.referenceId = "null";
             databaseHelper.insertTicketInfo(ticketInfoList);
 
             if (totalDistance != null) {
-                float distanceInKm = (totalDistance/ 1000);
+                float distanceInKm = (totalDistance / 1000);
                 strTotal = distanceInKm + "";
                 if (strTotal.length() > 4) {
                     strTotal = strTotal.substring(0, 4);
@@ -436,13 +454,17 @@ public class QrCodeScanner extends BaseActivity implements View.OnClickListener 
                 strTotal = "null";
             }
             String printTransaction = busName + "\n" +
-                    GeneralUtils.getUnicodeNumber(ticketInfoList.ticket_id)+"क्यू आर"+ "\n" +
+                    GeneralUtils.getUnicodeNumber(ticketInfoList.ticket_id) + "क्यू आर" + "\n" +
                     GeneralUtils.getUnicodeNumber(strTotal) + "कि.मी , रु." + GeneralUtils.getUnicodeNumber(ticketInfoList.transactionAmount) + discountType + "\n" +
                     nearest_name + "-" + station_name + "\n" +
                     GeneralUtils.getNepaliMonth(String.valueOf(month)) + " "
                     + GeneralUtils.getUnicodeNumber(String.valueOf(day)) + " " +
                     GeneralUtils.getUnicodeNumber(GeneralUtils.getTime());
-
+            try {
+                Printer.Print(QrCodeScanner.this, printTransaction);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
 //            String status = PrinterTester.getInstance().getStatus();
 
 //            if(status.equalsIgnoreCase("Out of paper ")){

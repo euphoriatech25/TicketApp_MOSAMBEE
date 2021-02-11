@@ -8,6 +8,7 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.RemoteException;
 import android.util.Base64;
 import android.util.Log;
 import android.view.Gravity;
@@ -28,6 +29,7 @@ import com.technosales.net.buslocationannouncement.activity.HelperLogin;
 import com.technosales.net.buslocationannouncement.activity.TicketAndTracking;
 import com.technosales.net.buslocationannouncement.base.BaseActivity;
 import com.technosales.net.buslocationannouncement.helper.DatabaseHelper;
+import com.technosales.net.buslocationannouncement.mosambeesupport.Printer;
 import com.technosales.net.buslocationannouncement.pojo.ApiError;
 import com.technosales.net.buslocationannouncement.pojo.BlockList;
 import com.technosales.net.buslocationannouncement.pojo.RouteStationList;
@@ -1003,19 +1005,11 @@ public class PayByCardActivity extends BaseActivity {
 
 
             if (!printTransaction.equalsIgnoreCase("")) {
-//                status = PrinterTester.getInstance().getStatus();
-//                if (status.equalsIgnoreCase("Out of paper ")) {
-//                    runOnUiThread(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            Toast.makeText(PayByCardActivity.this, "मुद्रण कागज समाप्त भयो।", Toast.LENGTH_SHORT).show();
-//                        }
-//                    });
-//
-//                } else {
-//                    paraPrint(printTransaction);
-//                }
-
+                try {
+                    Printer.Print(PayByCardActivity.this, printTransaction);
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                }
                 startActivity(new Intent(PayByCardActivity.this, TicketAndTracking.class));
                 finish();
             } else {
@@ -1093,24 +1087,17 @@ public class PayByCardActivity extends BaseActivity {
 
             pClick.dismiss();
 
-//            if (!printTransaction.equalsIgnoreCase("")) {
-//                status = PrinterTester.getInstance().getStatus();
-//                if (status.equalsIgnoreCase("Out of paper ")) {
-//                    runOnUiThread(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            Toast.makeText(PayByCardActivity.this, "मुद्रण कागज समाप्त भयो।", Toast.LENGTH_SHORT).show();
-//                        }
-//                    });
-//                } else {
-//                    paraPrint(printTransaction);
-//                }
-
-//                startActivity(new Intent(PayByCardActivity.this, TicketAndTracking.class));
-//                finish();
-//            } else {
-//                Log.i("TAG", "onActivate: " + "rrrr");
-//            }
+            if (!printTransaction.equalsIgnoreCase("")) {
+                    try {
+                        Printer.Print(PayByCardActivity.this, printTransaction);
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
+                    }
+                startActivity(new Intent(PayByCardActivity.this, TicketAndTracking.class));
+                finish();
+            } else {
+                Log.i("TAG", "onActivate: " + "rrrr");
+            }
         } else {
             runOnUiThread(new Runnable() {
                 @Override
@@ -1194,25 +1181,17 @@ public class PayByCardActivity extends BaseActivity {
                     + GeneralUtils.getUnicodeNumber(String.valueOf(day)) + " " +
                     GeneralUtils.getUnicodeNumber(GeneralUtils.getTime());
 
-//            if (!printTransaction.equalsIgnoreCase("")) {
-//                status = PrinterTester.getInstance().getStatus();
-//                if (status.equalsIgnoreCase("Out of paper ")) {
-//                    runOnUiThread(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            Toast.makeText(PayByCardActivity.this, "मुद्रण कागज समाप्त भयो।", Toast.LENGTH_SHORT).show();
-//                        }
-//                    });
-//
-//                } else {
-//                    paraPrint(printTransaction);
-//                }
-//                startActivity(new Intent(PayByCardActivity.this, TicketAndTracking.class));
-//                finish();
-//            } else {
-//                Log.i("TAG", "onActivate: " + "rrrr");
-//            }
-            finish();
+            if (!printTransaction.equalsIgnoreCase("")) {
+                try {
+                    Printer.Print(PayByCardActivity.this, printTransaction);
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                }
+                startActivity(new Intent(PayByCardActivity.this, TicketAndTracking.class));
+                finish();
+            } else {
+                Log.i("TAG", "onActivate: " + "rrrr");
+            }
         } else {
             runOnUiThread(new Runnable() {
                 @Override
@@ -1226,21 +1205,4 @@ public class PayByCardActivity extends BaseActivity {
 
         }
     }
-
-//    private void paraPrint(String printData) {
-//        RxUtils.runInBackgroud(new Runnable() {
-//            @Override
-//            public void run() {
-//                ReceiptPrintParam receiptPrintParam = new ReceiptPrintParam();
-//                String printType = "error";
-//                if (GeneralUtils.needBtPrint()) {
-//                    Printer.printA60Receipt("", "", printType);
-//                } else {
-//                    receiptPrintParam.print(printData, new PrintListenerImpl(PayByCardActivity.this));
-//                    Device.beepOk();
-//                }
-//            }
-//        });
-//    }
-
 }

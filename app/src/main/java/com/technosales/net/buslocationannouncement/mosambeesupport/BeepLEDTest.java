@@ -1,27 +1,40 @@
 package com.technosales.net.buslocationannouncement.mosambeesupport;
 
 import android.os.RemoteException;
+import android.util.Log;
 
 import com.morefun.yapi.device.beeper.BeepModeConstrants;
 import com.morefun.yapi.engine.DeviceServiceEngine;
+import com.technosales.net.buslocationannouncement.SDKManager;
 
 public class BeepLEDTest {
-
-    public static void setLed(DeviceServiceEngine mSDKManager, boolean isLightLed) {
-        try {
-            //PowerLed(boolean blue, boolean yellow, boolean green, boolean red)
-            mSDKManager.getLEDDriver().PowerLed(isLightLed, isLightLed, isLightLed, isLightLed);
-
-//            mSDKManager.getLEDDriver().setLed(LEDLightConstrants.BLUE, isLightLed);
-//            mSDKManager.getLEDDriver().setLed(LEDLightConstrants.YELLOW, isLightLed);
-//            mSDKManager.getLEDDriver().setLed(LEDLightConstrants.GREEN, isLightLed);
-//            mSDKManager.getLEDDriver().setLed(LEDLightConstrants.RED, isLightLed);
-        } catch (RemoteException e) {
-            e.printStackTrace();
+    public static void beepSuccess() throws RemoteException {
+        DeviceServiceEngine mSDKManager;
+        mSDKManager = SDKManager.getInstance().getDeviceServiceEngine();
+        if (mSDKManager == null) {
+            Log.e("TAG", "ServiceEngine is Null");
+            return;
         }
+        mSDKManager.getBeeper().beep(BeepModeConstrants.SUCCESS);
     }
 
-    public static void beep(DeviceServiceEngine mSDKManager) throws RemoteException {
-        mSDKManager.getBeeper().beep(BeepModeConstrants.NORMAL);
+    public static void beepFailed() throws RemoteException {
+        DeviceServiceEngine mSDKManager;
+        mSDKManager = SDKManager.getInstance().getDeviceServiceEngine();
+        if (mSDKManager == null) {
+            Log.e("TAG", "ServiceEngine is Null");
+            return;
+        }
+        mSDKManager.getBeeper().beep(BeepModeConstrants.FAIL);
+    }
+
+    public static void beepError() throws RemoteException {
+        DeviceServiceEngine mSDKManager;
+        mSDKManager = SDKManager.getInstance().getDeviceServiceEngine();
+        if (mSDKManager == null) {
+            Log.e("TAG", "ServiceEngine is Null");
+            return;
+        }
+        mSDKManager.getBeeper().beep(BeepModeConstrants.ERROR);
     }
 }

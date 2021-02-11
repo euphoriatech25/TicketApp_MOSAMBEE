@@ -3,6 +3,8 @@ package com.technosales.net.buslocationannouncement.mosambeesupport;
 import android.content.DialogInterface;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.os.RemoteException;
 import android.util.Log;
 
@@ -11,10 +13,11 @@ import com.morefun.yapi.device.scanner.InnerScanner;
 import com.morefun.yapi.device.scanner.OnScannedListener;
 import com.morefun.yapi.device.scanner.ScannerConfig;
 import com.morefun.yapi.engine.DeviceServiceEngine;
+import com.technosales.net.buslocationannouncement.utils.GeneralUtils;
 
 public class ScannerApi{
 
-    public static void ScannerApi(DeviceServiceEngine mSDKManager) {
+    public static void ScannerApi(Handler handler, DeviceServiceEngine mSDKManager) {
         try {
             final InnerScanner innerScanner = mSDKManager.getInnerScanner();
             Bundle bundle = new Bundle();
@@ -36,9 +39,10 @@ public class ScannerApi{
                 @Override
                 public void onScanResult(final int retCode, final byte[] scanResult) throws RemoteException {
                     Log.d("ScannerApi","scanResult = " + new String(scanResult));
-//                    listener.showMessage((retCode == ServiceResult.Success) ?
-//                            "scanResult = " + new String(scanResult)
-//                            : "Scan Fail " + retCode);
+                    Message message = Message.obtain();
+                    message.what = 100;
+                    message.obj =  new String(scanResult);
+                    handler.sendMessage(message);
                 }
             });
         } catch (RemoteException e) {

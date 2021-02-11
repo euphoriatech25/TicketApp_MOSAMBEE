@@ -13,6 +13,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.os.Build;
+import android.os.RemoteException;
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
 import android.text.style.ForegroundColorSpan;
@@ -30,10 +31,13 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.hornet.dateconverter.DateConverter;
 import com.hornet.dateconverter.Model;
+import com.morefun.yapi.engine.DeviceServiceEngine;
+import com.technosales.net.buslocationannouncement.SDKManager;
 import com.technosales.net.buslocationannouncement.additionalfeatures.PayByCardActivity;
 import com.technosales.net.buslocationannouncement.R;
 import com.technosales.net.buslocationannouncement.activity.TicketAndTracking;
 import com.technosales.net.buslocationannouncement.helper.DatabaseHelper;
+import com.technosales.net.buslocationannouncement.mosambeesupport.Printer;
 import com.technosales.net.buslocationannouncement.pojo.RouteStationList;
 import com.technosales.net.buslocationannouncement.pojo.TicketInfoList;
 import com.technosales.net.buslocationannouncement.utils.GeneralUtils;
@@ -76,7 +80,6 @@ public class PriceAdapterPrices extends RecyclerView.Adapter<PriceAdapterPrices.
     private String price;
     private int routeStationListSize;
     private TextToVoice textToVoice;
-    private String cardNumber;
 
     public PriceAdapterPrices(List<RouteStationList> routeStationLists, Context context, DatabaseHelper databaseHelper) {
         this.routeStationLists = routeStationLists;
@@ -801,7 +804,11 @@ public class PriceAdapterPrices extends RecyclerView.Adapter<PriceAdapterPrices.
 //                    } else {
 //                        ((TicketAndTracking) context).paraPrint(printTransaction);
 //                    }
-
+                    try {
+                        Printer.Print(context, printTransaction);
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
+                    }
                 } else {
                     Toast.makeText(context, "सहायक छान्नुहोस् ।", Toast.LENGTH_SHORT).show();
                     ((TicketAndTracking) context).helperName.setText("सहायक छान्नुहोस् ।");

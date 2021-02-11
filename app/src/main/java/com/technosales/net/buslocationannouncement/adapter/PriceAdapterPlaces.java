@@ -8,6 +8,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
+import android.os.RemoteException;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,10 +25,13 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.hornet.dateconverter.DateConverter;
 import com.hornet.dateconverter.Model;
+import com.morefun.yapi.engine.DeviceServiceEngine;
+import com.technosales.net.buslocationannouncement.SDKManager;
 import com.technosales.net.buslocationannouncement.additionalfeatures.PayByCardActivity;
 import com.technosales.net.buslocationannouncement.R;
 import com.technosales.net.buslocationannouncement.activity.TicketAndTracking;
 import com.technosales.net.buslocationannouncement.helper.DatabaseHelper;
+import com.technosales.net.buslocationannouncement.mosambeesupport.Printer;
 import com.technosales.net.buslocationannouncement.pojo.PriceList;
 import com.technosales.net.buslocationannouncement.pojo.RouteStationList;
 import com.technosales.net.buslocationannouncement.pojo.TicketInfoList;
@@ -66,7 +70,6 @@ public class PriceAdapterPlaces extends RecyclerView.Adapter<PriceAdapterPlaces.
     private int orderPos = 0;
     private String toGetOff = "";
     private int route_type;
-
 
     public PriceAdapterPlaces(List<PriceList> priceLists, Context context) {
         this.priceLists = priceLists;
@@ -571,7 +574,11 @@ public class PriceAdapterPlaces extends RecyclerView.Adapter<PriceAdapterPlaces.
 //            }else {
 //                ((TicketAndTracking) context).paraPrint(printTransaction);
 //            }
-
+            try {
+                Printer.Print(context, printTransaction);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
         } else {
             Toast.makeText(context, "सहायक छान्नुहोस् ।", Toast.LENGTH_SHORT).show();
             ((TicketAndTracking) context).helperName.setText("सहायक छान्नुहोस् ।");

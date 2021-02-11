@@ -12,22 +12,25 @@ import android.os.SystemClock;
 import android.util.Log;
 
 import com.morefun.yapi.engine.DeviceServiceEngine;
-import com.morefun.ypos.config.DukptConfigs;
 
 
 public class SDKManager {
+
     DeviceServiceEngine mDeviceServiceEngine;
     static SDKManager mZebraManager = new SDKManager();
     private static final String TAG = "SDKManager";
+    public static boolean isDukpt = false;
 
     private SDKManager() {
-
     }
 
     public static SDKManager getInstance() {
         return mZebraManager;
     }
-
+    public static String getBussinessId(){
+        isDukpt = false;
+        return "00000000";
+    }
     public DeviceServiceEngine getDeviceServiceEngine()throws NullPointerException {
         int count = 0;
         while (mDeviceServiceEngine == null) {
@@ -45,7 +48,7 @@ public class SDKManager {
         if (mDeviceServiceEngine != null){
             //TODO if need dukpt ,Please set 09000000.(DukptConfigs.getDukptBussinessId())
             try {
-                int ret = mDeviceServiceEngine.login(bundle, DukptConfigs.getBussinessId());
+                int ret = mDeviceServiceEngine.login(bundle, getBussinessId());
                 Log.d(TAG, "auto login result = " + ret);
             } catch (RemoteException e) {
                 e.printStackTrace();
