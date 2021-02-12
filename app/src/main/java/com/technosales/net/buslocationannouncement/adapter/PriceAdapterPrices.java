@@ -137,12 +137,12 @@ public class PriceAdapterPrices extends RecyclerView.Adapter<PriceAdapterPrices.
         }
 
         //TODO Checking distance and highlighting location
-        Log.i("TAG", "onBindViewHolder: " + orderPos);
+//        Log.i("TAG", "onBindViewHolder: " + orderPos);
 
 
         forward = preferences.getBoolean(UtilStrings.FORWARD, true);
         if (forward) {
-            Log.i("TAG", "onBindViewHolder: " + forward + " " + orderPos);
+//            Log.i("TAG", "onBindViewHolder: " + forward + " " + orderPos);
 
             if (routeStationModelList.station_order <= orderPos) {
                 holder.routeStationItem.setTextColor(Color.parseColor("#ababab"));

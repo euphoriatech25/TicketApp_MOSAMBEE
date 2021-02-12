@@ -29,6 +29,7 @@ import com.technosales.net.buslocationannouncement.activity.HelperLogin;
 import com.technosales.net.buslocationannouncement.activity.TicketAndTracking;
 import com.technosales.net.buslocationannouncement.base.BaseActivity;
 import com.technosales.net.buslocationannouncement.helper.DatabaseHelper;
+import com.technosales.net.buslocationannouncement.mosambeesupport.M1CardHandlerMosambee;
 import com.technosales.net.buslocationannouncement.mosambeesupport.Printer;
 import com.technosales.net.buslocationannouncement.pojo.ApiError;
 import com.technosales.net.buslocationannouncement.pojo.BlockList;
@@ -270,9 +271,6 @@ public class PayByCardActivity extends BaseActivity {
                     {
                         @Override
                         public void run() {
-//                            for (int i = 0; i < customerDetailsBlock.length; i++) {
-//                            PiccTransaction.getInstance(piccType).readCustomerDetails(handlerTransaction, customerDetailsBlock);
-//                            }
 
                         }
                     });
@@ -346,16 +344,24 @@ public class PayByCardActivity extends BaseActivity {
         stopThread3 = false;
         stopThread4 = false;
 
+        for (int i = 0; i < customerDetailsBlock.length; i++) {
+            M1CardHandlerMosambee.gettingCustomerDetails(handlerTransaction, customerDetailsBlock);
+        }
 
-
-        thread.start();
-        thread1.start();
+//        thread.start();
+//        thread1.start();
         if (GeneralUtils.isNetworkAvailable(this)) {
             isOnlineCheck = "true";
         } else {
             isOnlineCheck = "false";
         }
     }
+
+
+    public interface OnSearchListener {
+        void onSearchResult(int retCode, Bundle bundle);
+    }
+
 
     private void getCustomerDetails() {
         Log.i(TAG, "getCustomerDetails: " + (passengerId.equalsIgnoreCase("") && passengerAmt.equalsIgnoreCase("") && transactionHash.equalsIgnoreCase("") && passengerTranNo.equalsIgnoreCase("")));

@@ -26,13 +26,12 @@ import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.ActivityCompat;
 
-import com.technosales.net.buslocationannouncement.activity.CheckBalanceActivity;
-import com.technosales.net.buslocationannouncement.additionalfeatures.PayByCardActivity;
 import com.technosales.net.buslocationannouncement.callcontrol.IncomingCallReceiver;
 import com.technosales.net.buslocationannouncement.R;
 import com.technosales.net.buslocationannouncement.activity.TicketAndTracking;
 import com.technosales.net.buslocationannouncement.base.BaseActivity;
 import com.technosales.net.buslocationannouncement.helper.DatabaseHelper;
+import com.technosales.net.buslocationannouncement.mosambeesupport.M1CardHandlerMosambee;
 import com.technosales.net.buslocationannouncement.mosambeesupport.Printer;
 import com.technosales.net.buslocationannouncement.pojo.ApiError;
 import com.technosales.net.buslocationannouncement.utils.GeneralUtils;
@@ -489,7 +488,7 @@ public class IssueCardActivity extends BaseActivity implements ICreateAccount.Vi
                         int[] customerDetailsBlock={CUSTOMERID,CUSTOMER_AMT,CUSTOMER_HASH,CUSTOMER_TRANSACTION_NO};
 //                        PiccTransaction.getInstance(piccType).registerCustomerCard(handler,customerDetails,customerDetailsBlock);
                         for (int i = 0; i < customerDetails.length; i++) {
-//                            PiccTransaction.getInstance(piccType).registerTranBlock(handler,customerDetails[i],customerDetailsBlock[i]);
+                            M1CardHandlerMosambee.registerDetails(handler,customerDetails[i],customerDetailsBlock[i]);
                         }
                     }
                 }).show();

@@ -6,12 +6,8 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
-import android.view.View;
 import android.view.WindowManager;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -21,7 +17,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.bumptech.glide.Glide;
 import com.technosales.net.buslocationannouncement.APIToken.TokenManager;
 import com.technosales.net.buslocationannouncement.R;
-import com.technosales.net.buslocationannouncement.mosambeesupport.M1CardHandlerTest;
+import com.technosales.net.buslocationannouncement.mosambeesupport.M1CardHandlerMosambee;
 import com.technosales.net.buslocationannouncement.pojo.ApiError;
 import com.technosales.net.buslocationannouncement.serverconn.RetrofitInterface;
 import com.technosales.net.buslocationannouncement.serverconn.ServerConfigNew;
@@ -47,23 +43,11 @@ public class HelperLogin extends AppCompatActivity {
     SharedPreferences preferences;
     HelperModel helperDetails;
     ProgressDialog pClick;
-    //    Button btn_submit, btn_cancel;
     private String deviceId;
-    //    private EPiccType piccType;
     private ImageView helperLogin;
     private int TIME_DELAY = 500;
     private boolean stopThread;
-    Thread thread = new Thread(new Runnable() {
-        @Override
-        public void run() {
-            while (!Thread.interrupted() && !stopThread)
-                try {
-                    Thread.sleep(TIME_DELAY);
-//                PiccTransaction.getInstance(piccType).readId(handler);
-                } catch (InterruptedException e) {
-                }
-        }
-    });
+
     private TokenManager tokenManager;
     private DatabaseHelper databaseHelper;
     private Handler handler = new Handler() {
@@ -74,8 +58,15 @@ public class HelperLogin extends AppCompatActivity {
                         setHelperId(msg.obj.toString());
                         Log.i("TAG", "handleMessage: "+ msg.obj.toString());
                         stopThread = true;
-                        thread.interrupt();
+                    } else {
+                        Toast.makeText(HelperLogin.this, "Timeout Please restart", Toast.LENGTH_SHORT).show();
+                    }
+                    break;
 
+                    case 404:
+                    if (msg.obj.toString() != null) {
+                        Toast.makeText(HelperLogin.this, "Timeout Please restart", Toast.LENGTH_SHORT).show();
+                        stopThread = true;
                     } else {
                         Toast.makeText(HelperLogin.this, "Timeout Please restart", Toast.LENGTH_SHORT).show();
                     }
@@ -103,11 +94,8 @@ public class HelperLogin extends AppCompatActivity {
 
         Glide.with(this).asGif().load(R.drawable.helper).into(helperLogin);
         tokenManager = TokenManager.getInstance(getSharedPreferences("prefs", MODE_PRIVATE));
-//        piccType = EPiccType.INTERNAL;
         stopThread = false;
-        (thread).start();
-        M1CardHandlerTest.test_m1card(handler);
-
+        M1CardHandlerMosambee.test_m1card(handler);
     }
 
     private void setHelperId(String toString) {
