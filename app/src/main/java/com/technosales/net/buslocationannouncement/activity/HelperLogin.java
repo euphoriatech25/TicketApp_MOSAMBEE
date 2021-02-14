@@ -95,7 +95,8 @@ public class HelperLogin extends AppCompatActivity {
         Glide.with(this).asGif().load(R.drawable.helper).into(helperLogin);
         tokenManager = TokenManager.getInstance(getSharedPreferences("prefs", MODE_PRIVATE));
         stopThread = false;
-        M1CardHandlerMosambee.test_m1card(handler);
+        int[]value={};
+        M1CardHandlerMosambee.read_miCard(handler,value,"HelperLogin");
     }
 
     private void setHelperId(String toString) {

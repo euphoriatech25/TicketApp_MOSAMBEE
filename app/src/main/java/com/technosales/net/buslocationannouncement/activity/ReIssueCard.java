@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.RemoteException;
 import android.util.Base64;
 import android.util.Log;
 import android.view.View;
@@ -17,6 +18,9 @@ import androidx.annotation.Nullable;
 
 import com.technosales.net.buslocationannouncement.APIToken.TokenManager;
 import com.technosales.net.buslocationannouncement.R;
+import com.technosales.net.buslocationannouncement.mosambeesupport.BeepLEDTest;
+import com.technosales.net.buslocationannouncement.mosambeesupport.M1CardHandlerMosambee;
+import com.technosales.net.buslocationannouncement.mosambeesupport.Printer;
 import com.technosales.net.buslocationannouncement.serverconn.RetrofitInterface;
 import com.technosales.net.buslocationannouncement.serverconn.ServerConfigNew;
 import com.technosales.net.buslocationannouncement.base.BaseActivity;
@@ -41,8 +45,6 @@ public class ReIssueCard extends BaseActivity implements View.OnClickListener {
     private String customer_card_no;
     private TextView card_num;
     private Button btn_submit, btn_cancel;
-//    private EPiccType piccType;
-    public DetectMThread detectMThread;
     private EditText customer_mob_no;
     private ReIssueCardResponse reIssueCardResponse;
     private ProgressBar progressBar;
@@ -50,32 +52,9 @@ public class ReIssueCard extends BaseActivity implements View.OnClickListener {
     private boolean stopThread;
     private TokenManager tokenManager;
     private SharedPreferences preferences;
-    private String printData;
+     private String printData;
     int successStatus=0;
-    int total_collections_issue;
-        Thread thread=new Thread(new Runnable() {
-        @Override
-        public void run() {
-            while (!Thread.interrupted() && !stopThread)
-                try {
-                    Thread.sleep(1000);
-                    runOnUiThread(new Runnable() // start actions in UI thread
-                    {
-                        @Override
-                        public void run() {
-                            if (detectMThread != null) {
-                                detectMThread.interrupt();
-                                detectMThread = null;
-                            }
-//                            PiccTester.getInstance(piccType).open();
-                            detectMThread = new DetectMThread();
-                            detectMThread.start();
-                        }
-                    });
-                } catch (InterruptedException e) {
-                }
-        }
-    });
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -89,12 +68,12 @@ public class ReIssueCard extends BaseActivity implements View.OnClickListener {
         progressBar = findViewById(R.id.progressBar);
         btn_submit = findViewById(R.id.btn_submit);
         setUpToolbar("जानकारी अपडेट गर्नुहोस्", true);
-//        piccType = EPiccType.INTERNAL;
         preferences =getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0);
 
         tokenManager = TokenManager.getInstance(getSharedPreferences("prefs", MODE_PRIVATE));
         stopThread = false;
-        (thread).start();
+        int[]value={};
+        M1CardHandlerMosambee.read_miCard(handler,value,"ReIssueCard");
 
         btn_submit.setOnClickListener(this);
         btn_cancel.setOnClickListener(this);
@@ -104,7 +83,7 @@ public class ReIssueCard extends BaseActivity implements View.OnClickListener {
     private Handler handler = new Handler() {
         public void handleMessage(android.os.Message msg) {
             switch (msg.what) {
-                case 0:
+                case 100:
                     if (msg.obj.toString() != null) {
                         setCardNUm(msg.obj.toString());
                     } else {
@@ -112,24 +91,15 @@ public class ReIssueCard extends BaseActivity implements View.OnClickListener {
                     }
                     break;
                 case 200:
-                    if (msg.obj.toString()!=null) {
-                        Log.i("TAG", "handleMessage: "+successStatus);
-                        successStatus=successStatus+Integer.valueOf(msg.obj.toString());
-                        if(successStatus==4) {
-//                            String  status = PrinterTester.getInstance().getStatus();
-//                            if(status.equalsIgnoreCase("Out of paper ")){
-//                                Toast.makeText(ReIssueCard.this, "मुद्रण कागज समाप्त भयो।", Toast.LENGTH_SHORT).show();
-//                            }else {
-//                                paraPrint(printData);
-//                            }
-
-                            Toast.makeText(ReIssueCard.this, "ग्राहक सफलतापूर्वक दर्ता गरियो।", Toast.LENGTH_SHORT).show();
-                            startActivity(new Intent(ReIssueCard.this, TicketAndTracking.class));
-                            finish();
+                    if(msg.obj.toString().equalsIgnoreCase("Success")){
+                        try {
+                            Printer.Print(ReIssueCard.this,printData);
+                        } catch (RemoteException e) {
+                            e.printStackTrace();
                         }
-                    } else if (msg.obj.toString().equalsIgnoreCase("failed")) {
-                        Log.i("TAG", "handleMessage: " + "failed");
-                        Toast.makeText(ReIssueCard.this, "Verification Failed.. Please try again", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(ReIssueCard.this, "ग्राहक सफलतापूर्वक दर्ता गरियो।", Toast.LENGTH_SHORT).show();
+                        startActivity(new Intent(ReIssueCard.this, TicketAndTracking.class));
+                        finish();
                     }
                     break;
                 default:
@@ -144,13 +114,21 @@ public class ReIssueCard extends BaseActivity implements View.OnClickListener {
                 if (databaseHelper.listBlockList().get(i).identificationId.equalsIgnoreCase(toString)) {
                     Toast.makeText(ReIssueCard.this, "यो कार्ड ब्लक गरिएको छ।", Toast.LENGTH_SHORT).show();
                 } else {
-//                    SysTester.getInstance().beep(EBeepMode.FREQUENCE_LEVEL_6, 100);
+                    try {
+                        BeepLEDTest.beepSuccess();
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
+                    }
                     customer_card_no = toString;
                     card_num.setText(toString);
                 }
             }
         } else {
-//            SysTester.getInstance().beep(EBeepMode.FREQUENCE_LEVEL_6, 100);
+            try {
+                BeepLEDTest.beepSuccess();
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
             customer_card_no = toString;
             card_num.setText(toString);
         }
@@ -159,19 +137,13 @@ public class ReIssueCard extends BaseActivity implements View.OnClickListener {
     @Override
     protected void onResume() {
         super.onResume();
-        if (detectMThread != null) {
-            detectMThread.interrupt();
-            detectMThread = null;
-        }
+
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-         if (detectMThread != null) {
-            detectMThread.interrupt();
-            detectMThread = null;
-        }
+
     }
 
     @Override
@@ -182,11 +154,7 @@ public class ReIssueCard extends BaseActivity implements View.OnClickListener {
 
     @Override
     protected void onDestroy() {
-        stopThread = true;
-        if (detectMThread != null) {
-            detectMThread.interrupt();
-            detectMThread = null;
-        }
+
         super.onDestroy();
     }
 
@@ -226,7 +194,6 @@ public class ReIssueCard extends BaseActivity implements View.OnClickListener {
     }
 
     private void showCardReadLayout(String id, String amount, String referenceHash) {
-
         new SweetAlertDialog(ReIssueCard.this, SweetAlertDialog.SUCCESS_TYPE)
                 .setTitleText("Card ReIssued Successfully !!!")
                 .setContentText("तपाईको कार्ड प्रमाणित गर्नुहोस् ।")
@@ -242,9 +209,7 @@ public class ReIssueCard extends BaseActivity implements View.OnClickListener {
 
                         String[] customerDetails={customerId,customerAmt,customerHash,customerTranNo};
                         int[] customerDetailsBlock={CUSTOMERID,CUSTOMER_AMT,CUSTOMER_HASH,CUSTOMER_TRANSACTION_NO};
-                        for (int i = 0; i < customerDetails.length; i++) {
-//                            PiccTransaction.getInstance(piccType).registerTranBlock(handler,customerDetails[i],customerDetailsBlock[i]);
-                        }
+                        M1CardHandlerMosambee.write_miCard(handler,customerDetails,customerDetailsBlock,"ReIssueCard-UpdateCard");
                     }
                 }).show();
     }
@@ -256,7 +221,7 @@ public class ReIssueCard extends BaseActivity implements View.OnClickListener {
             case R.id.btn_submit:
                 if (GeneralUtils.isNetworkAvailable(this)) {
                     stopThread=true;
-                     thread.interrupt();
+
                     String mobile_customer = customer_mob_no.getText().toString();
                     if (customer_card_no != null && mobile_customer != null) {
                         progressBar.setVisibility(View.VISIBLE);
@@ -275,28 +240,7 @@ public class ReIssueCard extends BaseActivity implements View.OnClickListener {
         }
     }
 
-   private class DetectMThread extends Thread {
-        @Override
-        public void run() {
-            super.run();
-//            PiccTester.getInstance(piccType).getId(handler);
-        }
-    }
 
-//    private void paraPrint(String printData) {
-//        RxUtils.runInBackgroud(new Runnable() {
-//            @Override
-//            public void run() {
-////                ReceiptPrintParam receiptPrintParam = new ReceiptPrintParam();
-//                String printType = "error";
-//                if (GeneralUtils.needBtPrint()) {
-//                    Printer.printA60Receipt("", "", printType);
-//                } else {
-////                    receiptPrintParam.print(printData, new PrintListenerImpl(ReIssueCard.this));
-////                    Device.beepOk();
-//                }
-//            }
-//        });
-//    }
+
 
 }

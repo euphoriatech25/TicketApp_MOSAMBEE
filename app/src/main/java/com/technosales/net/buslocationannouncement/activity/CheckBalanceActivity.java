@@ -26,6 +26,7 @@ import com.hornet.dateconverter.DateConverter;
 import com.hornet.dateconverter.Model;
 import com.technosales.net.buslocationannouncement.APIToken.TokenManager;
 import com.technosales.net.buslocationannouncement.additionalfeatures.PayByCardActivity;
+import com.technosales.net.buslocationannouncement.mosambeesupport.M1CardHandlerMosambee;
 import com.technosales.net.buslocationannouncement.mosambeesupport.Printer;
 import com.technosales.net.buslocationannouncement.pojo.ApiError;
 import com.technosales.net.buslocationannouncement.R;
@@ -97,7 +98,6 @@ public class CheckBalanceActivity extends BaseActivity {
                     } else {
                         Toast.makeText(CheckBalanceActivity.this, "Please show card properly", Toast.LENGTH_SHORT).show();
                     }
-
                 case 101:
                     if (msg.obj.toString() != null) {
                         Log.i("TAG", "handleMessage: " + msg.obj.toString());
@@ -106,7 +106,6 @@ public class CheckBalanceActivity extends BaseActivity {
                         Toast.makeText(CheckBalanceActivity.this, "Timeout Please restart", Toast.LENGTH_SHORT).show();
                     }
                     break;
-
                 case 102:
                     if (msg.obj.toString() != null) {
                         Log.i("TAG", "handleMessage: " + msg.obj.toString());
@@ -115,12 +114,8 @@ public class CheckBalanceActivity extends BaseActivity {
                         Toast.makeText(CheckBalanceActivity.this, "Timeout Please restart", Toast.LENGTH_SHORT).show();
                     }
                     break;
-
                 case 200:
                     Log.i("TAG", "handleMessage: " + msg.obj.toString());
-                    if (msg.obj.toString() != null) {
-                        successStatus = successStatus + Integer.valueOf(msg.obj.toString());
-                        if (successStatus == 2) {
                             if (!rechargeBill.equalsIgnoreCase("")) {
                                 try {
                                     Printer.Print(CheckBalanceActivity.this, rechargeBill);
@@ -132,40 +127,14 @@ public class CheckBalanceActivity extends BaseActivity {
                             Toast.makeText(CheckBalanceActivity.this, "Recharged Successfully!!!", Toast.LENGTH_SHORT).show();
                             startActivity(new Intent(CheckBalanceActivity.this, TicketAndTracking.class));
                             finish();
-                        }
-                    } else {
-                        Toast.makeText(CheckBalanceActivity.this, "Timeout Please restart", Toast.LENGTH_SHORT).show();
-                    }
-                    if (msg.obj.toString().equalsIgnoreCase("successful")) {
 
-                    }
+
                     break;
                 default:
                     break;
             }
         }
     };
-    private Thread thread = new Thread(new Runnable() {
-        @Override
-        public void run() {
-            while (!Thread.interrupted() && !stopThread)
-                try {
-                    Thread.sleep(TIME_DELAY);
-                    runOnUiThread(new Runnable() // start actions in UI thread
-                    {
-                        @Override
-                        public void run() {
-//                            for (int i = 0; i < customerDetailsRead.length; i++) {
-//                            PiccTransaction.getInstance(piccType).read(rechargeHandler, customerDetailsRead);
-//                                Log.i("TAG", "run: "+i);
-//                            }
-
-                        }
-                    });
-                } catch (InterruptedException e) {
-                }
-        }
-    });
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -179,8 +148,10 @@ public class CheckBalanceActivity extends BaseActivity {
 //        piccType = EPiccType.INTERNAL;
 
         tokenManager = TokenManager.getInstance(getSharedPreferences("prefs", MODE_PRIVATE));
-        stopThread = false;
-        (thread).start();
+
+
+        M1CardHandlerMosambee.read_miCard(rechargeHandler, customerDetailsRead,"CheckBalanceActivity");
+
 
         if (GeneralUtils.isNetworkAvailable(this)) {
             isOnlineCheck = "true";
@@ -300,12 +271,7 @@ public class CheckBalanceActivity extends BaseActivity {
                                                 String customerAmt = Base64.encodeToString(String.valueOf(recharge.getData().getPassengerAmount()).getBytes(), Base64.DEFAULT);
                                                 String customerHash = Base64.encodeToString(newHash.getBytes(), Base64.DEFAULT);
                                                 String[] customerUpdatedDetails = {customerAmt, customerHash};
-                                                for (int i = 0; i < customerUpdatedDetails.length; i++) {
-//                                                    PiccTransaction.getInstance(piccType).writeData(rechargeHandler, customerUpdatedDetails[i], customerUpdatedDetailsBlock[i]);
-                                                    if (i == 1) {
-                                                        sDialog.dismiss();
-                                                    }
-                                                }
+                                                M1CardHandlerMosambee.write_miCard(rechargeHandler,customerUpdatedDetails,customerUpdatedDetailsBlock,"CheckBalanceActivity-UpdateCard");
                                             }
                                         }).show();
                             } else if (response.code() == 404) {

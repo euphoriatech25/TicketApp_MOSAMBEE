@@ -486,9 +486,11 @@ public class IssueCardActivity extends BaseActivity implements ICreateAccount.Vi
 
                         String[] customerDetails={customerId,customerAmt,customerHash,customerTranNo};
                         int[] customerDetailsBlock={CUSTOMERID,CUSTOMER_AMT,CUSTOMER_HASH,CUSTOMER_TRANSACTION_NO};
+                        M1CardHandlerMosambee.write_miCard(handler,customerDetails,customerDetailsBlock,"IssueCardActivity-UpdateCard");
+
 //                        PiccTransaction.getInstance(piccType).registerCustomerCard(handler,customerDetails,customerDetailsBlock);
                         for (int i = 0; i < customerDetails.length; i++) {
-                            M1CardHandlerMosambee.registerDetails(handler,customerDetails[i],customerDetailsBlock[i]);
+//                            M1CardHandlerMosambee.registerDetails(handler,customerDetails[i],customerDetailsBlock[i]);
                         }
                     }
                 }).show();

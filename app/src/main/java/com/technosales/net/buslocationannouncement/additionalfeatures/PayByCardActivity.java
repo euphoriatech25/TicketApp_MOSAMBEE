@@ -29,6 +29,7 @@ import com.technosales.net.buslocationannouncement.activity.HelperLogin;
 import com.technosales.net.buslocationannouncement.activity.TicketAndTracking;
 import com.technosales.net.buslocationannouncement.base.BaseActivity;
 import com.technosales.net.buslocationannouncement.helper.DatabaseHelper;
+import com.technosales.net.buslocationannouncement.mosambeesupport.BeepLEDTest;
 import com.technosales.net.buslocationannouncement.mosambeesupport.M1CardHandlerMosambee;
 import com.technosales.net.buslocationannouncement.mosambeesupport.Printer;
 import com.technosales.net.buslocationannouncement.pojo.ApiError;
@@ -201,26 +202,22 @@ public class PayByCardActivity extends BaseActivity {
                     Log.e("TAG", "handleMessage Id: " + msg.obj.toString());
                     break;
                 case 200:
-                        successStatus = successStatus + Integer.valueOf(msg.obj.toString());
-                        Log.i(TAG, "handleMessage: "+successStatus);
-                        if (successStatus == 2) {
-                                if (!ticketId.equalsIgnoreCase("") && !tranCurrentHash.equalsIgnoreCase("")) {
-                                    Log.i(TAG, "handleMessage: "+ticketId+""+tranCurrentHash);
-                                    if (source != null && source.equalsIgnoreCase(UtilStrings.PLACE)) {
-                                        price(ticketId,tranCurrentHash);
-                                    } else if (source != null && source.equalsIgnoreCase(UtilStrings.PRICE)) {
-                                        place(ticketId,tranCurrentHash);
-                                    } else {
-                                        normal(ticketId,tranCurrentHash);
-                                    }
-                                } else {
-                                    Log.i(TAG, "run: gonogDFSFFFo");
-                                }
-
+                    if(msg.obj.toString().equalsIgnoreCase("Success")){
+                        if (!ticketId.equalsIgnoreCase("") && !tranCurrentHash.equalsIgnoreCase("")) {
+                            Log.i(TAG, "handleMessage: "+ticketId+""+tranCurrentHash);
+                            if (source != null && source.equalsIgnoreCase(UtilStrings.PLACE)) {
+                                price(ticketId,tranCurrentHash);
+                            } else if (source != null && source.equalsIgnoreCase(UtilStrings.PRICE)) {
+                                place(ticketId,tranCurrentHash);
+                            } else {
+                                normal(ticketId,tranCurrentHash);
+                            }
+                        } else {
+                            Log.i(TAG, "run: gonogDFSFFFo");
                         }
+                    }
+
                     break;
-
-
                 default:
                     break;
             }
@@ -332,6 +329,16 @@ public class PayByCardActivity extends BaseActivity {
         totalDistance = getIntent().getFloatExtra(UtilStrings.TOTAL_DISTANCE, 0);
 
 
+//       transafering code from below
+        total_tickets = preferences.getInt(UtilStrings.TOTAL_TICKETS, 0);
+        total_collections = preferences.getInt(UtilStrings.TOTAL_COLLECTIONS, 0);
+        total_collections_card = preferences.getInt(UtilStrings.TOTAL_COLLECTIONS_BY_CARD, 0);
+        total_tickets = total_tickets + 1;
+        total_collections = total_collections + Integer.parseInt(amount);
+        total_collections_card = total_collections_card + Integer.parseInt(amount);
+
+
+
         station_name = getIntent().getStringExtra(UtilStrings.STATION_NAME);
         tokenManager = TokenManager.getInstance(getSharedPreferences("prefs", MODE_PRIVATE));
 
@@ -344,12 +351,10 @@ public class PayByCardActivity extends BaseActivity {
         stopThread3 = false;
         stopThread4 = false;
 
-        for (int i = 0; i < customerDetailsBlock.length; i++) {
-            M1CardHandlerMosambee.gettingCustomerDetails(handlerTransaction, customerDetailsBlock);
-        }
 
-//        thread.start();
-//        thread1.start();
+        M1CardHandlerMosambee.read_miCard(handlerTransaction, customerDetailsBlock,"PayByCardActivity");
+        (thread1).start();
+
         if (GeneralUtils.isNetworkAvailable(this)) {
             isOnlineCheck = "true";
         } else {
@@ -448,7 +453,7 @@ public class PayByCardActivity extends BaseActivity {
         getOfflineTransactionExecuted = true;
 
         int[] firstOfflineTranBlock = {FIRST_TRANSACTION_ID, FIRST_TRANSACTION_AMT, FIRST_TRANSACTION_HASH};
-//        PiccTransaction.getInstance(piccType).readCustomerFirstTrans(handlerTransaction, firstOfflineTranBlock);
+        M1CardHandlerMosambee.read_miCard(handlerTransaction, firstOfflineTranBlock,"GetOfflineTransaction");
         thread2.start();
     }
 
@@ -537,7 +542,7 @@ public class PayByCardActivity extends BaseActivity {
 
     private void getSecondTransaction() {
         int[] secondOfflineTranBlock = {SECOND_TRANSACTION_ID, SECOND_TRANSACTION_AMT, SECOND_TRANSACTION_HASH};
-//        PiccTransaction.getInstance(piccType).readCustomerSecondTrans(handlerTransaction, secondOfflineTranBlock);
+        M1CardHandlerMosambee.read_miCard(handlerTransaction, secondOfflineTranBlock,"GetSecondTransaction");
         thread3.start();
     }
 
@@ -627,13 +632,6 @@ public class PayByCardActivity extends BaseActivity {
         if (!validate()) {
             Log.i("TAG", "onClick: " + passengerAmt + amount);
             if (Integer.parseInt(passengerAmt) > Integer.parseInt(amount) || Integer.valueOf(passengerAmt).equals(Integer.valueOf(amount))) {
-                deviceId = preferences.getString(UtilStrings.DEVICE_ID, "");
-                total_tickets = preferences.getInt(UtilStrings.TOTAL_TICKETS, 0);
-                total_collections = preferences.getInt(UtilStrings.TOTAL_COLLECTIONS, 0);
-                total_collections_card = preferences.getInt(UtilStrings.TOTAL_COLLECTIONS_BY_CARD, 0);
-                total_tickets = total_tickets + 1;
-                total_collections = total_collections + Integer.parseInt(amount);
-                total_collections_card = total_collections_card + Integer.parseInt(amount);
 
                 String valueOfTickets = "";
                 if (total_tickets < 10) {
@@ -659,7 +657,11 @@ public class PayByCardActivity extends BaseActivity {
                 String newBalance = Base64.encodeToString(String.valueOf(reducedValue).getBytes(), Base64.DEFAULT);
                         if (GeneralUtils.isNetworkAvailable(PayByCardActivity.this)) {
                             if (!isFinishing()) {
-//                                SysTester.getInstance().beep(EBeepMode.FREQUENCE_LEVEL_6, 100);
+                                try {
+                                    BeepLEDTest.beepSuccess();
+                                } catch (RemoteException e) {
+                                    e.printStackTrace();
+                                }
                                 setNewTransaction(newBalance, newRefHash, ticketId, tranCurrentHash, pClick);
                             }
                         } else {
@@ -677,7 +679,7 @@ public class PayByCardActivity extends BaseActivity {
                                 if (passengerTranNo.equalsIgnoreCase("0")) {
                                     setFirstOfflineTransaction(newBalance, newRefHash1, newRefHash, ticketId, tranCurrentHash, pClick);
                                 } else if (passengerTranNo.equalsIgnoreCase("1")) {
-                                    setSecondOfflineTransaction(newBalance, newRefHash1, newRefHash, ticketId, tranCurrentHash, pClick);
+                                    secondOfflineTransaction(newBalance, newRefHash1, newRefHash, ticketId, tranCurrentHash, pClick);
                                 }
                             }
                         }
@@ -700,21 +702,22 @@ public class PayByCardActivity extends BaseActivity {
         }
     }
 
-    private void setSecondOfflineTransaction(String newBalance, String offlineHash, String newWritableHash, String ticketId, String tranCurrentHash, ProgressDialog pClick) {
+    private void secondOfflineTransaction(String newBalance, String offlineHash, String newWritableHash, String ticketId, String tranCurrentHash, ProgressDialog pClick) {
         String newTranNo = Base64.encodeToString("2".getBytes(), Base64.DEFAULT);
         String passenserFare = Base64.encodeToString(GeneralUtils.getUnicodeReverse(amount).getBytes(), Base64.DEFAULT);
 
         Log.i(TAG, "setSecondOfflineTransaction: " + ticketId + newWritableHash + " " + GeneralUtils.getUnicodeReverse(amount).getBytes() + " " + newTranNo);
         int[] secondOfflineTranBlock = {SECOND_TRANSACTION_ID, SECOND_TRANSACTION_AMT, SECOND_TRANSACTION_HASH, CUSTOMER_TRANSACTION_NO};
         String[] secondOfflineTran = {ticketId, passenserFare, offlineHash, newTranNo};
+        M1CardHandlerMosambee.write_miCard(handlerTransaction,secondOfflineTran,secondOfflineTranBlock,"SecondOfflineTran");
 
-        for (int i = 0; i < secondOfflineTran.length; i++) {
-//            PiccTransaction.getInstance(piccType).writeData(handlerTransaction, secondOfflineTran[i], secondOfflineTranBlock[i]);
-            Log.i(TAG, "setSecondOfflineTransaction: " + i);
-            if (i == 3) {
-                setNewTransaction(newBalance, newWritableHash, ticketId, tranCurrentHash, pClick);
-            }
-        }
+//        for (int i = 0; i < secondOfflineTran.length; i++) {
+////            PiccTransaction.getInstance(piccType).writeData(handlerTransaction, secondOfflineTran[i], secondOfflineTranBlock[i]);
+//            Log.i(TAG, "setSecondOfflineTransaction: " + i);
+//            if (i == 3) {
+//                setNewTransaction(newBalance, newWritableHash, ticketId, tranCurrentHash, pClick);
+//            }
+//        }
     }
 
     private void setFirstOfflineTransaction(String newBalance, String offlineHash, String newRefHash, String ticketId, String tranCurrentHash, ProgressDialog pClick) {
@@ -723,21 +726,21 @@ public class PayByCardActivity extends BaseActivity {
         Log.i(TAG, "startTransactionProcess: " + ticketId + newRefHash + GeneralUtils.getUnicodeReverse(amount));
         String[] firstOfflineTran = {ticketId, passenserFare, offlineHash, newTranNo};
         int[] firstOfflineTranBlock = {FIRST_TRANSACTION_ID, FIRST_TRANSACTION_AMT, FIRST_TRANSACTION_HASH, CUSTOMER_TRANSACTION_NO};
+        M1CardHandlerMosambee.write_miCard(handlerTransaction,firstOfflineTran,firstOfflineTranBlock,"FirstOfflineTransaction");
 
-        for (int i = 0; i < firstOfflineTranBlock.length; i++) {
-//            PiccTransaction.getInstance(piccType).writeData(handlerTransaction, firstOfflineTran[i], firstOfflineTranBlock[i]);
-            if (i == 3) {
-                setNewTransaction(newBalance, newRefHash, ticketId, tranCurrentHash, pClick);
-            }
-        }
+//        for (int i = 0; i < firstOfflineTranBlock.length; i++) {
+////            PiccTransaction.getInstance(piccType).writeData(handlerTransaction, firstOfflineTran[i], firstOfflineTranBlock[i]);
+//            if (i == 3) {
+//                setNewTransaction(newBalance, newRefHash, ticketId, tranCurrentHash, pClick);
+//            }
+//        }
     }
 
     private void setNewTransaction(String reducedBalance, String trimmedHash, String ticketId, String tranCurrentHash, ProgressDialog pClick) {
         String[] customerUpdatedDetails = {reducedBalance, trimmedHash};
         int[] customerUpdatedDetailsBlock = {CUSTOMER_AMT, CUSTOMER_HASH};
-        for (int i = 0; i < customerUpdatedDetails.length; i++) {
-//            PiccTransaction.getInstance(piccType).writeData(handlerTransaction,customerUpdatedDetails[i],customerUpdatedDetailsBlock[i]);
-        }
+        M1CardHandlerMosambee.write_miCard(handlerTransaction,customerUpdatedDetails,customerUpdatedDetailsBlock,"PayByCardActivity-UpdateCard");
+
     }
 
     void showRechargeError(String s) {

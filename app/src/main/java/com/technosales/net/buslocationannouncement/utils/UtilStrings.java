@@ -156,6 +156,13 @@ public class UtilStrings {
     public static final int SECTOR_TRANSACTION_NO = 31;
     public static final int SECTOR_TRAILER_CUSTOMER_SECOND_TRANSACTION =21;
 
+
+
+    public static final int SECTOR_CUSTOMER=3;
+    public static final int SECTOR_TRANSATION =7;
+    public static final int SECTOR_FIRST_TRANSATION = 6;
+    public static final int SECTOR_SECOND_TRANSATION =9;
+
     public static final byte[] KEY_DEFAULT =
             {(byte) 0xFF, (byte) 0xDB, (byte) 0x59, (byte) 0xCF, (byte) 0xF2, (byte) 0xF3,
                     (byte) 0x08, (byte) 0x77, (byte) 0x8F, (byte) 0xFF,
