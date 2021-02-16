@@ -213,7 +213,7 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
   /*normalDiscountToggle.setColorOff(getResources().getColor(android.R.color.black));
   normalDiscountToggle.setColorOn(getResources().getColor(R.color.colorAccent));*/
 
-        Toast.makeText(this, Double.parseDouble(preferences.getString(UtilStrings.LATITUDE, "0.0"))+"::::::"+Double.parseDouble(preferences.getString(UtilStrings.LONGITUDE, "0.0")), Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, Double.parseDouble(preferences.getString(UtilStrings.LATITUDE, "0.0"))+"::"+Double.parseDouble(preferences.getString(UtilStrings.LONGITUDE, "0.0")), Toast.LENGTH_SHORT).show();
 
 
         initializeDrawer();
@@ -250,6 +250,7 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
                     nearest = distance;
                     orderPos = routeStationLists.get(i).station_order;
                     gridLayoutManager.scrollToPositionWithOffset(orderPos-1, 10);
+                    Log.i("TAG", "onCreate: "+orderPos);
                 }
             }
         }
@@ -429,8 +430,6 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
 
         }
         interValDataPush();
-
-
 
 //TODO
 //        priceListView.addOnScrollListener(new RecyclerView.OnScrollListener() {

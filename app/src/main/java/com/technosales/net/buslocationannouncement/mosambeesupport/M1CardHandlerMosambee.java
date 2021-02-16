@@ -23,6 +23,8 @@ import java.io.UnsupportedEncodingException;
 import static com.technosales.net.buslocationannouncement.utils.UtilStrings.KEY_A;
 import static com.technosales.net.buslocationannouncement.utils.UtilStrings.KEY_B;
 import static com.technosales.net.buslocationannouncement.utils.UtilStrings.SECTOR_CUSTOMER;
+import static com.technosales.net.buslocationannouncement.utils.UtilStrings.SECTOR_FIRST_TRANSATION;
+import static com.technosales.net.buslocationannouncement.utils.UtilStrings.SECTOR_SECOND_TRANSATION;
 import static com.technosales.net.buslocationannouncement.utils.UtilStrings.SECTOR_TRANSATION;
 
 
@@ -37,6 +39,8 @@ public class M1CardHandlerMosambee {
             Log.e("TAG", "ServiceEngine is Null");
             return;
         }
+
+
         new SearchCardOrCardReaderTest(mSDKManager).searchRFCard(new String[]{IccCardType.M1CARD}, new PayByCardActivity.OnSearchListener() {
             @Override
             public void onSearchResult(int retCode, Bundle bundle) {
@@ -51,7 +55,7 @@ public class M1CardHandlerMosambee {
                             }
                             byte[] uid = new byte[4];
 
-                            if (fromWhichActivity.equalsIgnoreCase("HelperLogin") || fromWhichActivity.equalsIgnoreCase("ReIssueCard")) {
+                            if (fromWhichActivity.equalsIgnoreCase("HelperLogin") || fromWhichActivity.equalsIgnoreCase("ReIssueCard") || fromWhichActivity.equalsIgnoreCase("IssueCardActivity")) {
                                 int ret = m1CardHandler.authority(M1KeyTypeConstrants.KEYTYPE_A, SECTOR_CUSTOMER, KEY_A, uid);
                                 Message messageCardId = new Message();
                                 messageCardId.what = 100;
@@ -64,12 +68,33 @@ public class M1CardHandlerMosambee {
                                 if (ret == ServiceResult.Success) {
                                     readCustomerDetails(handler, m1CardHandler, customerDetailsBlock, uid);
 // return;
+                                } else if (ret == ServiceResult.M1Card_Not_Open) {
+                                    Message messageCardId = new Message();
+                                    messageCardId.what = 404;
+                                    messageCardId.obj = GeneralUtils.ByteArrayToHexString(
+                                            (uid == null) ? "".getBytes() : uid);
+                                    handler.sendMessage(messageCardId);
                                 }
                             } else if (fromWhichActivity.equalsIgnoreCase("CheckBalanceActivity")) {
                                 int ret = m1CardHandler.authority(M1KeyTypeConstrants.KEYTYPE_A, SECTOR_CUSTOMER, KEY_A, uid);
                                 Log.i(TAG, "onSearchResult111111: " + ret);
                                 if (ret == ServiceResult.Success) {
                                     readCustomerRechargeDetails(handler, m1CardHandler, customerDetailsBlock, uid);
+// return;
+                                }
+                            } else if (fromWhichActivity.equalsIgnoreCase("GetFirstOfflineTransaction")) {
+                                int ret = m1CardHandler.authority(M1KeyTypeConstrants.KEYTYPE_A, SECTOR_FIRST_TRANSATION, KEY_A, uid);
+                                Log.i(TAG, "onSearchResult111111: " + ret);
+                                if (ret == ServiceResult.Success) {
+                                    readCustomerFirstOfflineTranDetails(handler, m1CardHandler, customerDetailsBlock);
+// return;
+                                }
+
+                            } else if (fromWhichActivity.equalsIgnoreCase("GetSecondOfflineTransaction")) {
+                                int ret = m1CardHandler.authority(M1KeyTypeConstrants.KEYTYPE_A, SECTOR_SECOND_TRANSATION, KEY_A, uid);
+                                Log.i(TAG, "onSearchResult111111: " + ret);
+                                if (ret == ServiceResult.Success) {
+                                    readCustomerSecondOfflineTranDetails(handler, m1CardHandler, customerDetailsBlock);
 // return;
                                 }
                             }
@@ -82,6 +107,119 @@ public class M1CardHandlerMosambee {
                 }
             }
         });
+    }
+
+    private static void readCustomerFirstOfflineTranDetails(Handler handler, M1CardHandler m1CardHandler, int[] customerDetailsBlock) {
+        byte[] firstOffTranTicketId = new byte[16];
+        byte[] firstOffTranTicketAmt = new byte[16];
+        byte[] firstOffTranTicketHash = new byte[16];
+        int ret, ret1, ret2;
+
+        try {
+            ret = m1CardHandler.readBlock((byte) customerDetailsBlock[0], firstOffTranTicketId);
+            String str1 = null;
+            try {
+                str1 = new String(firstOffTranTicketId, "UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+            Log.i(TAG, "read: " + ret + str1);
+            Message messageCustomerId = new Message();
+            messageCustomerId.what = 105;
+            messageCustomerId.obj = str1;
+            handler.sendMessage(messageCustomerId);
+
+
+            ret1 = m1CardHandler.readBlock((byte) customerDetailsBlock[1], firstOffTranTicketAmt);
+            byte[] dataAmt = Base64.decode(firstOffTranTicketAmt, Base64.DEFAULT);
+            String str2 = null;
+            try {
+                str2 = new String(dataAmt, "UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+            Log.i(TAG, "read: " + ret1 + str2);
+
+            Message messageCustomerAmt = new Message();
+            messageCustomerAmt.what = 106;
+            messageCustomerAmt.obj = str2;
+            handler.sendMessage(messageCustomerAmt);
+
+
+            ret2 = m1CardHandler.readBlock((byte) customerDetailsBlock[2], firstOffTranTicketHash);
+            byte[] data = Base64.decode(firstOffTranTicketHash, Base64.DEFAULT);
+            String str3 = null;
+            try {
+                str3 = new String(data, "UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+            Log.i(TAG, "read: " + ret2 + str3);
+
+            Message messageCustomerHash = new Message();
+            messageCustomerHash.what = 107;
+            messageCustomerHash.obj = str3;
+            handler.sendMessage(messageCustomerHash);
+
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void readCustomerSecondOfflineTranDetails(Handler handler, M1CardHandler m1CardHandler, int[] customerDetailsBlock) {
+        byte[] secondOffTranTicketId = new byte[16];
+        byte[] secondOffTranTicketAmt = new byte[16];
+        byte[] secondOffTranTicketHash = new byte[16];
+        int ret, ret1, ret2;
+
+        try {
+            ret = m1CardHandler.readBlock((byte) customerDetailsBlock[0], secondOffTranTicketId);
+            String str1 = null;
+            try {
+                str1 = new String(secondOffTranTicketId, "UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+            Log.i(TAG, "read: " + ret + str1);
+            Message messageCustomerId = new Message();
+            messageCustomerId.what = 108;
+            messageCustomerId.obj = str1;
+            handler.sendMessage(messageCustomerId);
+
+
+            ret1 = m1CardHandler.readBlock((byte) customerDetailsBlock[1], secondOffTranTicketAmt);
+            byte[] dataAmt = Base64.decode(secondOffTranTicketAmt, Base64.DEFAULT);
+            String str2 = null;
+            try {
+                str2 = new String(dataAmt, "UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+            Log.i(TAG, "read: " + ret1 + str2);
+
+            Message messageCustomerAmt = new Message();
+            messageCustomerAmt.what = 109;
+            messageCustomerAmt.obj = str2;
+            handler.sendMessage(messageCustomerAmt);
+
+
+            ret2 = m1CardHandler.readBlock((byte) customerDetailsBlock[2], secondOffTranTicketHash);
+            byte[] data = Base64.decode(secondOffTranTicketHash, Base64.DEFAULT);
+            String str3 = null;
+            try {
+                str3 = new String(data, "UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+            Log.i(TAG, "read: " + ret2 + str3);
+
+            Message messageCustomerHash = new Message();
+            messageCustomerHash.what = 110;
+            messageCustomerHash.obj = str3;
+            handler.sendMessage(messageCustomerHash);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
     }
 
     private static void readCustomerRechargeDetails(Handler handler, M1CardHandler m1CardHandler, int[] customerDetailsBlock, byte[] uid) {
@@ -168,15 +306,36 @@ public class M1CardHandlerMosambee {
                                     writeCustomerDetails(handler, m1CardHandler, customerUpdatedValue, customerDetailsBlock);
                                     // return;
                                 }
-                            } else if (fromWhichActivity.equalsIgnoreCase("ReIssueCard-UpdateCard")||fromWhichActivity.equalsIgnoreCase("IssueCardActivity-UpdateCard")) {
+                            } else if (fromWhichActivity.equalsIgnoreCase("ReIssueCard-UpdateCard") || fromWhichActivity.equalsIgnoreCase("IssueCardActivity-UpdateCard")) {
                                 int ret = m1CardHandler.authority(M1KeyTypeConstrants.KEYTYPE_B, SECTOR_CUSTOMER, KEY_B, uid);
                                 Log.i(TAG, "onSearchResultWrite: " + ret);
                                 if (ret == ServiceResult.Success) {
                                     writeCustomerReIssue(handler, m1CardHandler, customerUpdatedValue, customerDetailsBlock, uid);
                                 }
+                            } else if (fromWhichActivity.equalsIgnoreCase("FirstOfflineTransaction")) {
+                                int ret = m1CardHandler.authority(M1KeyTypeConstrants.KEYTYPE_B, SECTOR_FIRST_TRANSATION, KEY_B, uid);
+                                Log.i(TAG, "onSearchResultWrite111: " + ret);
+                                if (ret == ServiceResult.Success) {
+                                    writeOfflineTransaction(handler, m1CardHandler, customerUpdatedValue, customerDetailsBlock, uid);
+                                }
+                            } else if (fromWhichActivity.equalsIgnoreCase("SecondOfflineTransaction")) {
+                                int ret = m1CardHandler.authority(M1KeyTypeConstrants.KEYTYPE_B, SECTOR_SECOND_TRANSATION, KEY_B, uid);
+                                Log.i(TAG, "onSearchResultWrite111: " + ret);
+                                if (ret == ServiceResult.Success) {
+                                    writeOfflineTransaction(handler, m1CardHandler, customerUpdatedValue, customerDetailsBlock, uid);
+                                }
+                            } else if (fromWhichActivity.equalsIgnoreCase("OfflineTransactionNoUpdate")) {
+                                int ret = m1CardHandler.authority(M1KeyTypeConstrants.KEYTYPE_B, SECTOR_TRANSATION, KEY_B, uid);
+                                if (ret == ServiceResult.Success) {
+                                    writeTransationNo(handler, m1CardHandler, customerUpdatedValue, customerDetailsBlock);
+                                }
+
+                            } else if (fromWhichActivity.equalsIgnoreCase("IssueCardActivity-CreateCard")) {
+                                int ret = m1CardHandler.authority(M1KeyTypeConstrants.KEYTYPE_B, SECTOR_CUSTOMER, KEY_B, uid);
+                                if (ret == ServiceResult.Success) {
+                                    writeCustomerIssue(handler, m1CardHandler, customerUpdatedValue, customerDetailsBlock, uid);
+                                }
                             }
-
-
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
@@ -188,21 +347,53 @@ public class M1CardHandlerMosambee {
         });
     }
 
-    private static void writeCustomerReIssue(Handler handler, M1CardHandler m1CardHandler, String[] customerUpdatedValue, int[] customerDetailsBlock, byte[] uid) {
-
+    private static void writeCustomerIssue(Handler handler, M1CardHandler m1CardHandler, String[] customerUpdatedValue, int[] customerDetailsBlock, byte[] uid) {
         try {
             int ret1 = m1CardHandler.writeBlock((byte) customerDetailsBlock[0], customerUpdatedValue[0].getBytes());
             int ret2 = m1CardHandler.writeBlock((byte) customerDetailsBlock[1], customerUpdatedValue[1].getBytes());
-
             int ret3 = m1CardHandler.writeBlock((byte) customerDetailsBlock[2], customerUpdatedValue[2].getBytes());
 
-            int ret5=0;
+            int ret5 = 0;
             int ret4 = m1CardHandler.authority(M1KeyTypeConstrants.KEYTYPE_B, SECTOR_TRANSATION, KEY_B, uid);
             if (ret4 == ServiceResult.Success) {
-               ret5 = m1CardHandler.writeBlock((byte) customerDetailsBlock[3], customerUpdatedValue[3].getBytes());
+                ret5 = m1CardHandler.writeBlock((byte) customerDetailsBlock[3], customerUpdatedValue[3].getBytes());
             }
-            Log.i(TAG, "writeCustomerReIssue: "+ret1+ret2+ret3+ret4+ret5);
-            if(ret1==ServiceResult.Success&&ret2==ServiceResult.Success&&ret3==ServiceResult.Success&&ret4==ServiceResult.Success){
+            Log.i(TAG, "writeCustomerReIssue: " + ret1 + ret2 + ret3 + ret4 + ret5);
+            if (ret1 == ServiceResult.Success && ret2 == ServiceResult.Success && ret3 == ServiceResult.Success && ret4 == ServiceResult.Success) {
+                Message messageSuccess = new Message();
+                messageSuccess.what = 200;
+                messageSuccess.obj = "Success";
+                handler.sendMessage(messageSuccess);
+            }
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void writeTransationNo(Handler handler, M1CardHandler m1CardHandler, String[] customerUpdatedValue, int[] customerDetailsBlock) {
+        try {
+            int ret = m1CardHandler.writeBlock((byte) customerDetailsBlock[0], customerUpdatedValue[0].getBytes());
+            Log.i(TAG, "writeTransationNo: " + ret);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    private static void writeOfflineTransaction(Handler handler, M1CardHandler m1CardHandler, String[] customerUpdatedValue, int[] customerDetailsBlock, byte[] uid) {
+        Log.i(TAG, "writeOfflineTransaction: i am here");
+        int ret4 = 0;
+        try {
+            int ret1 = m1CardHandler.writeBlock((byte) customerDetailsBlock[0], customerUpdatedValue[0].getBytes());
+            int ret2 = m1CardHandler.writeBlock((byte) customerDetailsBlock[1], customerUpdatedValue[1].getBytes());
+            int ret3 = m1CardHandler.writeBlock((byte) customerDetailsBlock[2], customerUpdatedValue[2].getBytes());
+
+            int ret111 = m1CardHandler.authority(M1KeyTypeConstrants.KEYTYPE_B, SECTOR_TRANSATION, KEY_B, uid);
+            if (ret111 == ServiceResult.Success) {
+                ret4 = m1CardHandler.writeBlock((byte) customerDetailsBlock[3], customerUpdatedValue[3].getBytes());
+            }
+            Log.i(TAG, "writeCustomerDetails: " + ret1 + ret2 + ret3 + ret111 + ret4);
+            if (ret1 == ServiceResult.Success && ret2 == ServiceResult.Success && ret3 == ServiceResult.Success) {
                 Message messageSuccess = new Message();
                 messageSuccess.what = 200;
                 messageSuccess.obj = "Success";
@@ -212,14 +403,39 @@ public class M1CardHandlerMosambee {
             e.printStackTrace();
         }
 
-}
+    }
+
+    private static void writeCustomerReIssue(Handler handler, M1CardHandler m1CardHandler, String[] customerUpdatedValue, int[] customerDetailsBlock, byte[] uid) {
+
+        try {
+            int ret1 = m1CardHandler.writeBlock((byte) customerDetailsBlock[0], customerUpdatedValue[0].getBytes());
+            int ret2 = m1CardHandler.writeBlock((byte) customerDetailsBlock[1], customerUpdatedValue[1].getBytes());
+            int ret3 = m1CardHandler.writeBlock((byte) customerDetailsBlock[2], customerUpdatedValue[2].getBytes());
+
+            int ret5 = 0;
+            int ret4 = m1CardHandler.authority(M1KeyTypeConstrants.KEYTYPE_B, SECTOR_TRANSATION, KEY_B, uid);
+            if (ret4 == ServiceResult.Success) {
+                ret5 = m1CardHandler.writeBlock((byte) customerDetailsBlock[3], customerUpdatedValue[3].getBytes());
+            }
+            Log.i(TAG, "writeCustomerReIssue: " + ret1 + ret2 + ret3 + ret4 + ret5);
+            if (ret1 == ServiceResult.Success && ret2 == ServiceResult.Success && ret3 == ServiceResult.Success && ret4 == ServiceResult.Success) {
+                Message messageSuccess = new Message();
+                messageSuccess.what = 200;
+                messageSuccess.obj = "Success";
+                handler.sendMessage(messageSuccess);
+            }
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+
+    }
 
     private static void writeCustomerDetails(Handler handler, M1CardHandler m1CardHandler, String[] customerUpdatedValue, int[] customerDetailsBlock) {
         try {
             int ret1 = m1CardHandler.writeBlock((byte) customerDetailsBlock[0], customerUpdatedValue[0].getBytes());
             int ret2 = m1CardHandler.writeBlock((byte) customerDetailsBlock[1], customerUpdatedValue[1].getBytes());
-            Log.i(TAG, "writeCustomerDetails: "+ret1+ret2);
-            if(ret1==ServiceResult.Success&&ret2==ServiceResult.Success){
+            Log.i(TAG, "writeCustomerDetails: " + ret1 + ret2);
+            if (ret1 == ServiceResult.Success && ret2 == ServiceResult.Success) {
                 Message messageSuccess = new Message();
                 messageSuccess.what = 200;
                 messageSuccess.obj = "Success";
@@ -296,7 +512,7 @@ public class M1CardHandlerMosambee {
                 handlerTransaction.sendMessage(messageCustomerHash);
             }
 
-            int ret111 = m1CardHandler.authority(M1KeyTypeConstrants.KEYTYPE_A, 7, KEY_A, uid);
+            int ret111 = m1CardHandler.authority(M1KeyTypeConstrants.KEYTYPE_A, SECTOR_TRANSATION, KEY_A, uid);
             if (ret111 == ServiceResult.Success) {
                 ret3 = m1CardHandler.readBlock((byte) blockList[3], customerTranNo);
                 if (customerTranNo != null) {

@@ -31,6 +31,7 @@ import com.technosales.net.buslocationannouncement.R;
 import com.technosales.net.buslocationannouncement.activity.TicketAndTracking;
 import com.technosales.net.buslocationannouncement.base.BaseActivity;
 import com.technosales.net.buslocationannouncement.helper.DatabaseHelper;
+import com.technosales.net.buslocationannouncement.mosambeesupport.BeepLEDTest;
 import com.technosales.net.buslocationannouncement.mosambeesupport.M1CardHandlerMosambee;
 import com.technosales.net.buslocationannouncement.mosambeesupport.Printer;
 import com.technosales.net.buslocationannouncement.pojo.ApiError;
@@ -51,8 +52,7 @@ import static com.technosales.net.buslocationannouncement.utils.UtilStrings.SECT
 import static com.technosales.net.buslocationannouncement.utils.UtilStrings.SECTOR_TRAILER_CUSTOMER_SECOND_TRANSACTION;
 import static com.technosales.net.buslocationannouncement.utils.UtilStrings.network;
 
-//import com.pax.dal.entity.EBeepMode;
-@SuppressLint("HandlerLeak")
+
 public class IssueCardActivity extends BaseActivity implements ICreateAccount.View {
     public DetectMThread detectMThread;
     String phoneNumber = "";
@@ -119,38 +119,19 @@ public class IssueCardActivity extends BaseActivity implements ICreateAccount.Vi
         public void handleMessage(android.os.Message msg) {
             switch (msg.what) {
                 case 100:
-                    if (msg.obj.toString() != null) {
-                        setCardNUm(msg.obj.toString());
-                    } else {
-                        Toast.makeText(IssueCardActivity.this, "Timeout Please restart", Toast.LENGTH_SHORT).show();
-                    }
+                    setCardNUm(msg.obj.toString());
                     break;
 
                 case 200:
-                    if (msg.obj.toString()!=null) {
-                        Log.i("TAG", "handleMessage: "+successStatus);
-                        successStatus=successStatus+Integer.valueOf(msg.obj.toString());
-                        if(successStatus==4) {
-//                          String  status = PrinterTester.getInstance().getStatus();
-//                            if(status.equalsIgnoreCase("Out of paper ")){
-//                                Toast.makeText(IssueCardActivity.this, "मुद्रण कागज समाप्त भयो।", Toast.LENGTH_SHORT).show();
-//                            }else {
-//                                paraPrint(printData);
-//                            }
-                            try {
-                                Printer.Print(IssueCardActivity.this, printData);
-                            } catch (RemoteException e) {
-                                e.printStackTrace();
-                            }
-
-                            Toast.makeText(IssueCardActivity.this, "ग्राहक सफलतापूर्वक दर्ता गरियो।", Toast.LENGTH_SHORT).show();
-                            startActivity(new Intent(IssueCardActivity.this, TicketAndTracking.class));
-                            finish();
+                        try {
+                            Printer.Print(IssueCardActivity.this, printData);
+                        } catch (RemoteException e) {
+                            e.printStackTrace();
                         }
-                    } else if (msg.obj.toString().equalsIgnoreCase("failed")) {
-                        Log.i("TAG", "handleMessage: " + "failed");
-                        Toast.makeText(IssueCardActivity.this, "Verification Failed.. Please try again", Toast.LENGTH_SHORT).show();
-                    }
+                        Toast.makeText(IssueCardActivity.this, "ग्राहक सफलतापूर्वक दर्ता गरियो।", Toast.LENGTH_SHORT).show();
+                        startActivity(new Intent(IssueCardActivity.this, TicketAndTracking.class));
+                        finish();
+
                     break;
                 default:
                     break;
@@ -166,7 +147,6 @@ public class IssueCardActivity extends BaseActivity implements ICreateAccount.Vi
         setUpToolbar("ग्राहक कार्ड दर्ता", true);
         userNumber = getIntent().getStringExtra("phone_number");
         progressDialog = new ProgressDialog(IssueCardActivity.this);
-//        piccType = EPiccType.INTERNAL;
 
         SharedPreferences sharedPreferences = getSharedPreferences("User_NUM", MODE_PRIVATE);
         user_num = sharedPreferences.getString("userNum", "0");
@@ -180,7 +160,10 @@ public class IssueCardActivity extends BaseActivity implements ICreateAccount.Vi
         helperId = preferencesHelper.getString(UtilStrings.ID_HELPER, "");
 
         databaseHelper = new DatabaseHelper(this);
-        customer_number = getIntent().getStringExtra(IncomingCallReceiver.key_bootUpStart);
+//        customer_number = getIntent().getStringExtra(IncomingCallReceiver.key_bootUpStart);
+        customer_number="9841041332";
+        int[]value={};
+        M1CardHandlerMosambee.read_miCard(handler,value,"IssueCardActivity");
         getCallDetails(user_num, customer_number);
     }
 
@@ -343,7 +326,11 @@ public class IssueCardActivity extends BaseActivity implements ICreateAccount.Vi
             if (databaseHelper.listBlockList().size() != 0) {
                 for (int i = 0; i < databaseHelper.listBlockList().size(); i++) {
                     if (!databaseHelper.listBlockList().get(i).identificationId.equalsIgnoreCase(num)) {
-//                        SysTester.getInstance().beep(EBeepMode.FREQUENCE_LEVEL_6, 100);
+                        try {
+                            BeepLEDTest.beepSuccess();
+                        } catch (RemoteException e) {
+                            e.printStackTrace();
+                        }
                         cardNUmber = num;
                         tv_cardNum.setText(num);
                     } else {
@@ -351,7 +338,11 @@ public class IssueCardActivity extends BaseActivity implements ICreateAccount.Vi
                     }
                 }
             } else {
-//                SysTester.getInstance().beep(EBeepMode.FREQUENCE_LEVEL_6, 100);
+                try {
+                    BeepLEDTest.beepSuccess();
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                }
                 cardNUmber = num;
                 tv_cardNum.setText(num);
             }
@@ -486,12 +477,7 @@ public class IssueCardActivity extends BaseActivity implements ICreateAccount.Vi
 
                         String[] customerDetails={customerId,customerAmt,customerHash,customerTranNo};
                         int[] customerDetailsBlock={CUSTOMERID,CUSTOMER_AMT,CUSTOMER_HASH,CUSTOMER_TRANSACTION_NO};
-                        M1CardHandlerMosambee.write_miCard(handler,customerDetails,customerDetailsBlock,"IssueCardActivity-UpdateCard");
-
-//                        PiccTransaction.getInstance(piccType).registerCustomerCard(handler,customerDetails,customerDetailsBlock);
-                        for (int i = 0; i < customerDetails.length; i++) {
-//                            M1CardHandlerMosambee.registerDetails(handler,customerDetails[i],customerDetailsBlock[i]);
-                        }
+                        M1CardHandlerMosambee.write_miCard(handler,customerDetails,customerDetailsBlock,"IssueCardActivity-CreateCard");
                     }
                 }).show();
     }

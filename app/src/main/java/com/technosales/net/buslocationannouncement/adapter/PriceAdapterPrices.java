@@ -612,6 +612,7 @@ public class PriceAdapterPrices extends RecyclerView.Adapter<PriceAdapterPrices.
                 });
             }
         }
+        holder.setIsRecyclable(false);
     }
 
     private void payByQR(RouteStationList routeStationModelList, String price, int position) {
