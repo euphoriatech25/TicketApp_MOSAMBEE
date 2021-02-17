@@ -200,10 +200,8 @@ public class PayByCardActivity extends BaseActivity {
                                 normal(ticketId,tranCurrentHash);
                             }
                         } else {
-
                         }
                     }
-
                     break;
                 default:
                     break;
@@ -242,24 +240,6 @@ public class PayByCardActivity extends BaseActivity {
         }
     });
 
-    private Thread thread = new Thread(new Runnable() {
-        @Override
-        public void run() {
-            while (!Thread.interrupted() && !stopThread1)
-                try {
-                    Log.i(TAG, "run: " + "hello world");
-                    Thread.sleep(TIME_DELAY);
-                    runOnUiThread(new Runnable() // start actions in UI thread
-                    {
-                        @Override
-                        public void run() {
-
-                        }
-                    });
-                } catch (InterruptedException e) {
-                }
-        }
-    });
     private boolean getOfflineTransactionExecuted = false;
     Thread thread1 = new Thread(new Runnable() {
         @Override
@@ -358,11 +338,11 @@ public class PayByCardActivity extends BaseActivity {
         if (!passengerId.equalsIgnoreCase("") && !passengerAmt.equalsIgnoreCase("") && !transactionHash.equalsIgnoreCase("") && !passengerTranNo.equalsIgnoreCase("")) {
             stopThread1 = true;
             stopThread2 = true;
-            thread.interrupt();
+
 
             if (!helperId.equalsIgnoreCase(passengerId)) {
                 if (Integer.parseInt(passengerAmt) > Integer.parseInt(amount) || Integer.valueOf(passengerAmt).equals(Integer.valueOf(amount))) {
-                    thread.interrupt();
+
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -394,7 +374,7 @@ public class PayByCardActivity extends BaseActivity {
                         @Override
                         public void run() {
                             currentAmount.setText(GeneralUtils.getUnicodeNumber(String.valueOf(passengerAmt)));
-                            (thread).interrupt();
+
                             showRechargeError("तपाईंसँग पर्याप्त ब्यालेन्स छैन। कृपया रिचार्ज गर्नुहोस्।");
                         }
                     });
@@ -404,7 +384,7 @@ public class PayByCardActivity extends BaseActivity {
                     @Override
                     public void run() {
                         if (!isFinishing()) {
-                            (thread).interrupt();
+
                             showError("सहचालक कार्ड र यात्री कार्ड भिन्न हुनुपर्दछ।");
                         }
                     }
@@ -420,7 +400,6 @@ public class PayByCardActivity extends BaseActivity {
                         @Override
                         public void run() {
                             if (!isFinishing()) {
-                                (thread).interrupt();
                                 showError("यो कार्ड दर्ता गरिएको छैन।");
                             }
                         }

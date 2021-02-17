@@ -64,15 +64,14 @@ public class M1CardHandlerMosambee {
                                 handler.sendMessage(messageCardId);
                             } else if (fromWhichActivity.equalsIgnoreCase("PayByCardActivity")) {
                                 int ret = m1CardHandler.authority(M1KeyTypeConstrants.KEYTYPE_A, SECTOR_CUSTOMER, KEY_A, uid);
-                                Log.i(TAG, "onSearchResult111111: " + ret);
+                                Log.i(TAG, "onSearchResult: " + ret);
                                 if (ret == ServiceResult.Success) {
                                     readCustomerDetails(handler, m1CardHandler, customerDetailsBlock, uid);
 // return;
-                                } else if (ret == ServiceResult.M1Card_Not_Open) {
+                                } else if (ret ==-10301) {
                                     Message messageCardId = new Message();
                                     messageCardId.what = 404;
-                                    messageCardId.obj = GeneralUtils.ByteArrayToHexString(
-                                            (uid == null) ? "".getBytes() : uid);
+                                    messageCardId.obj ="Error";
                                     handler.sendMessage(messageCardId);
                                 }
                             } else if (fromWhichActivity.equalsIgnoreCase("CheckBalanceActivity")) {

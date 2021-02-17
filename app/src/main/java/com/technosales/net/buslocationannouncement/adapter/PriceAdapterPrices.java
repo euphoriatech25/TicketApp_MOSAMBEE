@@ -145,13 +145,153 @@ public class PriceAdapterPrices extends RecyclerView.Adapter<PriceAdapterPrices.
 //            Log.i("TAG", "onBindViewHolder: " + forward + " " + orderPos);
 
             if (routeStationModelList.station_order <= orderPos) {
-                holder.routeStationItem.setTextColor(Color.parseColor("#ababab"));
-                holder.routeStationItem.setPaintFlags(Paint.STRIKE_THRU_TEXT_FLAG | Paint.ANTI_ALIAS_FLAG);
-                holder.routeStationItem.setText(routeStationModelList.station_name);
-                holder.routeStationItem.setClickable(false);
                 if (position == orderPos - 1) {
                     holder.routeStationItem.setTextColor(Color.parseColor("#c72893"));
                     holder.routeStationItem.setBackgroundColor(Color.parseColor("#D0E9FA"));
+                holder.routeStationItem.setPaintFlags(Paint.STRIKE_THRU_TEXT_FLAG | Paint.ANTI_ALIAS_FLAG);
+                    holder.routeStationItem.setText(routeStationModelList.station_name);
+                }else {
+                     holder.routeStationItem.setTextColor(Color.parseColor("#ababab"));
+                holder.routeStationItem.setText(routeStationModelList.station_name);
+                holder.routeStationItem.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        holder.routeStationItem.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                holder.routeStationItem.setClickable(true);
+                            }
+                        }, 1000);
+                        holder.routeStationItem.setClickable(false);
+
+
+                        float distance, nearest = 0;
+                        totalDistance = 0;
+
+//                forward = false;
+                        for (int i = 0; i < routeStationListSize; i++) {
+                            double startLat = Double.parseDouble(preferences.getString(UtilStrings.LATITUDE, "0.0"));
+                            double startLng = Double.parseDouble(preferences.getString(UtilStrings.LONGITUDE, "0.0"));
+                            double endLat = Double.parseDouble(routeStationLists.get(i).station_lat);
+                            double endLng = Double.parseDouble(routeStationLists.get(i).station_lng);
+                            distance = GeneralUtils.calculateDistance(startLat, startLng, endLat, endLng);
+                            if (i == 0) {
+                                nearest = distance;
+                            } else {
+                                if (distance < nearest) {
+                                    nearest = distance;
+                                }
+                            }
+                            Log.i("nearest", "asdasda" + startLat + "::" + startLng + "::" + endLat + "::" + endLng);
+                        }
+
+
+//                        orderPos = routeStationLists.get(positionNew).station_order;
+//                        nearestName = routeStationLists.get(positionNew).station_name;
+//                        currentStationLat = Double.parseDouble(routeStationLists.get(positionNew).station_lat);
+//                        currentStationLng = Double.parseDouble(routeStationLists.get(positionNew).station_lng);
+//                        currentStationDistance = routeStationLists.get(positionNew).station_distance;
+//                        currentStationId = routeStationLists.get(positionNew).station_id;
+
+                        if (routeType == UtilStrings.NON_RING_ROAD) {
+                            price = databaseHelper.priceWrtDistance(Math.abs(currentStationDistance - routeStationModelList.station_distance), ((TicketAndTracking) context).normalDiscountToggle.isOn());
+                            totalDistance = Math.abs(currentStationDistance - routeStationModelList.station_distance);
+                            Log.i("priceWrt", price);
+
+                        } else {
+                            totalDistance = 0;
+                            if (forward) {
+                                if (orderPos <= routeStationModelList.station_order) {
+                                    for (int k = 0; k < routeStationListSize - 1; k++) {
+                                        if (routeStationLists.get(k).station_order >= orderPos && routeStationLists.get(k).station_order <= routeStationModelList.station_order) {
+                                            if (routeStationLists.get(k).station_order == routeStationModelList.station_order) {
+                                                break;
+                                            } else {
+                                                totalDistance = totalDistance + GeneralUtils.calculateDistance(Double.parseDouble(routeStationLists.get(k + 1).station_lat), Double.parseDouble(routeStationLists.get(k + 1).station_lng), Double.parseDouble(routeStationLists.get(k).station_lat), Double.parseDouble(routeStationLists.get(k).station_lng));
+
+                                            }
+                                        }
+                                    }
+
+                                } else /*if (orderPos >= routeStationModelList.station_order)*/ {
+                                    for (int i = 0; i < routeStationListSize; i++) {
+                                        if (routeStationLists.get(i).station_order > orderPos) {
+                                            totalDistance = totalDistance + GeneralUtils.calculateDistance(Double.parseDouble(routeStationLists.get(i - 1).station_lat), Double.parseDouble(routeStationLists.get(i - 1).station_lng), Double.parseDouble(routeStationLists.get(i).station_lat), Double.parseDouble(routeStationLists.get(i).station_lng));
+                                            if (i == routeStationListSize - 1) {
+                                                for (int j = 1; j < routeStationModelList.station_order; j++) {
+                                                    totalDistance = totalDistance + GeneralUtils.calculateDistance(Double.parseDouble(routeStationLists.get(j - 1).station_lat), Double.parseDouble(routeStationLists.get(j - 1).station_lng), Double.parseDouble(routeStationLists.get(j).station_lat), Double.parseDouble(routeStationLists.get(j).station_lng));
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            } else {
+                                Log.i("totalDistance", orderPos + "::" + routeStationModelList.station_order);
+                                if (orderPos >= routeStationModelList.station_order) {
+                                    for (int k = orderPos - 2; k > -1; k--) {
+                                        if (routeStationLists.get(k).station_order <= orderPos && routeStationLists.get(k).station_order >= routeStationModelList.station_order) {
+                                            totalDistance = totalDistance + GeneralUtils.calculateDistance(Double.parseDouble(routeStationLists.get(k + 1).station_lat), Double.parseDouble(routeStationLists.get(k + 1).station_lng), Double.parseDouble(routeStationLists.get(k).station_lat), Double.parseDouble(routeStationLists.get(k).station_lng));
+                                        }
+                                    }
+
+                                } else /*if (orderPos <= routeStationModelList.station_order)*/ {
+                                    for (int i = orderPos - 2; i > -1; i--) {
+                                        totalDistance = totalDistance + GeneralUtils.calculateDistance(Double.parseDouble(routeStationLists.get(i + 1).station_lat), Double.parseDouble(routeStationLists.get(i + 1).station_lng), Double.parseDouble(routeStationLists.get(i).station_lat), Double.parseDouble(routeStationLists.get(i).station_lng));
+                                        if (i == 0) {
+                                            Log.i("totalDistance", "0");
+                                            for (int j = routeStationListSize - 2; j > routeStationModelList.station_order - 2; j--) {
+                                                totalDistance = totalDistance + GeneralUtils.calculateDistance(Double.parseDouble(routeStationLists.get(j + 1).station_lat), Double.parseDouble(routeStationLists.get(j + 1).station_lng), Double.parseDouble(routeStationLists.get(j).station_lat), Double.parseDouble(routeStationLists.get(j).station_lng));
+                                            }
+                                        }
+
+                                    }
+                                }
+                            }
+                            price = databaseHelper.priceWrtDistance(totalDistance, ((TicketAndTracking) context).normalDiscountToggle.isOn());
+                            Log.i("totalDistance", "" + totalDistance / 1000);
+                        }
+                        if (((TicketAndTracking) context).normalDiscountToggle.isOn()) {
+                            ticketType = "discount";
+                            discountType = "(छुट)";
+                        } else {
+                            ticketType = "full";
+                            discountType = "(साधारण)";
+                        }
+
+
+                        String[] modes = {"Card", "Cash", "QR Code"};
+                        // 0 card 1 cash 2 QR Code
+
+                        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                        builder.setTitle("Select a payment mode:");
+                        builder.setItems(modes, new DialogInterface.OnClickListener() {
+
+                            @Override
+                            public void onClick(DialogInterface dialog, int item) {
+                                dialog.dismiss();
+
+                                switch (item) {
+
+                                    case 0: //card
+                                        payByCard(routeStationModelList, price, position);
+                                        dialog.dismiss();
+
+                                        break;
+                                    case 1: //cash
+                                        payByCash(routeStationModelList, price, position);
+                                        dialog.dismiss();
+
+                                        break;
+                                    case 2: //QR Code
+                                        payByQR(routeStationModelList, price, position);
+                                        dialog.dismiss();
+
+                                        break;
+                                }
+                            }
+                        }).show();
+                    }
+                });
                 }
             } else {
                 if ((position == orderPos)) {
@@ -308,7 +448,6 @@ public class PriceAdapterPrices extends RecyclerView.Adapter<PriceAdapterPrices.
                     });
                 }else {
 
-
                 holder.routeStationItem.setText(routeStationModelList.station_name);
                 holder.routeStationItem.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -454,9 +593,147 @@ public class PriceAdapterPrices extends RecyclerView.Adapter<PriceAdapterPrices.
         } else {
             if (routeStationModelList.station_order >= orderPos) {
                 holder.routeStationItem.setTextColor(Color.parseColor("#ababab"));
-                holder.routeStationItem.setPaintFlags(Paint.STRIKE_THRU_TEXT_FLAG | Paint.ANTI_ALIAS_FLAG);
+
                 holder.routeStationItem.setText(routeStationModelList.station_name);
-                holder.routeStationItem.setClickable(false);
+                holder.routeStationItem.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        holder.routeStationItem.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                holder.routeStationItem.setClickable(true);
+                            }
+                        }, 1000);
+                        holder.routeStationItem.setClickable(false);
+
+
+                        float distance, nearest = 0;
+                        totalDistance = 0;
+
+//                forward = false;
+                        for (int i = 0; i < routeStationListSize; i++) {
+                            double startLat = Double.parseDouble(preferences.getString(UtilStrings.LATITUDE, "0.0"));
+                            double startLng = Double.parseDouble(preferences.getString(UtilStrings.LONGITUDE, "0.0"));
+                            double endLat = Double.parseDouble(routeStationLists.get(i).station_lat);
+                            double endLng = Double.parseDouble(routeStationLists.get(i).station_lng);
+                            distance = GeneralUtils.calculateDistance(startLat, startLng, endLat, endLng);
+                            if (i == 0) {
+                                nearest = distance;
+                            } else {
+                                if (distance < nearest) {
+                                    nearest = distance;
+                                }
+                            }
+                            Log.i("nearest", "asdasda" + startLat + "::" + startLng + "::" + endLat + "::" + endLng);
+                        }
+
+
+//                        orderPos = routeStationLists.get(positionNew).station_order;
+//                        nearestName = routeStationLists.get(positionNew).station_name;
+//                        currentStationLat = Double.parseDouble(routeStationLists.get(positionNew).station_lat);
+//                        currentStationLng = Double.parseDouble(routeStationLists.get(positionNew).station_lng);
+//                        currentStationDistance = routeStationLists.get(positionNew).station_distance;
+//                        currentStationId = routeStationLists.get(positionNew).station_id;
+
+                        if (routeType == UtilStrings.NON_RING_ROAD) {
+                            price = databaseHelper.priceWrtDistance(Math.abs(currentStationDistance - routeStationModelList.station_distance), ((TicketAndTracking) context).normalDiscountToggle.isOn());
+                            totalDistance = Math.abs(currentStationDistance - routeStationModelList.station_distance);
+                            Log.i("priceWrt", price);
+
+                        } else {
+                            totalDistance = 0;
+                            if (forward) {
+                                if (orderPos <= routeStationModelList.station_order) {
+                                    for (int k = 0; k < routeStationListSize - 1; k++) {
+                                        if (routeStationLists.get(k).station_order >= orderPos && routeStationLists.get(k).station_order <= routeStationModelList.station_order) {
+                                            if (routeStationLists.get(k).station_order == routeStationModelList.station_order) {
+                                                break;
+                                            } else {
+                                                totalDistance = totalDistance + GeneralUtils.calculateDistance(Double.parseDouble(routeStationLists.get(k + 1).station_lat), Double.parseDouble(routeStationLists.get(k + 1).station_lng), Double.parseDouble(routeStationLists.get(k).station_lat), Double.parseDouble(routeStationLists.get(k).station_lng));
+
+                                            }
+                                        }
+                                    }
+
+                                } else /*if (orderPos >= routeStationModelList.station_order)*/ {
+                                    for (int i = 0; i < routeStationListSize; i++) {
+                                        if (routeStationLists.get(i).station_order > orderPos) {
+                                            totalDistance = totalDistance + GeneralUtils.calculateDistance(Double.parseDouble(routeStationLists.get(i - 1).station_lat), Double.parseDouble(routeStationLists.get(i - 1).station_lng), Double.parseDouble(routeStationLists.get(i).station_lat), Double.parseDouble(routeStationLists.get(i).station_lng));
+                                            if (i == routeStationListSize - 1) {
+                                                for (int j = 1; j < routeStationModelList.station_order; j++) {
+                                                    totalDistance = totalDistance + GeneralUtils.calculateDistance(Double.parseDouble(routeStationLists.get(j - 1).station_lat), Double.parseDouble(routeStationLists.get(j - 1).station_lng), Double.parseDouble(routeStationLists.get(j).station_lat), Double.parseDouble(routeStationLists.get(j).station_lng));
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            } else {
+                                Log.i("totalDistance", orderPos + "::" + routeStationModelList.station_order);
+                                if (orderPos >= routeStationModelList.station_order) {
+                                    for (int k = orderPos - 2; k > -1; k--) {
+                                        if (routeStationLists.get(k).station_order <= orderPos && routeStationLists.get(k).station_order >= routeStationModelList.station_order) {
+                                            totalDistance = totalDistance + GeneralUtils.calculateDistance(Double.parseDouble(routeStationLists.get(k + 1).station_lat), Double.parseDouble(routeStationLists.get(k + 1).station_lng), Double.parseDouble(routeStationLists.get(k).station_lat), Double.parseDouble(routeStationLists.get(k).station_lng));
+                                        }
+                                    }
+
+                                } else /*if (orderPos <= routeStationModelList.station_order)*/ {
+                                    for (int i = orderPos - 2; i > -1; i--) {
+                                        totalDistance = totalDistance + GeneralUtils.calculateDistance(Double.parseDouble(routeStationLists.get(i + 1).station_lat), Double.parseDouble(routeStationLists.get(i + 1).station_lng), Double.parseDouble(routeStationLists.get(i).station_lat), Double.parseDouble(routeStationLists.get(i).station_lng));
+                                        if (i == 0) {
+                                            Log.i("totalDistance", "0");
+                                            for (int j = routeStationListSize - 2; j > routeStationModelList.station_order - 2; j--) {
+                                                totalDistance = totalDistance + GeneralUtils.calculateDistance(Double.parseDouble(routeStationLists.get(j + 1).station_lat), Double.parseDouble(routeStationLists.get(j + 1).station_lng), Double.parseDouble(routeStationLists.get(j).station_lat), Double.parseDouble(routeStationLists.get(j).station_lng));
+                                            }
+                                        }
+
+                                    }
+                                }
+                            }
+                            price = databaseHelper.priceWrtDistance(totalDistance, ((TicketAndTracking) context).normalDiscountToggle.isOn());
+                            Log.i("totalDistance", "" + totalDistance / 1000);
+                        }
+                        if (((TicketAndTracking) context).normalDiscountToggle.isOn()) {
+                            ticketType = "discount";
+                            discountType = "(छुट)";
+                        } else {
+                            ticketType = "full";
+                            discountType = "(साधारण)";
+                        }
+
+
+                        String[] modes = {"Card", "Cash", "QR Code"};
+                        // 0 card 1 cash 2 QR Code
+
+                        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                        builder.setTitle("Select a payment mode:");
+                        builder.setItems(modes, new DialogInterface.OnClickListener() {
+
+                            @Override
+                            public void onClick(DialogInterface dialog, int item) {
+                                dialog.dismiss();
+
+                                switch (item) {
+
+                                    case 0: //card
+                                        payByCard(routeStationModelList, price, position);
+                                        dialog.dismiss();
+
+                                        break;
+                                    case 1: //cash
+                                        payByCash(routeStationModelList, price, position);
+                                        dialog.dismiss();
+
+                                        break;
+                                    case 2: //QR Code
+                                        payByQR(routeStationModelList, price, position);
+                                        dialog.dismiss();
+
+                                        break;
+                                }
+                            }
+                        }).show();
+                    }
+                });
             } else {
                 holder.routeStationItem.setText(routeStationModelList.station_name);
 

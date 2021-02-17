@@ -13,6 +13,7 @@ import com.technosales.net.buslocationannouncement.R;
 import com.technosales.net.buslocationannouncement.TicketBusApp;
 import com.technosales.net.buslocationannouncement.activity.CheckBalanceActivity;
 import com.technosales.net.buslocationannouncement.activity.HelperLogin;
+import com.technosales.net.buslocationannouncement.activity.TicketAndTracking;
 import com.technosales.net.buslocationannouncement.pojo.ApiError;
 import com.technosales.net.buslocationannouncement.serverconn.RetrofitInterface;
 import com.technosales.net.buslocationannouncement.serverconn.ServerConfigNew;
@@ -77,7 +78,12 @@ public class TicketInfoDataPush {
                         }else if(response.code()==404) {
                             handleError(response.errorBody(),context,ticketInfoList.ticket_id);
                         }else if(response.code()==401){
-                            Toast.makeText(context, context.getString(R.string.token_expire), Toast.LENGTH_SHORT).show();
+
+
+                            Intent intent = new Intent(context, HelperLogin.class);
+                            context.startActivity(intent);
+
+//                            Toast.makeText(context, context.getString(R.string.token_expire), Toast.LENGTH_SHORT).show();
                         }else if(response.code()==400){
                             new DatabaseHelper(context).deleteFromLocalId(ticketInfoList.ticket_id);
                         }

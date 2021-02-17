@@ -604,6 +604,7 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
                 public void onClick(View v) {
                     Intent intent = new Intent(TicketAndTracking.this, HelperLogin.class);
                     startActivity(intent);
+                    finish();
                 }
             });
 

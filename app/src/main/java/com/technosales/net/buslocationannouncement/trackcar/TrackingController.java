@@ -16,6 +16,7 @@
 package com.technosales.net.buslocationannouncement.trackcar;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.media.MediaPlayer;
 import android.net.Uri;
@@ -26,6 +27,7 @@ import android.speech.tts.TextToSpeech;
 import android.util.Log;
 
 import com.technosales.net.buslocationannouncement.R;
+import com.technosales.net.buslocationannouncement.activity.TicketAndTracking;
 import com.technosales.net.buslocationannouncement.helper.DatabaseHelper;
 import com.technosales.net.buslocationannouncement.pojo.AdvertiseList;
 import com.technosales.net.buslocationannouncement.pojo.RouteStationList;
@@ -193,6 +195,9 @@ public class TrackingController implements PositionProvider.PositionListener, Ne
                             preOrder = currentOrder;
                             preOrderId = currentOrderId;
 
+                            Intent i1 = new Intent(context, TicketAndTracking.class);
+                            i1.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            context.startActivity(i1);
                             speakStation(routeStationList.station_name, nextStation, currentOrderId);
                         }
                         break;
@@ -252,6 +257,9 @@ public class TrackingController implements PositionProvider.PositionListener, Ne
                             preOrder = currentOrder;
                             preOrderId = currentOrderId;
 
+                            Intent i1 = new Intent(context, TicketAndTracking.class);
+                            i1.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            context.startActivity(i1);
                             speakStation(routeStationList.station_name, nextStation, currentOrderId);
                         }
                         break;
