@@ -6,6 +6,10 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Rect;
 import android.location.Location;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -44,6 +48,14 @@ import retrofit2.Converter;
 public class GeneralUtils {
     private static final String[] BT_PRINT_DEVICE = {"A60", "Aries8", "Aries6"};
 
+
+    public static Bitmap mergeToPin(Bitmap firstImage, Bitmap secondImage) {
+            Bitmap result = Bitmap.createBitmap(firstImage.getWidth() + secondImage.getWidth(), firstImage.getHeight(), firstImage.getConfig());
+            Canvas canvas = new Canvas(result);
+            canvas.drawBitmap(firstImage, 0f, 0f, null);
+            canvas.drawBitmap(secondImage, firstImage.getWidth(), 0f, null);
+            return result;
+    }
 
     public static ApiError convertErrors(ResponseBody response){
         Converter<ResponseBody, ApiError> converter = ServerConfigNew.retrofit().responseBodyConverter(ApiError.class, new Annotation[0]);

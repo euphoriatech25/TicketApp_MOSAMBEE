@@ -125,7 +125,7 @@ public class CheckBalanceActivity extends BaseActivity {
                             } else {
                             }
                             Toast.makeText(CheckBalanceActivity.this, "Recharged Successfully!!!", Toast.LENGTH_SHORT).show();
-                            startActivity(new Intent(CheckBalanceActivity.this, TicketAndTracking.class));
+//                            startActivity(new Intent(CheckBalanceActivity.this, TicketAndTracking.class));
                             finish();
 
 
@@ -310,7 +310,7 @@ public class CheckBalanceActivity extends BaseActivity {
                         public void onClick(SweetAlertDialog sweetAlertDialog) {
                             sweetAlertDialog.dismiss();
                             sweetAlertDialog.dismissWithAnimation();
-                            startActivity(new Intent(CheckBalanceActivity.this, TicketAndTracking.class));
+//                            startActivity(new Intent(CheckBalanceActivity.this, TicketAndTracking.class));
                             finish();
                         }
                     }).show();

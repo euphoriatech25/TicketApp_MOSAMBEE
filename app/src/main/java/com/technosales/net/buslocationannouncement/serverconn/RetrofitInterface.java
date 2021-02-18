@@ -1,6 +1,7 @@
 package com.technosales.net.buslocationannouncement.serverconn;
 
 import com.technosales.net.buslocationannouncement.additionalfeatures.TraModel;
+import com.technosales.net.buslocationannouncement.pojo.CallResponse;
 import com.technosales.net.buslocationannouncement.userregistration.CreateAccountModel;
 import com.technosales.net.buslocationannouncement.pojo.BlockList;
 import com.technosales.net.buslocationannouncement.pojo.CheckBalanceModel;
@@ -92,6 +93,9 @@ public interface RetrofitInterface {
     @GET(UtilStrings.GET_CARD_BLOCK)
     Call<BlockList> getBlockList();
 
+
+    @GET("callserver/public/api/phone_verification/{phone_num}")
+    Call<CallResponse> getNumber(@Path("phone_num")String phone_num);
 
 //    @GET("callserver/public/api/phone_verification/{phone_num}")
 //    Call<CallResponse> getNumber(@Path("phone_num")String phone_num);

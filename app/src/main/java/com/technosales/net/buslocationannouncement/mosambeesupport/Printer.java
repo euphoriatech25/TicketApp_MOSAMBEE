@@ -36,12 +36,13 @@ public class Printer {
         Bitmap bmpHeader = drawTextBitmap(heading, 20, false,Layout.Alignment.ALIGN_CENTER);
 
         String newString =path + "\n\n\n";
-        Bitmap bmp = drawTextBitmap(newString, 25, false, Layout.Alignment.ALIGN_NORMAL);
+        Bitmap bmp = drawTextBitmap(newString, 23, false, Layout.Alignment.ALIGN_NORMAL);
 
         Bitmap icon = BitmapFactory.decodeResource(context.getResources(), R.drawable.person);
-        Bitmap smallIcon = GeneralUtils.getResizedBitmap(icon, 60);
-
-        PrintImage(mSDKManager, smallIcon,bmpHeader,bmp);
+        Bitmap icon1 = BitmapFactory.decodeResource(context.getResources(), R.drawable.download);
+        Bitmap smallIcon = GeneralUtils.getResizedBitmap(icon, 40);
+        Bitmap img=GeneralUtils.mergeToPin(icon1,smallIcon);
+        PrintImage(mSDKManager, img,bmpHeader,bmp);
     }
 
 

@@ -1069,7 +1069,7 @@ public class PriceAdapterPrices extends RecyclerView.Adapter<PriceAdapterPrices.
                     }
 
                     String printTransaction = busName + "\n" +
-                            GeneralUtils.getUnicodeNumber(ticketInfoList.ticket_id) + "(नगद)" + "\n" +
+                            GeneralUtils.getUnicodeNumber(ticketInfoList.ticket_id)  + "(नगद)" + "\n" +
                             GeneralUtils.getUnicodeNumber(strTotal) + "कि.मी , रु." + GeneralUtils.getUnicodeNumber(ticketInfoList.transactionAmount) + discountType + "\n" +
                             nearestName + "-" + routeStationModelList.station_name + "\n" +
                             GeneralUtils.getNepaliMonth(String.valueOf(month)) + " "

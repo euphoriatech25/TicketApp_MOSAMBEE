@@ -8,6 +8,7 @@ import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
+import static com.technosales.net.buslocationannouncement.utils.UtilStrings.CALL_REGISTER_CHECK;
 import static com.technosales.net.buslocationannouncement.utils.UtilStrings.TICKET_URL;
 
 public class ServiceConfig {
@@ -23,7 +24,7 @@ public class ServiceConfig {
                     .setLevel(HttpLoggingInterceptor.Level.BODY);
 
     private static Retrofit.Builder builder = new Retrofit.Builder()
-            .baseUrl(TICKET_URL)
+            .baseUrl(CALL_REGISTER_CHECK)
             .addConverterFactory(GsonConverterFactory.create());
 
     private static Retrofit retrofit = builder.client(httpClient.build()).build();

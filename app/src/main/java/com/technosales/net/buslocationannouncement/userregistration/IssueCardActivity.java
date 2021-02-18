@@ -162,77 +162,13 @@ public class IssueCardActivity extends BaseActivity implements ICreateAccount.Vi
         databaseHelper = new DatabaseHelper(this);
 //        customer_number = getIntent().getStringExtra(IncomingCallReceiver.key_bootUpStart);
         customer_number="9841041332";
+
+
         int[]value={};
         M1CardHandlerMosambee.read_miCard(handler,value,"IssueCardActivity");
-        getCallDetails(user_num, customer_number);
+        setupUI();
     }
 
-    private void getCallDetails(final String userNum, String customer_num) {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_NUMBERS) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return;
-        }
-        TelephonyManager telemamanger = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
-        String getSimNumber = telemamanger.getLine1Number();
-        Log.e("TAG", "getCallDetails: " + getSimNumber);
-        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        if (getSimNumber != null) {
-
-            builder.setTitle("Number Received").setMessage("कृपया " + getSimNumber + " मा कल गर्नुहोस यसमा कुनै शुल्क लाग्दैन " + userNum);
-
-            builder.setPositiveButton("चेक गर्नुहोस", null);
-            builder.setNegativeButton("रद्द गर्नुहोस", null);
-        }
-
-        final LinearLayout layout = new LinearLayout(this);
-        layout.setOrientation(LinearLayout.VERTICAL);
-        TextView tv = new TextView(IssueCardActivity.this);
-        tv.setPadding(5, 5, 5, 5);
-        tv.setGravity(Gravity.CENTER | Gravity.BOTTOM);
-        layout.addView(tv);
-        builder.setView(layout);
-        final AlertDialog mAlertDialog = builder.create();
-        mAlertDialog.setCanceledOnTouchOutside(false);
-        mAlertDialog.show();
-        mAlertDialog.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (customer_num != null) {
-                    if(intent!=null){
-                        stopService(intent);
-                    }
-                    String trimmed = customer_num.substring(customer_num.length() - 3);
-                    if (userNum.equals(trimmed)) {
-                        tv.setText("Matched");
-                        mAlertDialog.dismiss();
-                        stopThread = false;
-                        (thread).start();
-
-                        setupUI();
-                    } else {
-                        tv.setText("NOT Matched");
-                    }
-                } else {
-                    Toast.makeText(IssueCardActivity.this, "Waiting for call", Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
-
-        mAlertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "रद्द गर्नुहोस",
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        mAlertDialog.dismiss();
-                        startActivity(new Intent(IssueCardActivity.this, TicketAndTracking.class));
-                        finish();
-                    }
-                });
-    }
 
     void setupUI() {
 
@@ -353,7 +289,7 @@ public class IssueCardActivity extends BaseActivity implements ICreateAccount.Vi
 
     void setPhoneNum(String num) {
         phoneNumber = num;
-        tv_phoneNum.setText(num.substring(num.length() - 3));
+        tv_phoneNum.setText("***"+num.substring(num.length() - 3));
     }
 
     @Override

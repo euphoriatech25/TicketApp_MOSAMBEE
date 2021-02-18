@@ -19,9 +19,11 @@ import android.os.Handler;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
+import android.telecom.CallScreeningService;
 import android.text.InputFilter;
 import android.text.InputType;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -59,8 +61,11 @@ import com.technosales.net.buslocationannouncement.APIToken.TokenManager;
 import com.technosales.net.buslocationannouncement.R;
 import com.technosales.net.buslocationannouncement.SDKManager;
 import com.technosales.net.buslocationannouncement.mosambeesupport.Printer;
+import com.technosales.net.buslocationannouncement.pojo.ApiError;
+import com.technosales.net.buslocationannouncement.pojo.CallResponse;
 import com.technosales.net.buslocationannouncement.serverconn.RetrofitInterface;
 import com.technosales.net.buslocationannouncement.serverconn.ServerConfigNew;
+import com.technosales.net.buslocationannouncement.serverconn.ServiceConfig;
 import com.technosales.net.buslocationannouncement.userregistration.IssueCardActivity;
 import com.technosales.net.buslocationannouncement.adapter.PriceAdapter;
 import com.technosales.net.buslocationannouncement.adapter.PriceAdapterPlaces;
@@ -86,17 +91,22 @@ import java.net.NetworkInterface;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 import static com.technosales.net.buslocationannouncement.trackcar.MainFragment.KEY_ACCURACY;
 import static com.technosales.net.buslocationannouncement.trackcar.MainFragment.KEY_DEVICE;
 import static com.technosales.net.buslocationannouncement.trackcar.MainFragment.KEY_DISTANCE;
 import static com.technosales.net.buslocationannouncement.trackcar.MainFragment.KEY_INTERVAL;
 import static com.technosales.net.buslocationannouncement.trackcar.MainFragment.KEY_URL;
+import static com.technosales.net.buslocationannouncement.utils.UtilStrings.CALL_REGISTER_CHECK;
+import static com.technosales.net.buslocationannouncement.utils.UtilStrings.USER_NUMBER;
 
 public class TicketAndTracking extends AppCompatActivity implements GetPricesFares.OnPriceUpdate {
     private static final int PERMISSION_REQUEST_READ_PHONE_STATE = 1;
@@ -133,7 +143,7 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
     private PriceAdapterPrices priceAdapterPrices;
     private List<RouteStationList> routeStationListsForInfinite;
     private SharedPreferences preferences,preferencesHelper;
-    private boolean isFirstRun;
+    private boolean isFirstRun,onLocationChanged;
     String deviceIDHelper, helperNameString, helperId;
     private static final int REQUEST_PHONE_CALL = 1;
     TokenManager tokenManager;
@@ -214,6 +224,14 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
   normalDiscountToggle.setColorOn(getResources().getColor(R.color.colorAccent));*/
 
         Toast.makeText(this, Double.parseDouble(preferences.getString(UtilStrings.LATITUDE, "0.0"))+"::"+Double.parseDouble(preferences.getString(UtilStrings.LONGITUDE, "0.0")), Toast.LENGTH_SHORT).show();
+//       ///////////////////////////////////////////////////////////////////////////////////////////////////
+        onLocationChanged=preferences.getBoolean(UtilStrings.LOCATION_CHANGE, false);
+       if(onLocationChanged){
+             startActivity(getIntent());
+             finish();
+             overridePendingTransition(0, 0);
+         }
+       //       ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 
         initializeDrawer();
@@ -767,6 +785,7 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
         });
     }
 
+
     private boolean IssueProcess() {
         final AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Issue Card");
@@ -780,7 +799,7 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
         numberInput.setHint(R.string.last_three);
         numberInput.setInputType(InputType.TYPE_CLASS_NUMBER);
         numberInput.setFilters(new InputFilter[]{
-                new InputFilter.LengthFilter(3)
+                new InputFilter.LengthFilter(10)
         });
 //        numberInput.setTextSize(40);
 //        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
@@ -808,21 +827,14 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
                 okay.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        if (numberInput.getText().toString().length() == 3) {
-                            if (ContextCompat.checkSelfPermission(TicketAndTracking.this, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
-                                ActivityCompat.requestPermissions(TicketAndTracking.this, new String[]{Manifest.permission.CALL_PHONE}, REQUEST_PHONE_CALL);
-                            } else {
-                                SharedPreferences sharedPreferences = getSharedPreferences("User_NUM", MODE_PRIVATE);
-                                SharedPreferences.Editor myEdit = sharedPreferences.edit();
-                                myEdit.putString("userNum", numberInput.getText().toString());
-                                myEdit.apply();
-                                Intent intent = new Intent(TicketAndTracking.this, IssueCardActivity.class);
-                                startActivity(intent);
-                                mAlertDialog.dismiss();
-                            }
-
+                        if (ContextCompat.checkSelfPermission(TicketAndTracking.this, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
+                            ActivityCompat.requestPermissions(TicketAndTracking.this, new String[]{Manifest.permission.CALL_PHONE}, REQUEST_PHONE_CALL);
                         } else {
-                            Toast.makeText(TicketAndTracking.this, "Please input number", Toast.LENGTH_SHORT).show();
+                            SharedPreferences sharedPreferences = getSharedPreferences("User_NUM", MODE_PRIVATE);
+                            SharedPreferences.Editor myEdit = sharedPreferences.edit();
+                            myEdit.putString("userNum", numberInput.getText().toString());
+                            myEdit.apply();
+                            getCallDetails(numberInput.getText().toString());
                         }
                     }
                 });
@@ -832,6 +844,108 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
 
         return true;
     }
+
+    private void getCallDetails(final String userNum) {
+        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+
+        builder.setTitle("Number Received").setMessage("कृपया मा कल गर्नुहोस यसमा कुनै शुल्क लाग्दैन " + userNum);
+
+        builder.setPositiveButton("चेक गर्नुहोस", null);
+        builder.setNegativeButton("रद्द गर्नुहोस", null);
+
+
+        final LinearLayout layout = new LinearLayout(this);
+        layout.setOrientation(LinearLayout.VERTICAL);
+        TextView tv = new TextView(TicketAndTracking.this);
+        tv.setPadding(5, 5, 5, 5);
+        tv.setGravity(Gravity.CENTER | Gravity.BOTTOM);
+        layout.addView(tv);
+        builder.setView(layout);
+
+        AlertDialog mAlertDialog;
+        mAlertDialog = builder.create();
+        mAlertDialog.setCanceledOnTouchOutside(false);
+        mAlertDialog.show();
+        mAlertDialog.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ProgressDialog pClick = new ProgressDialog(TicketAndTracking.this); //Your Activity.this
+                pClick.setMessage("कृपया पर्खनुहोस्...");
+                pClick.setCancelable(true);
+                pClick.show();
+                getNumberFromServer(userNum, pClick);
+            }
+        });
+
+        mAlertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "रद्द गर्नुहोस",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        mAlertDialog.dismiss();
+                    }
+                });
+    }
+
+    private void getNumberFromServer(String userNum, ProgressDialog pClick) {
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(CALL_REGISTER_CHECK)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+        RetrofitInterface post = ServiceConfig.createService(RetrofitInterface.class);
+        Call<CallResponse> call = post.getNumber(userNum);
+        call.enqueue(new Callback<CallResponse>() {
+            @Override
+            public void onResponse(Call<CallResponse> call, Response<CallResponse> response) {
+                CallResponse callResponse=response.body();
+                if (response.isSuccessful()) {
+                    pClick.dismiss();
+                    String customer_num_server=callResponse.getData().getMobileNumber();
+                    if (userNum != null&&customer_num_server!=null) {
+                        if (userNum.equals(customer_num_server)) {
+                            Log.i("TAG", "onCreate: "+customer_num_server);
+                            Intent intent = new Intent(TicketAndTracking.this, IssueCardActivity.class);
+                            intent.putExtra(USER_NUMBER,customer_num_server);
+                            startActivity(intent);
+                        } else {
+                            Toast.makeText(TicketAndTracking.this, "Phone number not matched", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                }
+                else if(response.code()==404){
+                    pClick.dismiss();
+                    handleErrors(response.errorBody());
+                }else if(response.code()==403){
+                    pClick.dismiss();
+                    handleErrors(response.errorBody());
+                }else {
+                    pClick.dismiss();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<CallResponse> call, Throwable t) {
+                pClick.dismiss();
+                Log.i("TAG", "onResponse: Failed"+t.getLocalizedMessage());
+            }
+        });
+    }
+    private void handleErrors(ResponseBody responseBody) {
+        ApiError apiErrors = GeneralUtils.convertErrors(responseBody);
+
+        if (responseBody != null) {
+            for (Map.Entry<String, List<String>> error : apiErrors.getErrors().entrySet()) {
+                if (error.getKey().equals("message")) {
+                    Toast.makeText(this, error.getValue().get(0), Toast.LENGTH_SHORT).show();
+                } else {
+                }
+            }
+        } else {
+            Toast.makeText(this, "something went wrong", Toast.LENGTH_SHORT).show();
+        }
+
+    }
+
+
 
     private void setMode(int modeType, int spanCount, String modeStr) {
         preferences.edit().putInt(UtilStrings.MODE, modeType).apply();

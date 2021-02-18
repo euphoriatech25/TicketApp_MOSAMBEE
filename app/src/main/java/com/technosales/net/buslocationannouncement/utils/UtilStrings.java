@@ -176,4 +176,9 @@ public class UtilStrings {
     public static final String REFRESH_TOKEN ="helper_login/refresh_token" ;
 
     public static final String NULL = "";
+
+    public static final String USER_NUMBER ="userNum";
+
+    public static final String CALL_REGISTER_CHECK = "http://202.52.240.149:82/";
+    public static final String LOCATION_CHANGE = "location_change";
 }
