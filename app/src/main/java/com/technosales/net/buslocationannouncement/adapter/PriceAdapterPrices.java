@@ -1068,13 +1068,21 @@ public class PriceAdapterPrices extends RecyclerView.Adapter<PriceAdapterPrices.
                         strTotal = strTotal.substring(0, 4);
                     }
 
-                    String printTransaction = busName + "\n" +
-                            GeneralUtils.getUnicodeNumber(ticketInfoList.ticket_id)  + "(नगद)" + "\n" +
-                            GeneralUtils.getUnicodeNumber(strTotal) + "कि.मी , रु." + GeneralUtils.getUnicodeNumber(ticketInfoList.transactionAmount) + discountType + "\n" +
-                            nearestName + "-" + routeStationModelList.station_name + "\n" +
-                            GeneralUtils.getNepaliMonth(String.valueOf(month)) + " "
+                    String printTransaction ="बस नम्बर :- "+busName + " (कार्ड)" + "\n" +
+                            "टिकट नम्बर :-"+ GeneralUtils.getUnicodeNumber(ticketInfoList.ticket_id) + "\n" +
+                            GeneralUtils.getUnicodeNumber(strTotal) + "कि.मी \n रकम :- रु." + GeneralUtils.getUnicodeNumber(ticketInfoList.transactionAmount) + discountType + "\n" +
+                            "दूरी :-"+nearestName + "-" + routeStationModelList.station_name + "\n" +
+                            "जारी मिति :-"+ GeneralUtils.getNepaliMonth(String.valueOf(month)) + " "
                             + GeneralUtils.getUnicodeNumber(String.valueOf(day)) + " " +
                             GeneralUtils.getUnicodeNumber(GeneralUtils.getTime());
+
+//                            busName + "\n" +
+//                            GeneralUtils.getUnicodeNumber(ticketInfoList.ticket_id)  + "(नगद)" + "\n" +
+//                            GeneralUtils.getUnicodeNumber(strTotal) + "कि.मी , रु." + GeneralUtils.getUnicodeNumber(ticketInfoList.transactionAmount) + discountType + "\n" +
+//                            nearestName + "-" + routeStationModelList.station_name + "\n" +
+//                            GeneralUtils.getNepaliMonth(String.valueOf(month)) + " "
+//                            + GeneralUtils.getUnicodeNumber(String.valueOf(day)) + " " +
+//                            GeneralUtils.getUnicodeNumber(GeneralUtils.getTime());
 
 //                    String status = PrinterTester.getInstance().getStatus();
 //                    if (status.equalsIgnoreCase("Out of paper ")) {

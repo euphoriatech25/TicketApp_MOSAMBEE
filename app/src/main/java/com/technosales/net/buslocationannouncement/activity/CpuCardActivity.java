@@ -2,7 +2,6 @@
 //
 //import android.os.Bundle;
 //import android.os.RemoteException;
-//import android.util.Log;
 //import android.view.View;
 //import android.widget.Button;
 //import android.widget.TextView;
@@ -15,32 +14,37 @@
 //import com.morefun.yapi.device.reader.icc.IccCardType;
 //import com.morefun.yapi.device.reader.icc.IccReaderSlot;
 //import com.morefun.yapi.device.reader.icc.OnSearchIccCardListener;
-//import com.morefun.yapi.engine.DeviceServiceEngine;
+//
 //import com.technosales.net.buslocationannouncement.R;
-//import com.technosales.net.buslocationannouncement.SDKManager;
 //import com.technosales.net.buslocationannouncement.base.BaseActivity;
 //
-//public class SAMReadWrite extends BaseActivity {
-//    private final String TAG = SAMReadWrite.class.getName();
-//TextView v;
-//Button b;
+//
+//
+//public class CpuCardActivity extends BaseActivity {
+//    private final String TAG = CpuCardActivity.class.getName();
+//
+//    TextView textView;
+//
+//    Button button;
 //
 //    @Override
 //    protected void onCreate(Bundle savedInstanceState) {
 //        super.onCreate(savedInstanceState);
 //        setContentView(R.layout.activity_test);
-//        v=findViewById(R.id.textSam);
-//        b=findViewById(R.id.buttonSam);
-//        b.setOnClickListener(new View.OnClickListener() {
-//        @Override
-//        public void onClick(View v) {
+//       textView=findViewById(R.id.textSam);
+//       button=findViewById(R.id.buttonSam);
+//button.setOnClickListener(new View.OnClickListener() {
+//    @Override
+//    public void onClick(View v) {
+//        //        showResult(textView, getString(R.string.msg_icorrfid));
+//        searchCPUCard(new String[]{IccCardType.CPUCARD});
+//    }
+//});
 //
-//            searchCPUCard(new String[]{IccCardType.CPUCARD});
-//        }
-//    });
-//        setButtonName();
 //
 //    }
+//
+//
 //
 //    private void searchCPUCard(final String[] cardType) {
 //        try {
@@ -59,12 +63,11 @@
 //                        if (IccCardType.CPUCARD.equals(cardType)) {
 //                            int slot = bundle.getInt(ICCSearchResult.CARDOTHER);
 //                            String uid = bundle.getString(ICCSearchResult.M1SN);
-//
-//                            v.setText(uid);
+////                            showResult(textView, "uid:" + uid);
 //                            exchangeApdu(slot);
 //                        }
 //                    } else {
-//                        v.setText(retCode);
+////                        showResult(textView, "result:" + retCode);
 //                    }
 //                }
 //            };
@@ -74,8 +77,7 @@
 //
 //        } catch (RemoteException e) {
 //            e.printStackTrace();
-//            v.setText( e.toString());
-//
+////            showResult(textView, e.toString());
 //        }
 //    }
 //
@@ -84,14 +86,9 @@
 //            String cmd = "00A40400";
 //            String data = "325041592E5359532E4444463031";
 //            byte le = 0x00;
-//            DeviceServiceEngine mSDKManager;
-//            mSDKManager = SDKManager.getInstance().getDeviceServiceEngine();
-//            if (mSDKManager == null) {
-//                Log.e("TAG", "ServiceEngine is Null");
-//                return;
-//            }
-//            IccCardReader cardReader = mSDKManager.getIccCardReader(slot);
-//            CPUCardHandler cpuCardHandler = mSDKManager.getCPUCardHandler(cardReader);
+//
+//            IccCardReader cardReader = DeviceHelper.getIccCardReader(slot);
+//            CPUCardHandler cpuCardHandler = DeviceHelper.getCpuCardHandler(cardReader);
 //
 //            if (cpuCardHandler == null) {
 ////                SweetDialogUtil.showError(CpuCardActivity.this, getString(R.string.msg_readfail_retry));
@@ -137,15 +134,9 @@
 //    }
 //
 //    private void exchangeApdu(int slot, String apduCommon) throws RemoteException {
-//        DeviceServiceEngine mSDKManager;
-//        mSDKManager = SDKManager.getInstance().getDeviceServiceEngine();
-//        if (mSDKManager == null) {
-//            Log.e("TAG", "ServiceEngine is Null");
-//            return;
-//        }
 //        try {
-//            IccCardReader cardReader = mSDKManager.getIccCardReader(slot);
-//            CPUCardHandler cpuCardHandler = mSDKManager.getCPUCardHandler(cardReader);
+//            IccCardReader cardReader = DeviceHelper.getIccCardReader(slot);
+//            CPUCardHandler cpuCardHandler = DeviceHelper.getCpuCardHandler(cardReader);
 //
 //            if (cpuCardHandler == null) {
 ////                SweetDialogUtil.showError(CpuCardActivity.this, getString(R.string.msg_readfail_retry));
@@ -159,8 +150,8 @@
 //
 //            byte[] dataArray = HexUtil.hexStringToByte(apduCommon);
 //            byte[] tmp = new byte[256];
-//APDUCmd cmd
-//            int ret = cpuCardHandler.exchangeAPDUCmd()
+//
+//            int ret = cpuCardHandler.exchangeCmd(tmp, dataArray, dataArray.length);
 //
 //            if (ret > 0) {
 ////                showResult(textView, "recv len = " + ret);
@@ -173,6 +164,7 @@
 ////            showResult(textView, e.toString());
 //        }
 //    }
+//
 //
 //
 //

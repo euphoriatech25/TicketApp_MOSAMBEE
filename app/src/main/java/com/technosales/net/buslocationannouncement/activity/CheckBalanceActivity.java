@@ -66,7 +66,7 @@ import static com.technosales.net.buslocationannouncement.utils.UtilStrings.TRAN
 public class CheckBalanceActivity extends BaseActivity {
     int minAmt = 25, maxAmt = 500;
     int total_tickets;
-    int total_collections;
+    int total_collections_card;
     String passenserId, currentAmount, transactionHash;
     String latitude;
     String longitude;
@@ -83,7 +83,7 @@ public class CheckBalanceActivity extends BaseActivity {
     private String helperString = "";
 //    private EPiccType piccType;
     private String isOnlineCheck;
-    private int TIME_DELAY = 500;
+    private int TIME_DELAY = 30000;
     private DatabaseHelper databaseHelper;
     private boolean stopThread;
     private String rechargeBill;
@@ -127,8 +127,10 @@ public class CheckBalanceActivity extends BaseActivity {
                             Toast.makeText(CheckBalanceActivity.this, "Recharged Successfully!!!", Toast.LENGTH_SHORT).show();
 //                            startActivity(new Intent(CheckBalanceActivity.this, TicketAndTracking.class));
                             finish();
-
-
+                    break;
+                    case 404:
+                        Toast.makeText(CheckBalanceActivity.this, "Card is not authorized", Toast.LENGTH_SHORT).show();
+                        finish();
                     break;
                 default:
                     break;
@@ -136,6 +138,24 @@ public class CheckBalanceActivity extends BaseActivity {
         }
     };
 
+    Thread thread=new Thread(new Runnable() {
+        @Override
+        public void run() {
+            while (!Thread.interrupted() && !stopThread)
+                try {
+                    Thread.sleep(TIME_DELAY);
+                    runOnUiThread(new Runnable() // start actions in UI thread
+                    {
+                        @Override
+                        public void run() {
+                            M1CardHandlerMosambee.read_miCard(rechargeHandler, customerDetailsRead,"CheckBalanceActivity");
+
+                        }
+                    });
+                } catch (InterruptedException e) {
+                }
+        }
+    });
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -145,13 +165,9 @@ public class CheckBalanceActivity extends BaseActivity {
         databaseHelper = new DatabaseHelper(this);
         setUpToolbar("ब्यालेन्स जाँच", true);
         setupUI();
-//        piccType = EPiccType.INTERNAL;
-
         tokenManager = TokenManager.getInstance(getSharedPreferences("prefs", MODE_PRIVATE));
-
-
         M1CardHandlerMosambee.read_miCard(rechargeHandler, customerDetailsRead,"CheckBalanceActivity");
-
+        thread.start();
 
         if (GeneralUtils.isNetworkAvailable(this)) {
             isOnlineCheck = "true";
@@ -186,10 +202,10 @@ public class CheckBalanceActivity extends BaseActivity {
 
 
         total_tickets = preferences.getInt(UtilStrings.TOTAL_TICKETS, 0);
-        total_collections = preferences.getInt(UtilStrings.TOTAL_COLLECTIONS_CARD, 0);
+        total_collections_card = preferences.getInt(UtilStrings.TOTAL_COLLECTIONS_CARD, 0);
 
         total_tickets = total_tickets + 1;
-        total_collections = total_collections + amount;
+        total_collections_card = total_collections_card + amount;
 
         String valueOfTickets = "";
 
@@ -250,13 +266,10 @@ public class CheckBalanceActivity extends BaseActivity {
                             stopThread = true;
                             if (response.isSuccessful()) {
 
-                                preferences.edit().putInt(UtilStrings.TOTAL_TICKETS, total_tickets).apply();
-                                preferences.edit().putInt(UtilStrings.TOTAL_COLLECTIONS_CARD, total_collections).apply();
+                                preferencesHelper.edit().putString(UtilStrings.AMOUNT_HELPER, String.valueOf(recharge.getData().getHelperAmount())).apply();
 
-                                SharedPreferences sharedPreferences = getSharedPreferences(SHARED_PREFERENCES, MODE_PRIVATE);
-                                SharedPreferences.Editor myEdit = sharedPreferences.edit();
-                                myEdit.putString(UtilStrings.AMOUNT_HELPER, String.valueOf(recharge.getData().getHelperAmount()));
-                                myEdit.apply();
+                                preferences.edit().putInt(UtilStrings.TOTAL_TICKETS, total_tickets).apply();
+                                preferences.edit().putInt(UtilStrings.TOTAL_COLLECTIONS_CARD, total_collections_card).apply();
 
                                 printDetails(recharge.getData().getPassengerAmount(), amount);
                                 tv_amount.setText("रू " + GeneralUtils.getUnicodeNumber(String.valueOf(recharge.getData().getPassengerAmount())));

@@ -3,111 +3,96 @@ package com.technosales.net.buslocationannouncement.pojo;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class CallResponse {
+import java.util.List;
 
-    @SerializedName("msg")
+public class CallResponse {
+    @SerializedName("success")
     @Expose
-    private String msg;
-    @SerializedName("status")
-    @Expose
-    private Integer status;
+    private Boolean success;
     @SerializedName("data")
     @Expose
-    private Data data;
+    private List<Object> data = null;
+    @SerializedName("message")
+    @Expose
+    private String message;
 
-    public String getMsg() {
-        return msg;
+    public Boolean getSuccess() {
+        return success;
     }
 
-    public void setMsg(String msg) {
-        this.msg = msg;
+    public void setSuccess(Boolean success) {
+        this.success = success;
     }
 
-    public Integer getStatus() {
-        return status;
-    }
-
-    public void setStatus(Integer status) {
-        this.status = status;
-    }
-
-    public Data getData() {
+    public List<Object> getData() {
         return data;
     }
 
-    public void setData(Data data) {
+    public void setData(List<Object> data) {
         this.data = data;
     }
 
-    public class Data {
+    public String getMessage() {
+        return message;
+    }
 
-        @SerializedName("id")
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+
+
+    public class GetServerNumber{
+
+        @SerializedName("success")
         @Expose
-        private Integer id;
-        @SerializedName("mobile_number")
+        private Boolean success;
+        @SerializedName("data")
         @Expose
-        private String mobileNumber;
-        @SerializedName("is_phoned")
+        private Data data;
+        @SerializedName("message")
         @Expose
-        private Integer isPhoned;
-        @SerializedName("expired_at")
-        @Expose
-        private String expiredAt;
-        @SerializedName("created_at")
-        @Expose
-        private String createdAt;
-        @SerializedName("updated_at")
-        @Expose
-        private String updatedAt;
+        private String message;
 
-        public Integer getId() {
-            return id;
+        public Boolean getSuccess() {
+            return success;
         }
 
-        public void setId(Integer id) {
-            this.id = id;
+        public void setSuccess(Boolean success) {
+            this.success = success;
         }
 
-        public String getMobileNumber() {
-            return mobileNumber;
+        public Data getData() {
+            return data;
         }
 
-        public void setMobileNumber(String mobileNumber) {
-            this.mobileNumber = mobileNumber;
+        public void setData(Data data) {
+            this.data = data;
         }
 
-        public Integer getIsPhoned() {
-            return isPhoned;
+        public String getMessage() {
+            return message;
         }
 
-        public void setIsPhoned(Integer isPhoned) {
-            this.isPhoned = isPhoned;
+        public void setMessage(String message) {
+            this.message = message;
         }
 
-        public String getExpiredAt() {
-            return expiredAt;
-        }
+        public class Data {
 
-        public void setExpiredAt(String expiredAt) {
-            this.expiredAt = expiredAt;
-        }
+            @SerializedName("server_number")
+            @Expose
+            private String serverNumber;
 
-        public String getCreatedAt() {
-            return createdAt;
-        }
+            public String getServerNumber() {
+                return serverNumber;
+            }
 
-        public void setCreatedAt(String createdAt) {
-            this.createdAt = createdAt;
-        }
+            public void setServerNumber(String serverNumber) {
+                this.serverNumber = serverNumber;
+            }
 
-        public String getUpdatedAt() {
-            return updatedAt;
         }
-
-        public void setUpdatedAt(String updatedAt) {
-            this.updatedAt = updatedAt;
-        }
-
     }
 }
 

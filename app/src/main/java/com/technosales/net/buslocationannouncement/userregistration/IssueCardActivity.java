@@ -61,7 +61,7 @@ public class IssueCardActivity extends BaseActivity implements ICreateAccount.Vi
     String user_num;
     String accountTypeStg, helperId, deviceId;
     int total_tickets;
-    int total_collections_issue;
+    int total_collections_card;
     boolean stopThread;
     private EditText first_name, middle_name, last_name, contactNo, editTextEmail, editAddress;
     private EditText addressField;
@@ -76,7 +76,7 @@ public class IssueCardActivity extends BaseActivity implements ICreateAccount.Vi
     private ScrollView registerScroll;
     private String success, customerId, cusmoterMobile, customerAmount;
 //    private EM1KeyType m1KeyType = EM1KeyType.TYPE_B;
-    private int TIME_DELAY = 1000;
+    private int TIME_DELAY = 30000;
     private String ticketId;
     private String valueOfTickets = "";
     private String printData;
@@ -96,18 +96,8 @@ public class IssueCardActivity extends BaseActivity implements ICreateAccount.Vi
                     {
                         @Override
                         public void run() {
-//                            PiccTransaction.getInstance(piccType).readId(handler);
-                            for (int i = 0; i < authBlock.length; i++) {
-                                int finalI = i;
-                                final Handler handler = new Handler();
-                                handler.postDelayed(new Runnable() {
-                                    @Override
-                                    public void run() {
-//                                        PiccTransaction.getInstance(piccType).authSector(handler,authBlock[finalI]);
-                                    }
-                                }, 1000);
-
-                            }
+                            int[]value={};
+                            M1CardHandlerMosambee.read_miCard(handler,value,"IssueCardActivity");
                         }
                     });
                 } catch (InterruptedException e) {
@@ -163,9 +153,8 @@ public class IssueCardActivity extends BaseActivity implements ICreateAccount.Vi
 //        customer_number = getIntent().getStringExtra(IncomingCallReceiver.key_bootUpStart);
         customer_number="9841041332";
 
+      thread.start();
 
-        int[]value={};
-        M1CardHandlerMosambee.read_miCard(handler,value,"IssueCardActivity");
         setupUI();
     }
 
@@ -199,13 +188,13 @@ public class IssueCardActivity extends BaseActivity implements ICreateAccount.Vi
             public void onClick(View v) {
                 preferences = getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0);
                 total_tickets = preferences.getInt(UtilStrings.TOTAL_TICKETS, 0);
-                total_collections_issue= preferences.getInt(UtilStrings.TOTAL_COLLECTIONS_CARD, 0);
+                total_collections_card= preferences.getInt(UtilStrings.TOTAL_COLLECTIONS_CARD, 0);
                 deviceId = preferences.getString(UtilStrings.DEVICE_ID, "");
                 latitude = preferences.getString(UtilStrings.LATITUDE, "0.0");
                 longitude = preferences.getString(UtilStrings.LONGITUDE, "0.0");
 
                 total_tickets = total_tickets + 1;
-                total_collections_issue=total_collections_issue+100;
+                total_collections_card=total_collections_card+100;
 //                if (total_tickets < 10) {
 //                    valueOfTickets = "00" + String.valueOf(total_tickets);
 //
@@ -380,7 +369,7 @@ public class IssueCardActivity extends BaseActivity implements ICreateAccount.Vi
         preferencesHelper.edit().putString(UtilStrings.AMOUNT_HELPER, String.valueOf(newHelperAmt)).apply();
 
         preferences.edit().putInt(UtilStrings.TOTAL_TICKETS, total_tickets).apply();
-        preferences.edit().putInt(UtilStrings.TOTAL_COLLECTIONS_CARD, total_collections_issue).apply();
+        preferences.edit().putInt(UtilStrings.TOTAL_COLLECTIONS_CARD, total_collections_card).apply();
 
 
         progressDialog.dismiss();

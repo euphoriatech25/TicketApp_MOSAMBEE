@@ -183,10 +183,8 @@ public class PayByCardActivity extends BaseActivity {
                     break;
 
                     case 404:
+                        Toast.makeText(PayByCardActivity.this, "Card is not authorized", Toast.LENGTH_SHORT).show();
                         finish();
-                        overridePendingTransition( 0, 0);
-                        startActivity(getIntent());
-                        overridePendingTransition( 0, 0);
                     break;
                 case 200:
                     if(msg.obj.toString().equalsIgnoreCase("Success")){
@@ -986,12 +984,19 @@ public class PayByCardActivity extends BaseActivity {
                     String.valueOf(Integer.parseInt(amount) + "\n" + ticketType + "\n" + GeneralUtils.getFullDate() + "\n" + GeneralUtils.getTime() + "\n" + latitude + "\n" + longitude + "\n " + helperId));
             Log.i("TAG", "rwwwwwwwun: " + reducedValue);
 
-            printTransaction = busName + "\n" +
-                    GeneralUtils.getUnicodeNumber(ticketInfoList.ticket_id) + "\n" +
-                    "रु." + GeneralUtils.getUnicodeNumber(ticketInfoList.transactionAmount) + discountType + "\n" +
-                    GeneralUtils.getNepaliMonth(String.valueOf(month)) + " "
+            printTransaction = "बस नम्बर :- "+ busName + " (कार्ड)" +"\n"+
+                    "टिकट नम्बर :-"+ GeneralUtils.getUnicodeNumber(ticketInfoList.ticket_id) +"\n" +
+                    "रकम :- "+"रु." + GeneralUtils.getUnicodeNumber(ticketInfoList.transactionAmount) + discountType + "\n" +
+                    "जारी मिति :-" + GeneralUtils.getNepaliMonth(String.valueOf(month)) + " "
                     + GeneralUtils.getUnicodeNumber(String.valueOf(day)) + " " +
                     GeneralUtils.getUnicodeNumber(GeneralUtils.getTime());
+
+//                    busName + "\n" +
+//                    GeneralUtils.getUnicodeNumber(ticketInfoList.ticket_id) + "\n" +
+//                    "रु." + GeneralUtils.getUnicodeNumber(ticketInfoList.transactionAmount) + discountType + "\n" +
+//                    GeneralUtils.getNepaliMonth(String.valueOf(month)) + " "
+//                    + GeneralUtils.getUnicodeNumber(String.valueOf(day)) + " " +
+//                    GeneralUtils.getUnicodeNumber(GeneralUtils.getTime());
             pClick.dismiss();
 
 
@@ -1068,11 +1073,11 @@ public class PayByCardActivity extends BaseActivity {
             databaseHelper.insertTicketInfo(ticketInfoList);
 
 
-            printTransaction = busName + "\n" +
-                    GeneralUtils.getUnicodeNumber(ticketInfoList.ticket_id) + "\n" +
-                    "रु." + GeneralUtils.getUnicodeNumber(ticketInfoList.transactionAmount) + discountType + "\n" +
-                    nearest_name + "-" + toGetOff + "\n" +
-                    GeneralUtils.getNepaliMonth(String.valueOf(month)) + " "
+            printTransaction =  "बस नम्बर :- "+busName + " (कार्ड)" + "\n" +
+                    "टिकट नम्बर :-"+ GeneralUtils.getUnicodeNumber(ticketInfoList.ticket_id) + "\n" +
+                    "रकम :- "+ "रु." + GeneralUtils.getUnicodeNumber(ticketInfoList.transactionAmount) + discountType + "\n" +
+                    "दूरी :-"+ nearest_name + "-" + toGetOff + "\n" +
+                    "जारी मिति :-" + GeneralUtils.getNepaliMonth(String.valueOf(month)) + " "
                     + GeneralUtils.getUnicodeNumber(String.valueOf(day)) + " " +
                     GeneralUtils.getUnicodeNumber(GeneralUtils.getTime());
 
@@ -1164,11 +1169,11 @@ public class PayByCardActivity extends BaseActivity {
                 strTotal = "null";
             }
 
-            printTransaction = busName + "\n" +
-                    GeneralUtils.getUnicodeNumber(ticketInfoList.ticket_id) + "\n" +
-                    GeneralUtils.getUnicodeNumber(strTotal) + "कि.मी , रु." + GeneralUtils.getUnicodeNumber(ticketInfoList.transactionAmount) + discountType + "\n" +
-                    nearest_name + "-" + station_name + "\n" +
-                    GeneralUtils.getNepaliMonth(String.valueOf(month)) + " "
+            printTransaction =  "बस नम्बर :- "+busName + " (कार्ड)" + "\n" +
+                    "टिकट नम्बर :-"+ GeneralUtils.getUnicodeNumber(ticketInfoList.ticket_id) + "\n" +
+                    GeneralUtils.getUnicodeNumber(strTotal) + "कि.मी \n रकम :- रु." + GeneralUtils.getUnicodeNumber(ticketInfoList.transactionAmount) + discountType + "\n" +
+                   "दूरी :-"+ nearest_name + "-" + station_name + "\n" +
+                    "जारी मिति :-"+ GeneralUtils.getNepaliMonth(String.valueOf(month)) + " "
                     + GeneralUtils.getUnicodeNumber(String.valueOf(day)) + " " +
                     GeneralUtils.getUnicodeNumber(GeneralUtils.getTime());
 

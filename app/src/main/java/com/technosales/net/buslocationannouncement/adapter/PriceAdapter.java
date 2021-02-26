@@ -258,10 +258,10 @@ public class PriceAdapter extends RecyclerView.Adapter<PriceAdapter.MyViewHolder
                             databaseHelper.insertTicketInfo(ticketInfoList);
                             Log.i("TAG", "onClick: "+"helllooooo");
 
-                            String printTransaction = busName + "\n" +
-                                    GeneralUtils.getUnicodeNumber(ticketInfoList.ticket_id) +"(नगद)" +"\n" +
-                                    "रु." + GeneralUtils.getUnicodeNumber(ticketInfoList.transactionAmount) + discountType + "\n" +
-                                    GeneralUtils.getNepaliMonth(String.valueOf(month)) + " "
+                            String printTransaction ="बस नम्बर :- "+ busName + " (नगद)" +"\n"+
+                                   "टिकट नम्बर :-"+ GeneralUtils.getUnicodeNumber(ticketInfoList.ticket_id) +"\n" +
+                                    "रकम :- "+"रु." + GeneralUtils.getUnicodeNumber(ticketInfoList.transactionAmount) + discountType + "\n" +
+                                   "जारी मिति :-" + GeneralUtils.getNepaliMonth(String.valueOf(month)) + " "
                                     + GeneralUtils.getUnicodeNumber(String.valueOf(day)) + " " +
                                     GeneralUtils.getUnicodeNumber(GeneralUtils.getTime());
 

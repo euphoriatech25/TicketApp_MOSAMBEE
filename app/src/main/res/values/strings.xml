@@ -199,7 +199,7 @@
     <string name="places_mode">Places</string>
     <string name="price_mode">Price</string>
     <string name="update_fare">Update Fare</string>
-    <string name="last_three"><font size="20">"कृपया मोबाइल नम्बर को अन्तिम\n३ अंक राख्नु होला "</font></string>
+    <string name="last_three"><font size="20">"कृपया तपाईको मोबाइल नम्बर \nदिनुहोस्।"</font></string>
     <string name="incomeTorecharge"><font size="20">ट्रान्सफर इन्कमे टू रेचार्गे</font></string>
     <string name="helperLogin"><font size="18">सहयोगी लगईन...</font></string>
 

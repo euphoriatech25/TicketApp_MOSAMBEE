@@ -44,6 +44,7 @@ public class M1CardHandlerMosambee {
         new SearchCardOrCardReaderTest(mSDKManager).searchRFCard(new String[]{IccCardType.M1CARD}, new PayByCardActivity.OnSearchListener() {
             @Override
             public void onSearchResult(int retCode, Bundle bundle) {
+                Log.i(TAG, "onSearchResult: "+retCode);
                 if (ServiceResult.Success == retCode) {
                     String cardType = bundle.getString(ICCSearchResult.CARDTYPE);
                     if (IccCardType.M1CARD.equals(cardType)) {
@@ -80,6 +81,11 @@ public class M1CardHandlerMosambee {
                                 if (ret == ServiceResult.Success) {
                                     readCustomerRechargeDetails(handler, m1CardHandler, customerDetailsBlock, uid);
 // return;
+                                }else if(ret==-10301){
+                                    Message messageCardId = new Message();
+                                    messageCardId.what = 404;
+                                    messageCardId.obj ="Error";
+                                    handler.sendMessage(messageCardId);
                                 }
                             } else if (fromWhichActivity.equalsIgnoreCase("GetFirstOfflineTransaction")) {
                                 int ret = m1CardHandler.authority(M1KeyTypeConstrants.KEYTYPE_A, SECTOR_FIRST_TRANSATION, KEY_A, uid);

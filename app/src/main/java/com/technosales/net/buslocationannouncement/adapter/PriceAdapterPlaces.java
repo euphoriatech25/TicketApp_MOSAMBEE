@@ -560,13 +560,24 @@ public class PriceAdapterPlaces extends RecyclerView.Adapter<PriceAdapterPlaces.
             databaseHelper.insertTicketInfo(ticketInfoList);
 
 
-            String printTransaction = busName +"\n" +
-                    GeneralUtils.getUnicodeNumber(ticketInfoList.ticket_id) +"(नगद)"+ "\n" +
-                    "रु." + GeneralUtils.getUnicodeNumber(ticketInfoList.transactionAmount) + discountType + "\n" +
-                    nearest_name + "-" + toGetOff + "\n" +
-                    GeneralUtils.getNepaliMonth(String.valueOf(month)) + " "
+            String printTransaction = "बस नम्बर :- "+busName + "(नगद)" + "\n" +
+                    "टिकट नम्बर :-"+ GeneralUtils.getUnicodeNumber(ticketInfoList.ticket_id) + "\n" +
+                    "रकम :- "+ "रु." + GeneralUtils.getUnicodeNumber(ticketInfoList.transactionAmount) + discountType + "\n" +
+                    "दूरी :-"+ nearest_name + "-" + toGetOff + "\n" +
+                    "जारी मिति :-" + GeneralUtils.getNepaliMonth(String.valueOf(month)) + " "
                     + GeneralUtils.getUnicodeNumber(String.valueOf(day)) + " " +
                     GeneralUtils.getUnicodeNumber(GeneralUtils.getTime());
+
+
+//                    busName +"\n" +
+//                    GeneralUtils.getUnicodeNumber(ticketInfoList.ticket_id) +"(नगद)"+ "\n" +
+//                    "रु." + GeneralUtils.getUnicodeNumber(ticketInfoList.transactionAmount) + discountType + "\n" +
+//                    nearest_name + "-" + toGetOff + "\n" +
+//                    GeneralUtils.getNepaliMonth(String.valueOf(month)) + " "
+//                    + GeneralUtils.getUnicodeNumber(String.valueOf(day)) + " " +
+//                    GeneralUtils.getUnicodeNumber(GeneralUtils.getTime());
+
+
 
 //            String status = PrinterTester.getInstance().getStatus();
 //            if(status.equalsIgnoreCase("Out of paper ")){

@@ -148,6 +148,7 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
     private static final int REQUEST_PHONE_CALL = 1;
     TokenManager tokenManager;
     private String isOnlineCheck;
+    String stationChange="false";
 
     public static Bitmap getBitmapFromView(View view) {
         Bitmap returnedBitmap = Bitmap.createBitmap(view.getWidth(), view.getHeight(), Bitmap.Config.ARGB_8888);
@@ -220,17 +221,18 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
         normalDiscountToggle.setLabelOn(getString(R.string.discount_rate));
         normalDiscountToggle.setLabelOff(getString(R.string.normal_rate));
         normalDiscountToggle.setOn(false);
+        stationChange=getIntent().getStringExtra("stationChange");
   /*normalDiscountToggle.setColorOff(getResources().getColor(android.R.color.black));
   normalDiscountToggle.setColorOn(getResources().getColor(R.color.colorAccent));*/
 
-        Toast.makeText(this, Double.parseDouble(preferences.getString(UtilStrings.LATITUDE, "0.0"))+"::"+Double.parseDouble(preferences.getString(UtilStrings.LONGITUDE, "0.0")), Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, stationChange+"  "+Double.parseDouble(preferences.getString(UtilStrings.LATITUDE, "0.0"))+"::"+Double.parseDouble(preferences.getString(UtilStrings.LONGITUDE, "0.0")), Toast.LENGTH_SHORT).show();
 //       ///////////////////////////////////////////////////////////////////////////////////////////////////
-        onLocationChanged=preferences.getBoolean(UtilStrings.LOCATION_CHANGE, false);
-       if(onLocationChanged){
-             startActivity(getIntent());
-             finish();
-             overridePendingTransition(0, 0);
-         }
+//        onLocationChanged=preferences.getBoolean(UtilStrings.LOCATION_CHANGE, false);
+//       if(onLocationChanged){
+//             startActivity(getIntent());
+//             finish();
+//             overridePendingTransition(0, 0);
+//         }
        //       ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -547,17 +549,25 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
                             priceListView.setAdapter(new PriceAdapter(priceLists, view.getContext()));
                             setMode(UtilStrings.MODE_1, 4, getString(R.string.normal_mode));
                             priceListView.setAdapter(new PriceAdapter(priceLists, TicketAndTracking.this));
+                            recreate();
                             mainDrawer.closeDrawer();
 
 
                         } else if (drawerItem.equals(Places)) {
                             priceListView.setAdapter(priceAdapterPrices);
                             setMode(UtilStrings.MODE_3, 1, getString(R.string.places_mode));
+
+                            finish();
+                            overridePendingTransition( 0, 0);
+                            startActivity(getIntent());
+                            overridePendingTransition( 0, 0);
+
                             mainDrawer.closeDrawer();
 
                         } else if (drawerItem.equals(Price)) {
                             priceListView.setAdapter(new PriceAdapterPlaces(priceLists, TicketAndTracking.this));
                             setMode(UtilStrings.MODE_2, 4, getString(R.string.price_mode));
+                            recreate();
                             mainDrawer.closeDrawer();
 
                         } else if (drawerItem.equals(UpdatePrice)) {
@@ -827,15 +837,32 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
                 okay.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        if (ContextCompat.checkSelfPermission(TicketAndTracking.this, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
-                            ActivityCompat.requestPermissions(TicketAndTracking.this, new String[]{Manifest.permission.CALL_PHONE}, REQUEST_PHONE_CALL);
-                        } else {
-                            SharedPreferences sharedPreferences = getSharedPreferences("User_NUM", MODE_PRIVATE);
-                            SharedPreferences.Editor myEdit = sharedPreferences.edit();
-                            myEdit.putString("userNum", numberInput.getText().toString());
-                            myEdit.apply();
-                            getCallDetails(numberInput.getText().toString());
-                        }
+
+                      if(GeneralUtils.isNetworkAvailable(TicketAndTracking.this)) {
+                          RetrofitInterface post = ServiceConfig.createServiceWithAuth(RetrofitInterface.class);
+                          Call<CallResponse.GetServerNumber> call = post.getServerNumber();
+                          call.enqueue(new Callback<CallResponse.GetServerNumber>() {
+                              @Override
+                              public void onResponse(Call<CallResponse.GetServerNumber> call, Response<CallResponse.GetServerNumber> response) {
+                                  CallResponse.GetServerNumber callResponse = response.body();
+                                  if (callResponse != null) {
+                                      SharedPreferences sharedPreferences = getSharedPreferences("User_NUM", MODE_PRIVATE);
+                                      SharedPreferences.Editor myEdit = sharedPreferences.edit();
+                                      myEdit.putString("userNum", numberInput.getText().toString());
+                                      myEdit.apply();
+                                      getCallDetails(numberInput.getText().toString(), callResponse.getData().getServerNumber());
+                                  }
+                              }
+
+                              @Override
+                              public void onFailure(Call<CallResponse.GetServerNumber> call, Throwable t) {
+                                  Log.i("TAG", "onResponse: Failed" + t.getLocalizedMessage());
+                              }
+                          });
+                      }else {
+                          Toast.makeText(TicketAndTracking.this, "Check your network connection", Toast.LENGTH_SHORT).show();
+                      }
+
                     }
                 });
             }
@@ -845,11 +872,11 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
         return true;
     }
 
-    private void getCallDetails(final String userNum) {
+    private void getCallDetails(String userNum, final String serverNum) {
         final AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
 
-        builder.setTitle("Number Received").setMessage("कृपया मा कल गर्नुहोस यसमा कुनै शुल्क लाग्दैन " + userNum);
+        builder.setTitle("Number Received").setMessage("कृपया "+serverNum+" मा कल गर्नुहोस यसमा कुनै शुल्क लाग्दैन " + userNum);
 
         builder.setPositiveButton("चेक गर्नुहोस", null);
         builder.setNegativeButton("रद्द गर्नुहोस", null);
@@ -874,7 +901,7 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
                 pClick.setMessage("कृपया पर्खनुहोस्...");
                 pClick.setCancelable(true);
                 pClick.show();
-                getNumberFromServer(userNum, pClick);
+                getNumberFromServer(userNum, serverNum,pClick);
             }
         });
 
@@ -886,32 +913,22 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
                 });
     }
 
-    private void getNumberFromServer(String userNum, ProgressDialog pClick) {
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(CALL_REGISTER_CHECK)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-        RetrofitInterface post = ServiceConfig.createService(RetrofitInterface.class);
-        Call<CallResponse> call = post.getNumber(userNum);
+    private void getNumberFromServer(String num, String userNum, ProgressDialog pClick) {
+
+        RetrofitInterface post = ServiceConfig.createServiceWithAuth(RetrofitInterface.class);
+        Call<CallResponse> call = post.getNumber(num,userNum);
         call.enqueue(new Callback<CallResponse>() {
             @Override
             public void onResponse(Call<CallResponse> call, Response<CallResponse> response) {
-                CallResponse callResponse=response.body();
                 if (response.isSuccessful()) {
                     pClick.dismiss();
-                    String customer_num_server=callResponse.getData().getMobileNumber();
-                    if (userNum != null&&customer_num_server!=null) {
-                        if (userNum.equals(customer_num_server)) {
-                            Log.i("TAG", "onCreate: "+customer_num_server);
+                    if (userNum != null&&num!=null) {
+                            Log.i("TAG", "onCreate: "+num);
                             Intent intent = new Intent(TicketAndTracking.this, IssueCardActivity.class);
-                            intent.putExtra(USER_NUMBER,customer_num_server);
+                            intent.putExtra(USER_NUMBER,num);
                             startActivity(intent);
-                        } else {
-                            Toast.makeText(TicketAndTracking.this, "Phone number not matched", Toast.LENGTH_SHORT).show();
-                        }
                     }
-                }
-                else if(response.code()==404){
+                }else if(response.code()==404){
                     pClick.dismiss();
                     handleErrors(response.errorBody());
                 }else if(response.code()==403){
@@ -1185,12 +1202,9 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
 
 
                 totalRemainingTickets.setText(GeneralUtils.getUnicodeNumber(String.valueOf(databaseHelper.listTickets().size())) + "\n" + GeneralUtils.getUnicodeNumber(String.valueOf(databaseHelper.remainingAmount())));
-
                 rHandler.postAtTime(rTicker, next);
             }
-        }
-
-        ;
+        };
         rTicker.run();
 
     }

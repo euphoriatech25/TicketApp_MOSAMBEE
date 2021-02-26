@@ -94,8 +94,13 @@ public interface RetrofitInterface {
     Call<BlockList> getBlockList();
 
 
-    @GET("callserver/public/api/phone_verification/{phone_num}")
-    Call<CallResponse> getNumber(@Path("phone_num")String phone_num);
+    @GET("call_record_verification")
+    Call<CallResponse> getNumber(@Query("mobile_number") String mobile_number,@Query("server_number") String server_number);
+
+
+
+    @GET("get_server_number")
+    Call<CallResponse.GetServerNumber> getServerNumber();
 
 //    @GET("callserver/public/api/phone_verification/{phone_num}")
 //    Call<CallResponse> getNumber(@Path("phone_num")String phone_num);
