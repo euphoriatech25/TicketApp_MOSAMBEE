@@ -221,19 +221,23 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
         normalDiscountToggle.setLabelOn(getString(R.string.discount_rate));
         normalDiscountToggle.setLabelOff(getString(R.string.normal_rate));
         normalDiscountToggle.setOn(false);
-        stationChange=getIntent().getStringExtra("stationChange");
+
   /*normalDiscountToggle.setColorOff(getResources().getColor(android.R.color.black));
   normalDiscountToggle.setColorOn(getResources().getColor(R.color.colorAccent));*/
+        onLocationChanged=preferences.getBoolean(UtilStrings.LOCATION_CHANGE, false);
 
-        Toast.makeText(this, stationChange+"  "+Double.parseDouble(preferences.getString(UtilStrings.LATITUDE, "0.0"))+"::"+Double.parseDouble(preferences.getString(UtilStrings.LONGITUDE, "0.0")), Toast.LENGTH_SHORT).show();
-//       ///////////////////////////////////////////////////////////////////////////////////////////////////
-//        onLocationChanged=preferences.getBoolean(UtilStrings.LOCATION_CHANGE, false);
-//       if(onLocationChanged){
-//             startActivity(getIntent());
-//             finish();
-//             overridePendingTransition(0, 0);
-//         }
-       //       ///////////////////////////////////////////////////////////////////////////////////////////////////
+        ///////////////////////////////////////////////////////////////////////////////////////////////////
+        Toast.makeText(this, onLocationChanged+"  "+Double.parseDouble(preferences.getString(UtilStrings.LATITUDE, "0.0"))+"::"+Double.parseDouble(preferences.getString(UtilStrings.LONGITUDE, "0.0")), Toast.LENGTH_SHORT).show();
+
+        Log.i("TAG", "onCreate: "+ onLocationChanged);
+       if(onLocationChanged){
+             getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.LOCATION_CHANGE, false).apply();
+             startActivity(getIntent());
+             finish();
+             overridePendingTransition(0, 0);
+         }
+
+       // ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 
         initializeDrawer();
@@ -270,7 +274,6 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
                     nearest = distance;
                     orderPos = routeStationLists.get(i).station_order;
                     gridLayoutManager.scrollToPositionWithOffset(orderPos-1, 10);
-                    Log.i("TAG", "onCreate: "+orderPos);
                 }
             }
         }
@@ -301,7 +304,6 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
         mode_selector.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 PopupMenu popup = new PopupMenu(TicketAndTracking.this, mode_selector);
                 //inflating menu from xml resource
                 popup.inflate(R.menu.mode_select_menu);
@@ -557,10 +559,9 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
                             priceListView.setAdapter(priceAdapterPrices);
                             setMode(UtilStrings.MODE_3, 1, getString(R.string.places_mode));
 
-                            finish();
-                            overridePendingTransition( 0, 0);
                             startActivity(getIntent());
-                            overridePendingTransition( 0, 0);
+                            finish();
+                            overridePendingTransition(0, 0);
 
                             mainDrawer.closeDrawer();
 
@@ -923,7 +924,6 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
                 if (response.isSuccessful()) {
                     pClick.dismiss();
                     if (userNum != null&&num!=null) {
-                            Log.i("TAG", "onCreate: "+num);
                             Intent intent = new Intent(TicketAndTracking.this, IssueCardActivity.class);
                             intent.putExtra(USER_NUMBER,num);
                             startActivity(intent);

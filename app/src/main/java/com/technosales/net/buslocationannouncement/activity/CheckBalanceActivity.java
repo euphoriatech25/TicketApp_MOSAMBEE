@@ -125,7 +125,8 @@ public class CheckBalanceActivity extends BaseActivity {
                             } else {
                             }
                             Toast.makeText(CheckBalanceActivity.this, "Recharged Successfully!!!", Toast.LENGTH_SHORT).show();
-//                            startActivity(new Intent(CheckBalanceActivity.this, TicketAndTracking.class));
+                    getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.LOCATION_CHANGE, true).apply();
+                    startActivity(new Intent(CheckBalanceActivity.this, TicketAndTracking.class));
                             finish();
                     break;
                     case 404:

@@ -164,8 +164,4 @@
 ////            showResult(textView, e.toString());
 //        }
 //    }
-//
-//
-//
-//
 //}

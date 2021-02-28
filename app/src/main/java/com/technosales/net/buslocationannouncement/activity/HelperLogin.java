@@ -188,10 +188,10 @@ public class HelperLogin extends AppCompatActivity {
                 } else if (response.code() == 400) {
                     pClick.dismiss();
                     Toast.makeText(HelperLogin.this, "Helper not Registered", Toast.LENGTH_SHORT).show();
+                    finish();
                 } else if (response.code() == 404) {
                     pClick.dismiss();
                     handleErrors(response.errorBody());
-
                 }
             }
 
@@ -211,6 +211,7 @@ public class HelperLogin extends AppCompatActivity {
             for (Map.Entry<String, List<String>> error : apiErrors.getErrors().entrySet()) {
                 if (error.getKey().equals("message")) {
                     Toast.makeText(this, error.getValue().get(0), Toast.LENGTH_SHORT).show();
+                    finish();
                 }
             }
         } else {

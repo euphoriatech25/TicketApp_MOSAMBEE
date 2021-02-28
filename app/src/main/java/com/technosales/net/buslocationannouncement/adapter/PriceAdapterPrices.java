@@ -918,6 +918,7 @@ public class PriceAdapterPrices extends RecyclerView.Adapter<PriceAdapterPrices.
                 intent.putExtra(UtilStrings.DISCOUNT_TYPE, discountType);
             }
 
+            ((TicketAndTracking) context).finish();
             context.startActivity(intent);
         } else {
             Toast.makeText(context, "सहायक छान्नुहोस् ।", Toast.LENGTH_SHORT).show();
@@ -951,7 +952,7 @@ public class PriceAdapterPrices extends RecyclerView.Adapter<PriceAdapterPrices.
                 intent.putExtra(UtilStrings.TICKET_TYPE, ticketType);
                 intent.putExtra(UtilStrings.DISCOUNT_TYPE, discountType);
             }
-
+            ((TicketAndTracking) context).finish();
             context.startActivity(intent);
         } else {
             Toast.makeText(context, "सहायक छान्नुहोस् ।", Toast.LENGTH_SHORT).show();
@@ -1075,21 +1076,9 @@ public class PriceAdapterPrices extends RecyclerView.Adapter<PriceAdapterPrices.
                             "जारी मिति :-"+ GeneralUtils.getNepaliMonth(String.valueOf(month)) + " "
                             + GeneralUtils.getUnicodeNumber(String.valueOf(day)) + " " +
                             GeneralUtils.getUnicodeNumber(GeneralUtils.getTime());
+                    ((TicketAndTracking)context).recreate();
+                    Toast.makeText(context, "टिकट सफलतापूर्वक काटियो।", Toast.LENGTH_SHORT).show();
 
-//                            busName + "\n" +
-//                            GeneralUtils.getUnicodeNumber(ticketInfoList.ticket_id)  + "(नगद)" + "\n" +
-//                            GeneralUtils.getUnicodeNumber(strTotal) + "कि.मी , रु." + GeneralUtils.getUnicodeNumber(ticketInfoList.transactionAmount) + discountType + "\n" +
-//                            nearestName + "-" + routeStationModelList.station_name + "\n" +
-//                            GeneralUtils.getNepaliMonth(String.valueOf(month)) + " "
-//                            + GeneralUtils.getUnicodeNumber(String.valueOf(day)) + " " +
-//                            GeneralUtils.getUnicodeNumber(GeneralUtils.getTime());
-
-//                    String status = PrinterTester.getInstance().getStatus();
-//                    if (status.equalsIgnoreCase("Out of paper ")) {
-//                        Toast.makeText(context, "मुद्रण कागज समाप्त भयो।", Toast.LENGTH_SHORT).show();
-//                    } else {
-//                        ((TicketAndTracking) context).paraPrint(printTransaction);
-//                    }
                     try {
                         Printer.Print(context, printTransaction);
                     } catch (RemoteException e) {
@@ -1135,7 +1124,6 @@ public class PriceAdapterPrices extends RecyclerView.Adapter<PriceAdapterPrices.
 
         public MyViewHolder(View itemView) {
             super(itemView);
-
 
             routeStationItem = itemView.findViewById(R.id.routeStationItem);
             rl_route_station = itemView.findViewById(R.id.rl_route_station);

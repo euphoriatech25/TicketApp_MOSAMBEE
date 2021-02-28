@@ -198,7 +198,7 @@ public class TrackingController implements PositionProvider.PositionListener, Ne
                             Intent i1 = new Intent(context, TicketAndTracking.class);
                             i1.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                             context.startActivity(i1);
-//                            context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.LOCATION_CHANGE, true).apply();
+                            context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.LOCATION_CHANGE, true).apply();
                             speakStation(routeStationList.station_name, nextStation, currentOrderId);
                         }
                         break;
@@ -259,10 +259,8 @@ public class TrackingController implements PositionProvider.PositionListener, Ne
 
                             Intent i1 = new Intent(context, TicketAndTracking.class);
                             i1.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                            i1.putExtra("stationChange","true");
-                            context.startActivity(i1);
-//                            context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.LOCATION_CHANGE, true).apply();
-
+                             context.startActivity(i1);
+                            context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.LOCATION_CHANGE, true).apply();
                             speakStation(routeStationList.station_name, nextStation, currentOrderId);
                         }
                         break;

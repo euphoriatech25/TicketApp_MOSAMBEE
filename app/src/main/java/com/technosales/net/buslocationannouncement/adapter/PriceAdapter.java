@@ -256,7 +256,7 @@ public class PriceAdapter extends RecyclerView.Adapter<PriceAdapter.MyViewHolder
                             ticketInfoList.referenceHash =NULL;
                             ticketInfoList.referenceId =NULL;
                             databaseHelper.insertTicketInfo(ticketInfoList);
-                            Log.i("TAG", "onClick: "+"helllooooo");
+
 
                             String printTransaction ="बस नम्बर :- "+ busName + " (नगद)" +"\n"+
                                    "टिकट नम्बर :-"+ GeneralUtils.getUnicodeNumber(ticketInfoList.ticket_id) +"\n" +
@@ -265,12 +265,9 @@ public class PriceAdapter extends RecyclerView.Adapter<PriceAdapter.MyViewHolder
                                     + GeneralUtils.getUnicodeNumber(String.valueOf(day)) + " " +
                                     GeneralUtils.getUnicodeNumber(GeneralUtils.getTime());
 
-//                            String status = PrinterTester.getInstance().getStatus();
-//                            if(status.equalsIgnoreCase("Out of paper ")){
-//                                Toast.makeText(context, "मुद्रण कागज समाप्त भयो।", Toast.LENGTH_SHORT).show();
-//                            }else {
-//                                ((TicketAndTracking) context).paraPrint(printTransaction);
-//                            }
+                            ((TicketAndTracking)context).recreate();
+                            Toast.makeText(context, "टिकट सफलतापूर्वक काटियो।", Toast.LENGTH_SHORT).show();
+
                             try {
                                 Printer.Print(context, printTransaction);
                             } catch (RemoteException e) {
@@ -316,6 +313,7 @@ public class PriceAdapter extends RecyclerView.Adapter<PriceAdapter.MyViewHolder
             }
 
             context.startActivity(intent);
+            ((TicketAndTracking) context).finish();
         }else {
             Toast.makeText(context, "सहायक छान्नुहोस् ।", Toast.LENGTH_SHORT).show();
             ((TicketAndTracking) context).helperName.setText("सहायक छान्नुहोस् ।");
@@ -340,8 +338,8 @@ public class PriceAdapter extends RecyclerView.Adapter<PriceAdapter.MyViewHolder
                 intent.putExtra(UtilStrings.POSITION, position);
                 intent.putExtra(UtilStrings.DISCOUNT_TYPE, discountType);
             }
-
-            context.startActivity(intent);
+             context.startActivity(intent);
+            ((TicketAndTracking) context).finish();
         }else {
             Toast.makeText(context, "सहायक छान्नुहोस् ।", Toast.LENGTH_SHORT).show();
             ((TicketAndTracking) context).helperName.setText("सहायक छान्नुहोस् ।");

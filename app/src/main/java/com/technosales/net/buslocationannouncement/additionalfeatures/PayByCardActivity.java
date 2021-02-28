@@ -2,6 +2,7 @@ package com.technosales.net.buslocationannouncement.additionalfeatures;
 
 import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -89,7 +90,7 @@ public class PayByCardActivity extends BaseActivity {
     int reducedValue = 0;
     String dateTime;
     boolean stopThread1, stopThread2, stopThread3, stopThread4;
-
+   Context context;
     ProgressDialog pClick;
 //    EPiccType piccType;
     int[] customerDetailsBlock = {CUSTOMERID, CUSTOMER_AMT, CUSTOMER_HASH, CUSTOMER_TRANSACTION_NO};
@@ -184,11 +185,34 @@ public class PayByCardActivity extends BaseActivity {
 
                     case 404:
                         Toast.makeText(PayByCardActivity.this, "Card is not authorized", Toast.LENGTH_SHORT).show();
+                        getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.LOCATION_CHANGE, true).apply();
+                        startActivity(new Intent(PayByCardActivity.this,TicketAndTracking.class));
                         finish();
+                    break;
+
+                    case 405:
+                        Toast.makeText(PayByCardActivity.this, msg.obj.toString(), Toast.LENGTH_SHORT).show();
+                        startActivity(getIntent());
+                        finish();
+                        overridePendingTransition(0, 0);
+                    break;
+
+
+                    case 500:
+                        Toast.makeText(PayByCardActivity.this, msg.obj.toString(), Toast.LENGTH_SHORT).show();
+                        pClick.dismiss();
+                        startActivity(getIntent());
+                        finish();
+                        overridePendingTransition(0, 0);
                     break;
                 case 200:
                     if(msg.obj.toString().equalsIgnoreCase("Success")){
                         if (!ticketId.equalsIgnoreCase("") && !tranCurrentHash.equalsIgnoreCase("")) {
+                            try {
+                                BeepLEDTest.beepSuccess();
+                            } catch (RemoteException e) {
+                                e.printStackTrace();
+                            }
                             Log.i(TAG, "handleMessage: "+ticketId+""+tranCurrentHash);
                             if (source != null && source.equalsIgnoreCase(UtilStrings.PLACE)) {
                                 price(ticketId,tranCurrentHash);
@@ -636,11 +660,6 @@ public class PayByCardActivity extends BaseActivity {
                 String newBalance = Base64.encodeToString(String.valueOf(reducedValue).getBytes(), Base64.DEFAULT);
                         if (GeneralUtils.isNetworkAvailable(PayByCardActivity.this)) {
                             if (!isFinishing()) {
-                                try {
-                                    BeepLEDTest.beepSuccess();
-                                } catch (RemoteException e) {
-                                    e.printStackTrace();
-                                }
                                 setNewTransaction(newBalance, newRefHash, ticketId, tranCurrentHash, pClick);
                             }
                         } else {
@@ -735,6 +754,7 @@ public class PayByCardActivity extends BaseActivity {
                         public void onClick(SweetAlertDialog sweetAlertDialog) {
                             sweetAlertDialog.dismiss();
                             sweetAlertDialog.dismissWithAnimation();
+                            getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.LOCATION_CHANGE, true).apply();
                             startActivity(new Intent(PayByCardActivity.this, TicketAndTracking.class));
                             finish();
                         }
@@ -761,9 +781,9 @@ public class PayByCardActivity extends BaseActivity {
                     .setCancelButton("close", new SweetAlertDialog.OnSweetClickListener() {
                         @Override
                         public void onClick(SweetAlertDialog sDialog) {
-
                             sDialog.dismiss();
                             sDialog.dismissWithAnimation();
+                            getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.LOCATION_CHANGE, true).apply();
                             startActivity(new Intent(PayByCardActivity.this, TicketAndTracking.class));
                             finish();
                         }
@@ -1006,7 +1026,9 @@ public class PayByCardActivity extends BaseActivity {
                 } catch (RemoteException e) {
                     e.printStackTrace();
                 }
-//                startActivity(new Intent(PayByCardActivity.this, TicketAndTracking.class));
+
+                getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.LOCATION_CHANGE, true).apply();
+                startActivity(new Intent(PayByCardActivity.this, TicketAndTracking.class));
                 finish();
             } else {
             }
@@ -1089,7 +1111,9 @@ public class PayByCardActivity extends BaseActivity {
                     } catch (RemoteException e) {
                         e.printStackTrace();
                     }
-//                startActivity(new Intent(PayByCardActivity.this, TicketAndTracking.class));
+
+                getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.LOCATION_CHANGE, true).apply();
+                startActivity(new Intent(PayByCardActivity.this, TicketAndTracking.class));
                 finish();
             } else {
                 Log.i("TAG", "onActivate: " + "rrrr");
@@ -1100,7 +1124,7 @@ public class PayByCardActivity extends BaseActivity {
                 public void run() {
                     pClick.dismiss();
                     Toast.makeText(PayByCardActivity.this, "सहयोगी लग ईन छैन", Toast.LENGTH_SHORT).show();
-//                    startActivity(new Intent(PayByCardActivity.this, TicketAndTracking.class));
+                    startActivity(new Intent(PayByCardActivity.this, TicketAndTracking.class));
                     finish();
                 }
             });
@@ -1183,7 +1207,9 @@ public class PayByCardActivity extends BaseActivity {
                 } catch (RemoteException e) {
                     e.printStackTrace();
                 }
-//                startActivity(new Intent(PayByCardActivity.this, TicketAndTracking.class));
+
+                getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.LOCATION_CHANGE, true).apply();
+                startActivity(new Intent(PayByCardActivity.this, TicketAndTracking.class));
                 finish();
             } else {
                 Log.i("TAG", "onActivate: " + "rrrr");

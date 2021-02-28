@@ -74,6 +74,11 @@ public class M1CardHandlerMosambee {
                                     messageCardId.what = 404;
                                     messageCardId.obj ="Error";
                                     handler.sendMessage(messageCardId);
+                                }else if(ret==-10304){
+                                    Message messageCardId = new Message();
+                                    messageCardId.what = 405;
+                                    messageCardId.obj ="Please Card Show Again Properly";
+                                    handler.sendMessage(messageCardId);
                                 }
                             } else if (fromWhichActivity.equalsIgnoreCase("CheckBalanceActivity")) {
                                 int ret = m1CardHandler.authority(M1KeyTypeConstrants.KEYTYPE_A, SECTOR_CUSTOMER, KEY_A, uid);
@@ -303,6 +308,11 @@ public class M1CardHandlerMosambee {
                                 if (ret == ServiceResult.Success) {
                                     writeCustomerDetails(handler, m1CardHandler, customerUpdatedValue, customerDetailsBlock);
                                     // return;
+                                }else if(ret==-10301){
+                                    Message messageCardId = new Message();
+                                    messageCardId.what = 405;
+                                    messageCardId.obj ="Verification Error ";
+                                    handler.sendMessage(messageCardId);
                                 }
                             } else if (fromWhichActivity.equalsIgnoreCase("CheckBalanceActivity-UpdateCard")) {
                                 int ret = m1CardHandler.authority(M1KeyTypeConstrants.KEYTYPE_B, SECTOR_CUSTOMER, KEY_B, uid);
@@ -444,6 +454,11 @@ public class M1CardHandlerMosambee {
                 Message messageSuccess = new Message();
                 messageSuccess.what = 200;
                 messageSuccess.obj = "Success";
+                handler.sendMessage(messageSuccess);
+            }else if(ret1 == -10303|| ret2== -10303){
+                Message messageSuccess = new Message();
+                messageSuccess.what = 500;
+                messageSuccess.obj = "Hash Written Missed";
                 handler.sendMessage(messageSuccess);
             }
         } catch (RemoteException e) {
