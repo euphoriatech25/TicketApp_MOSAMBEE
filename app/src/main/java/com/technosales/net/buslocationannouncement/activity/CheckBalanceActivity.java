@@ -89,6 +89,8 @@ public class CheckBalanceActivity extends BaseActivity {
     private String rechargeBill;
     private String newHash = "";
     private int successStatus = 0;
+    SweetAlertDialog pDialog1 ;
+
     private Handler rechargeHandler = new Handler() {
         public void handleMessage(android.os.Message msg) {
             switch (msg.what) {
@@ -119,14 +121,14 @@ public class CheckBalanceActivity extends BaseActivity {
                             if (!rechargeBill.equalsIgnoreCase("")) {
                                 try {
                                     Printer.Print(CheckBalanceActivity.this, rechargeBill);
+                                    pDialog1.dismissWithAnimation();
                                 } catch (RemoteException e) {
                                     e.printStackTrace();
                                 }
                             } else {
                             }
                             Toast.makeText(CheckBalanceActivity.this, "Recharged Successfully!!!", Toast.LENGTH_SHORT).show();
-                    getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.LOCATION_CHANGE, true).apply();
-                    startActivity(new Intent(CheckBalanceActivity.this, TicketAndTracking.class));
+                            startActivity(new Intent(CheckBalanceActivity.this, TicketAndTracking.class));
                             finish();
                     break;
                     case 404:
@@ -210,107 +212,104 @@ public class CheckBalanceActivity extends BaseActivity {
 
         String valueOfTickets = "";
 
-//        if (total_tickets < 10) {
-//            valueOfTickets = "00" + String.valueOf(total_tickets);
-//
-//        } else if (total_tickets > 9 && total_tickets < 100) {
-//            valueOfTickets = "0" + String.valueOf(total_tickets);
-//        } else {
-//            valueOfTickets = String.valueOf(total_tickets);
-//        }
-
         valueOfTickets = String.format("%04d", total_tickets);
 
         String dateTime = GeneralUtils.getTicketDate() + GeneralUtils.getTicketTime();
-        if (!helperString.equalsIgnoreCase("")){
-            if (!helperString.equalsIgnoreCase(passenserId)) {
-                Log.i("TAG", "rechargeProcess: " + passenserId + " " + transactionHash);
-                if (GeneralUtils.isNetworkAvailable(this)) {
-                    String ticketId = deviceID.substring(deviceID.length() - 2) + dateTime + "" + valueOfTickets;
-                    String referenceHash = BCrypt.withDefaults().hashToString(10, (transactionHash + ticketId + passenserId + amount).toCharArray());
-                    newHash = referenceHash.substring(referenceHash.length() - 9);
-                    Map<String, Object> params = new HashMap<>();
-                    params.put("helper_id", helperString);
-                    params.put("ticket_id", ticketId);
-                    params.put("transactionType", TRANSACTION_TYPE_LOAD);
-                    params.put("device_time", dateTime);
-                    params.put("transactionAmount", amount);
-                    params.put("transactionMedium", PAYMENT_CASH);
-                    params.put("lat", latitude);
-                    params.put("lng", longitude);
-                    params.put("userType", "recharge");
-                    params.put("transactionFee", NULL);
-                    params.put("transactionCommission", NULL);
-                    params.put("isOnline", true);
-                    params.put("offlineRefId", NULL);
-                    params.put("status", STATUS);
-                    params.put("referenceId", NULL);
-                    params.put("referenceHash", referenceHash);
-                    params.put("passenger_id", passenserId);
-                    params.put("device_id", getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).getString(UtilStrings.DEVICE_ID, ""));
-                    Log.i("getParams123", "" + params);
+        if(passenserId.length()>0&&transactionHash.length()>0) {
+            if (!helperString.equalsIgnoreCase("")) {
+                if (!helperString.equalsIgnoreCase(passenserId)) {
+                    Log.i("TAG", "rechargeProcess: " + passenserId + " " + transactionHash);
+                    if (GeneralUtils.isNetworkAvailable(this)) {
+                        String ticketId = deviceID.substring(deviceID.length() - 2) + dateTime + "" + valueOfTickets;
+                        String referenceHash = BCrypt.withDefaults().hashToString(10, (transactionHash + ticketId + passenserId + amount).toCharArray());
+                        newHash = referenceHash.substring(referenceHash.length() - 9);
+                        Map<String, Object> params = new HashMap<>();
+                        params.put("helper_id", helperString);
+                        params.put("ticket_id", ticketId);
+                        params.put("transactionType", TRANSACTION_TYPE_LOAD);
+                        params.put("device_time", dateTime);
+                        params.put("transactionAmount", amount);
+                        params.put("transactionMedium", PAYMENT_CASH);
+                        params.put("lat", latitude);
+                        params.put("lng", longitude);
+                        params.put("userType", "recharge");
+                        params.put("transactionFee", NULL);
+                        params.put("transactionCommission", NULL);
+                        params.put("isOnline", true);
+                        params.put("offlineRefId", NULL);
+                        params.put("status", STATUS);
+                        params.put("referenceId", NULL);
+                        params.put("referenceHash", referenceHash);
+                        params.put("passenger_id", passenserId);
+                        params.put("device_id", getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).getString(UtilStrings.DEVICE_ID, ""));
+                        Log.i("getParams123", "" + params);
 
 
-                    ProgressDialog pDialog = new ProgressDialog(this); //Your Activity.this
-                    pDialog.setMessage("Requesting");
-                    pDialog.setCancelable(false);
-                    pDialog.show();
+                        ProgressDialog pDialog = new ProgressDialog(this); //Your Activity.this
+                        pDialog.setMessage("Requesting");
+                        pDialog.setCancelable(false);
+                        pDialog.show();
 
 
-                    RetrofitInterface post = ServerConfigNew.createServiceWithAuth(RetrofitInterface.class, tokenManager);
-                    Call<Recharge> call = post.recharge(params);
-                    call.enqueue(new Callback<Recharge>() {
-                        @Override
-                        public void onResponse(Call<Recharge> call, Response<Recharge> response) {
-                            Recharge recharge = response.body();
-                            pDialog.dismiss();
-                            stopThread = true;
-                            if (response.isSuccessful()) {
+                        RetrofitInterface post = ServerConfigNew.createServiceWithAuth(RetrofitInterface.class, tokenManager);
+                        Call<Recharge> call = post.recharge(params);
+                        call.enqueue(new Callback<Recharge>() {
+                            @Override
+                            public void onResponse(Call<Recharge> call, Response<Recharge> response) {
+                                Recharge recharge = response.body();
+                                pDialog.dismiss();
+                                stopThread = true;
+                                if (response.isSuccessful()) {
 
-                                preferencesHelper.edit().putString(UtilStrings.AMOUNT_HELPER, String.valueOf(recharge.getData().getHelperAmount())).apply();
+                                    preferencesHelper.edit().putString(UtilStrings.AMOUNT_HELPER, String.valueOf(recharge.getData().getHelperAmount())).apply();
 
-                                preferences.edit().putInt(UtilStrings.TOTAL_TICKETS, total_tickets).apply();
-                                preferences.edit().putInt(UtilStrings.TOTAL_COLLECTIONS_CARD, total_collections_card).apply();
+                                    preferences.edit().putInt(UtilStrings.TOTAL_TICKETS, total_tickets).apply();
+                                    preferences.edit().putInt(UtilStrings.TOTAL_COLLECTIONS_CARD, total_collections_card).apply();
 
-                                printDetails(recharge.getData().getPassengerAmount(), amount);
-                                tv_amount.setText("रू " + GeneralUtils.getUnicodeNumber(String.valueOf(recharge.getData().getPassengerAmount())));
-                                new SweetAlertDialog(CheckBalanceActivity.this, SweetAlertDialog.SUCCESS_TYPE)
-                                        .setTitleText("तपाईंको रिचार्ज सफलतापूर्वक सम्पन्न भयो।!")
-                                        .setContentText("तपाईंको ब्यालेन्स अपडेट गर्नुहोस्।")
-                                        .setConfirmText("अपडेट")
-                                        .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
-                                            @Override
-                                            public void onClick(SweetAlertDialog sDialog) {
-                                                Log.i("TAG", "rechargeCard: " + recharge.getData().getPassengerAmount());
-                                                String customerAmt = Base64.encodeToString(String.valueOf(recharge.getData().getPassengerAmount()).getBytes(), Base64.DEFAULT);
-                                                String customerHash = Base64.encodeToString(newHash.getBytes(), Base64.DEFAULT);
-                                                String[] customerUpdatedDetails = {customerAmt, customerHash};
-                                                M1CardHandlerMosambee.write_miCard(rechargeHandler,customerUpdatedDetails,customerUpdatedDetailsBlock,"CheckBalanceActivity-UpdateCard");
-                                            }
-                                        }).show();
-                            } else if (response.code() == 404) {
-                                handleErrors(response.errorBody());
-                            } else if (response.code() == 401) {
-                                startActivity(new Intent(CheckBalanceActivity.this, HelperLogin.class));
-                                finish();
-                            } else {
-                                Toast.makeText(CheckBalanceActivity.this, "something went wrong", Toast.LENGTH_SHORT).show();
+                                    printDetails(recharge.getData().getPassengerAmount(), amount);
+                                    tv_amount.setText("रू " + GeneralUtils.getUnicodeNumber(String.valueOf(recharge.getData().getPassengerAmount())));
+                                    pDialog1 = new SweetAlertDialog(CheckBalanceActivity.this, SweetAlertDialog.SUCCESS_TYPE);
+                                    pDialog1.setTitleText("तपाईंको रिचार्ज सफलतापूर्वक सम्पन्न भयो।!")
+                                            .setContentText("तपाईंको ब्यालेन्स अपडेट गर्नुहोस्।")
+                                            .setConfirmText("अपडेट")
+                                            .setCancelable(false);
+                                    pDialog1.setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                                        @Override
+                                        public void onClick(SweetAlertDialog sDialog) {
+                                            Log.i("TAG", "rechargeCard: " + recharge.getData().getPassengerAmount());
+                                            String customerAmt = Base64.encodeToString(String.valueOf(recharge.getData().getPassengerAmount()).getBytes(), Base64.DEFAULT);
+                                            String customerHash = Base64.encodeToString(newHash.getBytes(), Base64.DEFAULT);
+                                            String[] customerUpdatedDetails = {customerAmt, customerHash};
+                                            M1CardHandlerMosambee.write_miCard(rechargeHandler, customerUpdatedDetails, customerUpdatedDetailsBlock, "CheckBalanceActivity-UpdateCard");
+                                        }
+                                    }).show();
+
+                                } else if (response.code() == 404) {
+                                    handleErrors(response.errorBody());
+                                } else if (response.code() == 401) {
+                                    startActivity(new Intent(CheckBalanceActivity.this, HelperLogin.class));
+                                    finish();
+                                } else {
+                                    Toast.makeText(CheckBalanceActivity.this, "something went wrong", Toast.LENGTH_SHORT).show();
+                                }
+
                             }
 
-                        }
-
-                        @Override
-                        public void onFailure(Call<Recharge> call, Throwable t) {
-                            Toast.makeText(CheckBalanceActivity.this, t.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
-                            pDialog.dismiss();
-                        }
-                    });
+                            @Override
+                            public void onFailure(Call<Recharge> call, Throwable t) {
+                                Toast.makeText(CheckBalanceActivity.this, t.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+                                pDialog.dismiss();
+                            }
+                        });
+                    }
+                } else {
+                    Toast.makeText(this, "Helper cannot recharge its own account", Toast.LENGTH_SHORT).show();
                 }
             } else {
-                Toast.makeText(this, "Helper cannot recharge its own account", Toast.LENGTH_SHORT).show();
+                showRechargeError("सहयोगी लग इन छैन। कृपया पहिले लग ईन गर्नुहोस्।");
             }
-    }else {
-            showRechargeError("सहयोगी लग इन छैन। कृपया पहिले लग ईन गर्नुहोस्।");
+        }else {
+            showRechargeError("कार्ड राम्रोसँग देखाइएको छैन। कृपया फेरि सुरू गर्नुहोस्।");
         }
     }
     void showRechargeError(String s) {

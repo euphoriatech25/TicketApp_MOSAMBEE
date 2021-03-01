@@ -51,24 +51,20 @@ public class M1CardHandlerMosambee {
                         try {
                             M1CardHandler m1CardHandler = mSDKManager.getM1CardHandler(mSDKManager.getIccCardReader(IccReaderSlot.RFSlOT));
                             if (m1CardHandler == null) {
-// alertDialogOnShowListener.showMessage(getString(R.string.msg_readfail_retry));
                                 return;
                             }
                             byte[] uid = new byte[4];
-
                             if (fromWhichActivity.equalsIgnoreCase("HelperLogin") || fromWhichActivity.equalsIgnoreCase("ReIssueCard") || fromWhichActivity.equalsIgnoreCase("IssueCardActivity")) {
                                 int ret = m1CardHandler.authority(M1KeyTypeConstrants.KEYTYPE_A, SECTOR_CUSTOMER, KEY_A, uid);
                                 Message messageCardId = new Message();
                                 messageCardId.what = 100;
-                                messageCardId.obj = GeneralUtils.ByteArrayToHexString(
-                                        (uid == null) ? "".getBytes() : uid);
+                                messageCardId.obj = GeneralUtils.ByteArrayToHexString(uid);
                                 handler.sendMessage(messageCardId);
                             } else if (fromWhichActivity.equalsIgnoreCase("PayByCardActivity")) {
                                 int ret = m1CardHandler.authority(M1KeyTypeConstrants.KEYTYPE_A, SECTOR_CUSTOMER, KEY_A, uid);
                                 Log.i(TAG, "onSearchResult: " + ret);
                                 if (ret == ServiceResult.Success) {
                                     readCustomerDetails(handler, m1CardHandler, customerDetailsBlock, uid);
-// return;
                                 } else if (ret ==-10301) {
                                     Message messageCardId = new Message();
                                     messageCardId.what = 404;
@@ -82,14 +78,18 @@ public class M1CardHandlerMosambee {
                                 }
                             } else if (fromWhichActivity.equalsIgnoreCase("CheckBalanceActivity")) {
                                 int ret = m1CardHandler.authority(M1KeyTypeConstrants.KEYTYPE_A, SECTOR_CUSTOMER, KEY_A, uid);
-                                Log.i(TAG, "onSearchResult111111: " + ret);
+                                Log.i(TAG, "onSearchResult CheckBalanceActivity: " + ret);
                                 if (ret == ServiceResult.Success) {
                                     readCustomerRechargeDetails(handler, m1CardHandler, customerDetailsBlock, uid);
-// return;
                                 }else if(ret==-10301){
                                     Message messageCardId = new Message();
                                     messageCardId.what = 404;
                                     messageCardId.obj ="Error";
+                                    handler.sendMessage(messageCardId);
+                                } else if(ret==-10304){
+                                    Message messageCardId = new Message();
+                                    messageCardId.what = 405;
+                                    messageCardId.obj ="Please Card Show Again Properly";
                                     handler.sendMessage(messageCardId);
                                 }
                             } else if (fromWhichActivity.equalsIgnoreCase("GetFirstOfflineTransaction")) {
@@ -97,7 +97,16 @@ public class M1CardHandlerMosambee {
                                 Log.i(TAG, "onSearchResult111111: " + ret);
                                 if (ret == ServiceResult.Success) {
                                     readCustomerFirstOfflineTranDetails(handler, m1CardHandler, customerDetailsBlock);
-// return;
+                                }else if(ret==-10301){
+                                    Message messageCardId = new Message();
+                                    messageCardId.what = 404;
+                                    messageCardId.obj ="Error";
+                                    handler.sendMessage(messageCardId);
+                                } else if(ret==-10304){
+                                    Message messageCardId = new Message();
+                                    messageCardId.what = 405;
+                                    messageCardId.obj ="Please Card Show Again Properly";
+                                    handler.sendMessage(messageCardId);
                                 }
 
                             } else if (fromWhichActivity.equalsIgnoreCase("GetSecondOfflineTransaction")) {
@@ -105,8 +114,17 @@ public class M1CardHandlerMosambee {
                                 Log.i(TAG, "onSearchResult111111: " + ret);
                                 if (ret == ServiceResult.Success) {
                                     readCustomerSecondOfflineTranDetails(handler, m1CardHandler, customerDetailsBlock);
-// return;
-                                }
+                                } else if(ret==-10301){
+                                Message messageCardId = new Message();
+                                messageCardId.what = 404;
+                                messageCardId.obj ="Error";
+                                handler.sendMessage(messageCardId);
+                            } else if(ret==-10304){
+                                Message messageCardId = new Message();
+                                messageCardId.what = 405;
+                                messageCardId.obj ="Please Card Show Again Properly";
+                                handler.sendMessage(messageCardId);
+                            }
                             }
                         } catch (Exception e) {
                             e.printStackTrace();
@@ -458,7 +476,7 @@ public class M1CardHandlerMosambee {
             }else if(ret1 == -10303|| ret2== -10303){
                 Message messageSuccess = new Message();
                 messageSuccess.what = 500;
-                messageSuccess.obj = "Hash Written Missed";
+                messageSuccess.obj = "Hash Written Missed..Please Wait....";
                 handler.sendMessage(messageSuccess);
             }
         } catch (RemoteException e) {

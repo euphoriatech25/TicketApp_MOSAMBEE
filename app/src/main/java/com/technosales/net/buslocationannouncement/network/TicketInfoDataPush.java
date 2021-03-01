@@ -79,11 +79,6 @@ public class TicketInfoDataPush {
                             handleError(response.errorBody(),context,ticketInfoList.ticket_id);
                         }else if(response.code()==401){
 
-
-                            Intent intent = new Intent(context, HelperLogin.class);
-                            context.startActivity(intent);
-
-//                            Toast.makeText(context, context.getString(R.string.token_expire), Toast.LENGTH_SHORT).show();
                         }else if(response.code()==400){
                             new DatabaseHelper(context).deleteFromLocalId(ticketInfoList.ticket_id);
                         }
@@ -112,7 +107,12 @@ public class TicketInfoDataPush {
             for (Map.Entry<String, List<String>> error : apiErrors.getErrors().entrySet()) {
                 if (error.getKey().equals("message")) {
                     new DatabaseHelper(context).deleteFromLocalId(ticket_id);
-                      Toast.makeText(context, error.getValue().get(0), Toast.LENGTH_SHORT).show();
+                    if(error.getValue().get(0).contains("Something error plz consult me")){
+                        Log.i("TAG", "handleError: "+error.getValue().get(0));
+                    }else {
+                        Toast.makeText(context, error.getValue().get(0), Toast.LENGTH_SHORT).show();
+                    }
+
                 }
             }
         } else {

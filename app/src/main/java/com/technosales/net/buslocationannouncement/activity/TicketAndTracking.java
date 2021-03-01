@@ -226,18 +226,14 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
   normalDiscountToggle.setColorOn(getResources().getColor(R.color.colorAccent));*/
         onLocationChanged=preferences.getBoolean(UtilStrings.LOCATION_CHANGE, false);
 
-        ///////////////////////////////////////////////////////////////////////////////////////////////////
-        Toast.makeText(this, onLocationChanged+"  "+Double.parseDouble(preferences.getString(UtilStrings.LATITUDE, "0.0"))+"::"+Double.parseDouble(preferences.getString(UtilStrings.LONGITUDE, "0.0")), Toast.LENGTH_SHORT).show();
 
-        Log.i("TAG", "onCreate: "+ onLocationChanged);
        if(onLocationChanged){
-             getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.LOCATION_CHANGE, false).apply();
-             startActivity(getIntent());
-             finish();
-             overridePendingTransition(0, 0);
-         }
+           getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.LOCATION_CHANGE, false).apply();
+           startActivity(getIntent());
+           finish();
+           overridePendingTransition(0, 0);
+       }
 
-       // ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 
         initializeDrawer();
@@ -286,7 +282,6 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
   }*/
 
         if (mode == UtilStrings.MODE_1) {
-
             priceListView.setAdapter(new PriceAdapter(priceLists, this));
             mode_selector.setText(getString(R.string.normal_mode));
         } else if (mode == UtilStrings.MODE_2) {
@@ -477,6 +472,10 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
 
         //        getBlockListHere
         BlockListCheck.getBlockList(this);
+        if(helperId.length()==0){
+           startActivity(new Intent(TicketAndTracking.this,HelperLogin.class));
+           finish();
+        }
 
     }
 
@@ -516,11 +515,6 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
 
         final PrimaryDrawerItem checkBalance = new PrimaryDrawerItem().withName("Check Balance");
 
-
-//        final PrimaryDrawerItem RechargeToIncome = new PrimaryDrawerItem().withName("Transfer Income to Recharge ");
-//         final PrimaryDrawerItem Transaction = new PrimaryDrawerItem().withName("Check Transaction Statement");
-//         final PrimaryDrawerItem Encrypt = new PrimaryDrawerItem().withName("Encrypt");
-
         Toolbar toolbar = new Toolbar(this);
         mainDrawer = new DrawerBuilder()
                 .withTranslucentNavigationBar(true)
@@ -559,6 +553,7 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
                             priceListView.setAdapter(priceAdapterPrices);
                             setMode(UtilStrings.MODE_3, 1, getString(R.string.places_mode));
 
+
                             startActivity(getIntent());
                             finish();
                             overridePendingTransition(0, 0);
@@ -584,10 +579,13 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
                             if (result) {
                             } else {
                             }
+                            mainDrawer.closeDrawer();
 
                         } else if (drawerItem.equals(checkBalance)) {
                             Intent intent = new Intent(TicketAndTracking.this, CheckBalanceActivity.class);
                             startActivity(intent);
+                            mainDrawer.closeDrawer();
+
                         } else if (drawerItem.equals(CardBlock)) {
                         boolean result = CardBlockProcess();
                         mainDrawer.closeDrawer();
@@ -598,7 +596,6 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
                         Intent intent = new Intent(TicketAndTracking.this, ReIssueCard.class);
                         startActivity(intent);
                         mainDrawer.closeDrawer();
-
                     }
                         return true;
                     }
@@ -1185,7 +1182,7 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
         rTicker = new Runnable() {
             public void run() {
                 long now = SystemClock.uptimeMillis();
-                long next = now + 15000;
+                long next = now + 20000;
                 i++;
                 if (i >= 10) {
                     i = 0;

@@ -51,8 +51,8 @@ public class BlockListCheck {
                         databaseHelper.clearBlockList();
                     }
                 } else if(response.code()==401){
-                    Toast.makeText(context, context.getString(R.string.token_expire), Toast.LENGTH_SHORT).show();
-                    context.startActivity(new Intent(context,HelperLogin.class));
+//                    Toast.makeText(context, context.getString(R.string.token_expire), Toast.LENGTH_SHORT).show();
+//
                 }else if(response.code()==404){
                     handleErrors(response.errorBody(),context);
                 }

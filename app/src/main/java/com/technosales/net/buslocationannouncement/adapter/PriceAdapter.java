@@ -210,14 +210,6 @@ public class PriceAdapter extends RecyclerView.Adapter<PriceAdapter.MyViewHolder
                             ((TicketAndTracking) context).setTotal();
                             String valueOfTickets = "";
 
-//                            if (total_tickets < 10) {
-//                                valueOfTickets = "00" + String.valueOf(total_tickets);
-//
-//                            } else if (total_tickets > 9 && total_tickets < 100) {
-//                                valueOfTickets = "0" + String.valueOf(total_tickets);
-//                            } else {
-//                                valueOfTickets = String.valueOf(total_tickets);
-//                            }
 
                             valueOfTickets = String.format("%04d",total_tickets);
                             dateConverter = new DateConverter();

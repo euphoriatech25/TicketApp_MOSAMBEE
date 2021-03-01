@@ -1027,7 +1027,7 @@ public class PayByCardActivity extends BaseActivity {
                     e.printStackTrace();
                 }
 
-                getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.LOCATION_CHANGE, true).apply();
+
                 startActivity(new Intent(PayByCardActivity.this, TicketAndTracking.class));
                 finish();
             } else {
@@ -1112,7 +1112,7 @@ public class PayByCardActivity extends BaseActivity {
                         e.printStackTrace();
                     }
 
-                getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.LOCATION_CHANGE, true).apply();
+
                 startActivity(new Intent(PayByCardActivity.this, TicketAndTracking.class));
                 finish();
             } else {
@@ -1208,7 +1208,7 @@ public class PayByCardActivity extends BaseActivity {
                     e.printStackTrace();
                 }
 
-                getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.LOCATION_CHANGE, true).apply();
+
                 startActivity(new Intent(PayByCardActivity.this, TicketAndTracking.class));
                 finish();
             } else {
