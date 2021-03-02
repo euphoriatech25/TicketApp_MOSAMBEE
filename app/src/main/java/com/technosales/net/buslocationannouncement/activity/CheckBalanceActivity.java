@@ -97,6 +97,7 @@ public class CheckBalanceActivity extends BaseActivity {
                 case 100:
                     if (!msg.obj.toString().equalsIgnoreCase("") && msg.obj.toString() != null) {
                         getUserInfo(msg.obj.toString());
+                        stopThread=true;
                     } else {
                         Toast.makeText(CheckBalanceActivity.this, "Please show card properly", Toast.LENGTH_SHORT).show();
                     }
@@ -104,6 +105,7 @@ public class CheckBalanceActivity extends BaseActivity {
                     if (msg.obj.toString() != null) {
                         Log.i("TAG", "handleMessage: " + msg.obj.toString());
                         passenserId=msg.obj.toString();
+                        stopThread=true;
                     } else {
                         Toast.makeText(CheckBalanceActivity.this, "Timeout Please restart", Toast.LENGTH_SHORT).show();
                     }
@@ -112,6 +114,7 @@ public class CheckBalanceActivity extends BaseActivity {
                     if (msg.obj.toString() != null) {
                         Log.i("TAG", "handleMessage: " + msg.obj.toString());
                         transactionHash=msg.obj.toString();
+                        stopThread=true;
                     } else {
                         Toast.makeText(CheckBalanceActivity.this, "Timeout Please restart", Toast.LENGTH_SHORT).show();
                     }
@@ -152,7 +155,6 @@ public class CheckBalanceActivity extends BaseActivity {
                         @Override
                         public void run() {
                             M1CardHandlerMosambee.read_miCard(rechargeHandler, customerDetailsRead,"CheckBalanceActivity");
-
                         }
                     });
                 } catch (InterruptedException e) {
@@ -169,6 +171,7 @@ public class CheckBalanceActivity extends BaseActivity {
         setUpToolbar("ब्यालेन्स जाँच", true);
         setupUI();
         tokenManager = TokenManager.getInstance(getSharedPreferences("prefs", MODE_PRIVATE));
+        stopThread=false;
         M1CardHandlerMosambee.read_miCard(rechargeHandler, customerDetailsRead,"CheckBalanceActivity");
         thread.start();
 
@@ -465,6 +468,8 @@ public class CheckBalanceActivity extends BaseActivity {
             for (int i = 0; i < databaseHelper.listBlockList().size(); i++) {
                 if (databaseHelper.listBlockList().get(i).identificationId.equalsIgnoreCase(toString)) {
                     Toast.makeText(CheckBalanceActivity.this, "यो कार्ड ब्लक गरिएको छ।", Toast.LENGTH_SHORT).show();
+                    startActivity(new Intent(CheckBalanceActivity.this,TicketAndTracking.class));
+                    finish();
                 } else {
                     if (GeneralUtils.isNetworkAvailable(CheckBalanceActivity.this)) {
 //                        SysTester.getInstance().beep(EBeepMode.FREQUENCE_LEVEL_6, 100);

@@ -45,7 +45,7 @@ public class HelperLogin extends AppCompatActivity {
     ProgressDialog pClick;
     private String deviceId;
     private ImageView helperLogin;
-    private int TIME_DELAY = 500;
+    private int TIME_DELAY = 30000;
     private boolean stopThread;
 
     private TokenManager tokenManager;
@@ -56,14 +56,14 @@ public class HelperLogin extends AppCompatActivity {
                 case 100:
                     if (msg.obj.toString() != null) {
                         setHelperId(msg.obj.toString());
-                        Log.i("TAG", "handleMessage: "+ msg.obj.toString());
+                        Log.i("TAG", "handleMessage: " + msg.obj.toString());
                         stopThread = true;
                     } else {
                         Toast.makeText(HelperLogin.this, "Timeout Please restart", Toast.LENGTH_SHORT).show();
                     }
                     break;
 
-                    case 404:
+                case 404:
                     if (msg.obj.toString() != null) {
                         Toast.makeText(HelperLogin.this, "Timeout Please restart", Toast.LENGTH_SHORT).show();
                         stopThread = true;
@@ -76,6 +76,27 @@ public class HelperLogin extends AppCompatActivity {
             }
         }
     };
+
+
+    Thread thread = new Thread(new Runnable() {
+        @Override
+        public void run() {
+            while (!Thread.interrupted() && !stopThread)
+                try {
+                    Thread.sleep(TIME_DELAY);
+                    runOnUiThread(new Runnable() // start actions in UI thread
+                    {
+                        @Override
+                        public void run() {
+                            Log.i("TAG", "run:0000000000000000000000 ");
+                            int[] value = {};
+                            M1CardHandlerMosambee.read_miCard(handler, value, "HelperLogin");
+                        }
+                    });
+                } catch (InterruptedException e) {
+                }
+        }
+    });
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -95,8 +116,9 @@ public class HelperLogin extends AppCompatActivity {
         Glide.with(this).asGif().load(R.drawable.helper).into(helperLogin);
         tokenManager = TokenManager.getInstance(getSharedPreferences("prefs", MODE_PRIVATE));
         stopThread = false;
-        int[]value={};
-        M1CardHandlerMosambee.read_miCard(handler,value,"HelperLogin");
+        int[] value = {};
+        M1CardHandlerMosambee.read_miCard(handler, value, "HelperLogin");
+        thread.start();
     }
 
     private void setHelperId(String toString) {
@@ -108,10 +130,15 @@ public class HelperLogin extends AppCompatActivity {
                     if (GeneralUtils.isNetworkAvailable(HelperLogin.this)) {
                         if (deviceId != null && card_helper_id != null) {
                             sendHelperDetail(deviceId, card_helper_id);
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    pClick.setMessage("कृपया पर्खनुहोस्...");
+                                    pClick.setCancelable(true);
+                                    pClick.show();
+                                }
+                            });
 
-                            pClick.setMessage("कृपया पर्खनुहोस्...");
-                            pClick.setCancelable(true);
-                            pClick.show();
                         } else {
                             Toast.makeText(HelperLogin.this, "कार्ड देखाउनु होस् ", Toast.LENGTH_SHORT).show();
                         }

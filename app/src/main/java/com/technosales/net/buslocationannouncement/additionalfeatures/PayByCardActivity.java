@@ -90,11 +90,10 @@ public class PayByCardActivity extends BaseActivity {
     int reducedValue = 0;
     String dateTime;
     boolean stopThread1, stopThread2, stopThread3, stopThread4;
-   Context context;
+    Context context;
     ProgressDialog pClick;
-//    EPiccType piccType;
     int[] customerDetailsBlock = {CUSTOMERID, CUSTOMER_AMT, CUSTOMER_HASH, CUSTOMER_TRANSACTION_NO};
-    String status;
+
     private TokenManager tokenManager;
     private String passengerId = "";
     private String passengerAmt = "";
@@ -111,7 +110,6 @@ public class PayByCardActivity extends BaseActivity {
     private List<RouteStationList> routeStationLists = new ArrayList<>();
     private String isOnlineCheck;
     private String printTransaction;
-    private int successStatus = 0;
     private String ticketFirstId = "", ticketSecondId = "", ticketFirstAmount = "", ticketSecondAmount = "", ticketFirstHash = "",ticketSecondHash = "", latestFirstTranResponseHash;
     private String ticketId="",tranCurrentHash="";
     int firstTransactionStatus=0;
@@ -121,9 +119,8 @@ public class PayByCardActivity extends BaseActivity {
             switch (msg.what) {
                 case 100:
                     msg.obj.toString();
-
                         cardNUmber = msg.obj.toString();
-                        tv_cardNum.setText(cardNUmber);
+                    setCardNUm(msg.obj.toString());
                         Log.e("TAG", "handleMessage Id: " + msg.obj.toString());
 
                     break;
@@ -270,8 +267,15 @@ public class PayByCardActivity extends BaseActivity {
                 if (!passengerId.equalsIgnoreCase("") && !passengerAmt.equalsIgnoreCase("") && !transactionHash.equalsIgnoreCase("") && !passengerTranNo.equalsIgnoreCase("")) {
                     thread1.interrupt();
                     stopThread2 = true;
-                    setCardNUm();
-                    getCustomerDetails();
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            currentAmount.setText(GeneralUtils.getUnicodeNumber(passengerAmt));
+                        }
+                    });
+                        getCustomerDetails();
+
+
                 } else {
                 }
             }
@@ -837,24 +841,11 @@ public class PayByCardActivity extends BaseActivity {
             Toast.makeText(this, "Please Show card Properly", Toast.LENGTH_SHORT).show();
             hasError = true;
         }
-        if (databaseHelper.listBlockList().size() != 0) {
-            for (int i = 0; i < databaseHelper.listBlockList().size(); i++) {
-                if (databaseHelper.listBlockList().get(i).identificationId.equalsIgnoreCase(cardNUmber)) {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(PayByCardActivity.this, "यो कार्ड ब्लक गरिएको छ। ", Toast.LENGTH_SHORT).show();
 
-                        }
-                    });
-                    hasError = true;
-                }
-            }
-        }
         return hasError;
     }
 
-    void setCardNUm() {
+   public void setCardNUm(String s) {
         if (cardNUmber != null) {
             if (databaseHelper.listBlockList().size() != 0) {
                 for (int i = 0; i < databaseHelper.listBlockList().size(); i++) {
@@ -870,7 +861,10 @@ public class PayByCardActivity extends BaseActivity {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
+
                                 Toast.makeText(PayByCardActivity.this, "यो कार्ड ब्लक गरिएको छ। ", Toast.LENGTH_SHORT).show();
+                                startActivity(new Intent(PayByCardActivity.this,TicketAndTracking.class));
+                                finish();
                             }
                         });
 
@@ -881,7 +875,6 @@ public class PayByCardActivity extends BaseActivity {
                     @Override
                     public void run() {
                         currentAmount.setText(GeneralUtils.getUnicodeNumber(passengerAmt));
-                        cardNUmber = cardNUmber;
                         tv_cardNum.setText(cardNUmber);
                     }
                 });

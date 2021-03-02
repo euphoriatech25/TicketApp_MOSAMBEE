@@ -48,8 +48,7 @@ import static com.technosales.net.buslocationannouncement.utils.UtilStrings.CUST
 import static com.technosales.net.buslocationannouncement.utils.UtilStrings.CUSTOMER_AMT;
 import static com.technosales.net.buslocationannouncement.utils.UtilStrings.CUSTOMER_HASH;
 import static com.technosales.net.buslocationannouncement.utils.UtilStrings.CUSTOMER_TRANSACTION_NO;
-import static com.technosales.net.buslocationannouncement.utils.UtilStrings.SECTOR_TRAILER_CUSTOMER_FIRST_TRANSACTION;
-import static com.technosales.net.buslocationannouncement.utils.UtilStrings.SECTOR_TRAILER_CUSTOMER_SECOND_TRANSACTION;
+import static com.technosales.net.buslocationannouncement.utils.UtilStrings.USER_NUMBER;
 import static com.technosales.net.buslocationannouncement.utils.UtilStrings.network;
 
 
@@ -85,7 +84,6 @@ public class IssueCardActivity extends BaseActivity implements ICreateAccount.Vi
     private DatabaseHelper databaseHelper;
     private Intent intent;
     int successStatus=0;
-    int[]authBlock={SECTOR_TRAILER_CUSTOMER_FIRST_TRANSACTION,SECTOR_TRAILER_CUSTOMER_SECOND_TRANSACTION};
     Thread thread=new Thread(new Runnable() {
         @Override
         public void run() {
@@ -110,6 +108,7 @@ public class IssueCardActivity extends BaseActivity implements ICreateAccount.Vi
             switch (msg.what) {
                 case 100:
                     setCardNUm(msg.obj.toString());
+                    stopThread=true;
                     break;
 
                 case 200:
@@ -135,11 +134,10 @@ public class IssueCardActivity extends BaseActivity implements ICreateAccount.Vi
         intent=new Intent(this, IncomingCallReceiver.class);
         startService(intent);
         setUpToolbar("ग्राहक कार्ड दर्ता", true);
-        userNumber = getIntent().getStringExtra("phone_number");
+        customer_number = getIntent().getStringExtra(USER_NUMBER);
         progressDialog = new ProgressDialog(IssueCardActivity.this);
 
-        SharedPreferences sharedPreferences = getSharedPreferences("User_NUM", MODE_PRIVATE);
-        user_num = sharedPreferences.getString("userNum", "0");
+
         registerScroll = findViewById(R.id.registerScroll);
         presenter = new RegisterImplPresenter(this, new RegisterControllerImpl());
         acctype = findViewById(R.id.acctype);
@@ -150,10 +148,11 @@ public class IssueCardActivity extends BaseActivity implements ICreateAccount.Vi
         helperId = preferencesHelper.getString(UtilStrings.ID_HELPER, "");
 
         databaseHelper = new DatabaseHelper(this);
-//        customer_number = getIntent().getStringExtra(IncomingCallReceiver.key_bootUpStart);
-        customer_number="9841041332";
 
-      thread.start();
+        stopThread=false;
+        int[]value={};
+        M1CardHandlerMosambee.read_miCard(handler,value,"IssueCardActivity");
+        thread.start();
 
         setupUI();
     }
@@ -171,11 +170,11 @@ public class IssueCardActivity extends BaseActivity implements ICreateAccount.Vi
         contactNo = findViewById(R.id.contactNo);
         editTextEmail = findViewById(R.id.editTextEmail);
         editAddress = findViewById(R.id.editAddress);
-        first_name.setText("Hari");
-        last_name.setText("Nepal");
-        contactNo.setText("9842554500");
-        editTextEmail.setText("hari@gmail.com");
-        editAddress.setText("Gothatar");
+//        first_name.setText("Hari");
+//        last_name.setText("Nepal");
+//        contactNo.setText("9842554500");
+//        editTextEmail.setText("hari@gmail.com");
+//        editAddress.setText("Gothatar");
 
         btn_cancel.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -226,7 +225,7 @@ public class IssueCardActivity extends BaseActivity implements ICreateAccount.Vi
             }
         });
         if (customer_number != null) {
-            setPhoneNum(user_num);
+            setPhoneNum(customer_number);
         }
     }
 

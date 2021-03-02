@@ -144,7 +144,7 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
     private List<RouteStationList> routeStationListsForInfinite;
     private SharedPreferences preferences,preferencesHelper;
     private boolean isFirstRun,onLocationChanged;
-    String deviceIDHelper, helperNameString, helperId;
+    String deviceIDHelper, helperNameString, helperId="";
     private static final int REQUEST_PHONE_CALL = 1;
     TokenManager tokenManager;
     private String isOnlineCheck;
@@ -912,7 +912,11 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
     }
 
     private void getNumberFromServer(String num, String userNum, ProgressDialog pClick) {
+//        Intent intent = new Intent(TicketAndTracking.this, IssueCardActivity.class);
+//        intent.putExtra(USER_NUMBER,num);
+//        startActivity(intent);
 
+//        TODO
         RetrofitInterface post = ServiceConfig.createServiceWithAuth(RetrofitInterface.class);
         Call<CallResponse> call = post.getNumber(num,userNum);
         call.enqueue(new Callback<CallResponse>() {
@@ -924,6 +928,7 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
                             Intent intent = new Intent(TicketAndTracking.this, IssueCardActivity.class);
                             intent.putExtra(USER_NUMBER,num);
                             startActivity(intent);
+                            finish();
                     }
                 }else if(response.code()==404){
                     pClick.dismiss();

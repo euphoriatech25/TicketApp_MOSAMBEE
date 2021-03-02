@@ -42,6 +42,8 @@ import static com.technosales.net.buslocationannouncement.utils.UtilStrings.CUST
 import static com.technosales.net.buslocationannouncement.utils.UtilStrings.SHARED_PREFERENCES;
 
 public class ReIssueCard extends BaseActivity implements View.OnClickListener {
+    int successStatus = 0;
+    SweetAlertDialog sweetAlertDialog;
     private String customer_card_no;
     private TextView card_num;
     private Button btn_submit, btn_cancel;
@@ -52,34 +54,7 @@ public class ReIssueCard extends BaseActivity implements View.OnClickListener {
     private boolean stopThread;
     private TokenManager tokenManager;
     private SharedPreferences preferences;
-     private String printData;
-    int successStatus=0;
-
-    @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.reissue_card_layout);
-        setUpToolbar("कार्ड पुनः जारी गर्नुहोस् |", true);
-        btn_cancel = findViewById(R.id.btn_cancel);
-        customer_mob_no = findViewById(R.id.customer_mob_no);
-        databaseHelper = new DatabaseHelper(this);
-
-        card_num = findViewById(R.id.card_num);
-        progressBar = findViewById(R.id.progressBar);
-        btn_submit = findViewById(R.id.btn_submit);
-        setUpToolbar("जानकारी अपडेट गर्नुहोस्", true);
-        preferences =getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0);
-
-        tokenManager = TokenManager.getInstance(getSharedPreferences("prefs", MODE_PRIVATE));
-        stopThread = false;
-        int[]value={};
-        M1CardHandlerMosambee.read_miCard(handler,value,"ReIssueCard");
-
-        btn_submit.setOnClickListener(this);
-        btn_cancel.setOnClickListener(this);
-    }
-
-
+    private String printData;
     private Handler handler = new Handler() {
         public void handleMessage(android.os.Message msg) {
             switch (msg.what) {
@@ -91,9 +66,10 @@ public class ReIssueCard extends BaseActivity implements View.OnClickListener {
                     }
                     break;
                 case 200:
-                    if(msg.obj.toString().equalsIgnoreCase("Success")){
+                    if (msg.obj.toString().equalsIgnoreCase("Success")) {
                         try {
-                            Printer.Print(ReIssueCard.this,printData);
+                            sweetAlertDialog.dismissWithAnimation();
+                            Printer.Print(ReIssueCard.this, printData);
                         } catch (RemoteException e) {
                             e.printStackTrace();
                         }
@@ -108,11 +84,37 @@ public class ReIssueCard extends BaseActivity implements View.OnClickListener {
         }
     };
 
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.reissue_card_layout);
+        setUpToolbar("कार्ड पुनः जारी गर्नुहोस् |", true);
+        btn_cancel = findViewById(R.id.btn_cancel);
+        customer_mob_no = findViewById(R.id.customer_mob_no);
+        databaseHelper = new DatabaseHelper(this);
+
+        card_num = findViewById(R.id.card_num);
+        progressBar = findViewById(R.id.progressBar);
+        btn_submit = findViewById(R.id.btn_submit);
+        setUpToolbar("जानकारी अपडेट गर्नुहोस्", true);
+        preferences = getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0);
+
+        tokenManager = TokenManager.getInstance(getSharedPreferences("prefs", MODE_PRIVATE));
+        stopThread = false;
+        int[] value = {};
+        M1CardHandlerMosambee.read_miCard(handler, value, "ReIssueCard");
+
+        btn_submit.setOnClickListener(this);
+        btn_cancel.setOnClickListener(this);
+    }
+
     private void setCardNUm(String toString) {
         if (databaseHelper.listBlockList().size() > 0) {
             for (int i = 0; i < databaseHelper.listBlockList().size(); i++) {
                 if (databaseHelper.listBlockList().get(i).identificationId.equalsIgnoreCase(toString)) {
                     Toast.makeText(ReIssueCard.this, "यो कार्ड ब्लक गरिएको छ।", Toast.LENGTH_SHORT).show();
+                    startActivity(new Intent(ReIssueCard.this,TicketAndTracking.class));
+                    finish();
                 } else {
                     try {
                         BeepLEDTest.beepSuccess();
@@ -160,7 +162,7 @@ public class ReIssueCard extends BaseActivity implements View.OnClickListener {
 
 
     private void issueCard(String mobile_customer, String card_helper_id) {
-        RetrofitInterface retrofitInterface = ServerConfigNew.createServiceWithAuth(RetrofitInterface.class,tokenManager);
+        RetrofitInterface retrofitInterface = ServerConfigNew.createServiceWithAuth(RetrofitInterface.class, tokenManager);
         Call<ReIssueCardResponse> call = retrofitInterface.reissue_card(mobile_customer, card_helper_id);
         call.enqueue(new Callback<ReIssueCardResponse>() {
             @Override
@@ -170,16 +172,16 @@ public class ReIssueCard extends BaseActivity implements View.OnClickListener {
 
                     String id = String.valueOf(reIssueCardResponse.getData().getCard().getId());
                     String referenceHash = reIssueCardResponse.getData().getPreviousHash();
-                    String amount =String.valueOf(reIssueCardResponse.getData().getCard().getAmount());
+                    String amount = String.valueOf(reIssueCardResponse.getData().getCard().getAmount());
 
-                    printData = "कार्ड पुनः जारी गरियो।" +"\n" +"ग्राहकको नाम :-" + reIssueCardResponse.getData().getCard().getFirstName() + " " +reIssueCardResponse.getData().getCard().getLastName()  + "\n " +
+                    printData = "कार्ड पुनः जारी गरियो।" + "\n" + "ग्राहकको नाम :-" + reIssueCardResponse.getData().getCard().getFirstName() + " " + reIssueCardResponse.getData().getCard().getLastName() + "\n " +
                             "वर्तमान रकम:-" + "Rs." + GeneralUtils.getUnicodeNumber(amount) + "\n" + "रेजिष्टर्ड फोन नम्बर:-" + "***" + customer_mob_no.getText().toString().substring(customer_mob_no.getText().toString().length() - 3);
-                     showCardReadLayout(id, amount, referenceHash);
+                    showCardReadLayout(id, amount, referenceHash);
                 } else if (response.code() == 404) {
                     progressBar.setVisibility(View.GONE);
                     Toast.makeText(ReIssueCard.this, "Mobile number Not Found ", Toast.LENGTH_SHORT).show();
-                }else if(response.code()==401){
-                    startActivity(new Intent(ReIssueCard.this,HelperLogin.class));
+                } else if (response.code() == 401) {
+                    startActivity(new Intent(ReIssueCard.this, HelperLogin.class));
                     finish();
                 }
             }
@@ -194,24 +196,25 @@ public class ReIssueCard extends BaseActivity implements View.OnClickListener {
     }
 
     private void showCardReadLayout(String id, String amount, String referenceHash) {
-        new SweetAlertDialog(ReIssueCard.this, SweetAlertDialog.SUCCESS_TYPE)
-                .setTitleText("Card ReIssued Successfully !!!")
+        sweetAlertDialog = new SweetAlertDialog(ReIssueCard.this, SweetAlertDialog.SUCCESS_TYPE);
+        sweetAlertDialog.setTitleText("Card ReIssued Successfully !!!")
                 .setContentText("तपाईको कार्ड प्रमाणित गर्नुहोस् ।")
                 .setConfirmText("CONFIRM")
-                .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
-                    @Override
-                    public void onClick(SweetAlertDialog sDialog) {
-                        String customerId = Base64.encodeToString(id.getBytes(), Base64.DEFAULT);
-                        String customerAmt = Base64.encodeToString(amount.getBytes(), Base64.DEFAULT);
-                        String customerHash = Base64.encodeToString(referenceHash.getBytes(), Base64.DEFAULT);
-                        String customerTranNo = Base64.encodeToString("0".getBytes(), Base64.DEFAULT);
-                        Log.i("TAG", "onClick: " + id + amount + referenceHash + customerTranNo);
+                .setCancelable(false);
+        sweetAlertDialog.setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+            @Override
+            public void onClick(SweetAlertDialog sDialog) {
+                String customerId = Base64.encodeToString(id.getBytes(), Base64.DEFAULT);
+                String customerAmt = Base64.encodeToString(amount.getBytes(), Base64.DEFAULT);
+                String customerHash = Base64.encodeToString(referenceHash.getBytes(), Base64.DEFAULT);
+                String customerTranNo = Base64.encodeToString("0".getBytes(), Base64.DEFAULT);
+                Log.i("TAG", "onClick: " + id + amount + referenceHash + customerTranNo);
 
-                        String[] customerDetails={customerId,customerAmt,customerHash,customerTranNo};
-                        int[] customerDetailsBlock={CUSTOMERID,CUSTOMER_AMT,CUSTOMER_HASH,CUSTOMER_TRANSACTION_NO};
-                        M1CardHandlerMosambee.write_miCard(handler,customerDetails,customerDetailsBlock,"ReIssueCard-UpdateCard");
-                    }
-                }).show();
+                String[] customerDetails = {customerId, customerAmt, customerHash, customerTranNo};
+                int[] customerDetailsBlock = {CUSTOMERID, CUSTOMER_AMT, CUSTOMER_HASH, CUSTOMER_TRANSACTION_NO};
+                M1CardHandlerMosambee.write_miCard(handler, customerDetails, customerDetailsBlock, "ReIssueCard-UpdateCard");
+            }
+        }).show();
     }
 
 
@@ -220,7 +223,7 @@ public class ReIssueCard extends BaseActivity implements View.OnClickListener {
         switch (view.getId()) {
             case R.id.btn_submit:
                 if (GeneralUtils.isNetworkAvailable(this)) {
-                    stopThread=true;
+                    stopThread = true;
 
                     String mobile_customer = customer_mob_no.getText().toString();
                     if (customer_card_no != null && mobile_customer != null) {
@@ -239,8 +242,6 @@ public class ReIssueCard extends BaseActivity implements View.OnClickListener {
                 break;
         }
     }
-
-
 
 
 }
