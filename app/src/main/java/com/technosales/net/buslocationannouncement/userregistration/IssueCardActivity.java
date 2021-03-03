@@ -84,6 +84,7 @@ public class IssueCardActivity extends BaseActivity implements ICreateAccount.Vi
     private DatabaseHelper databaseHelper;
     private Intent intent;
     int successStatus=0;
+    SweetAlertDialog sweetAlertDialog;
     Thread thread=new Thread(new Runnable() {
         @Override
         public void run() {
@@ -113,6 +114,7 @@ public class IssueCardActivity extends BaseActivity implements ICreateAccount.Vi
 
                 case 200:
                         try {
+                            sweetAlertDialog.dismissWithAnimation();
                             Printer.Print(IssueCardActivity.this, printData);
                         } catch (RemoteException e) {
                             e.printStackTrace();
@@ -385,12 +387,12 @@ public class IssueCardActivity extends BaseActivity implements ICreateAccount.Vi
     }
 
     private void showCardReadLayout(String id, String amount, String referenceHash) {
-
-        new SweetAlertDialog(IssueCardActivity.this, SweetAlertDialog.SUCCESS_TYPE)
-                .setTitleText("Account Created Successfully !!!")
+        sweetAlertDialog= new SweetAlertDialog(IssueCardActivity.this, SweetAlertDialog.SUCCESS_TYPE);
+        sweetAlertDialog.setTitleText("Account Created Successfully !!!")
                 .setContentText("तपाईको कार्ड प्रमाणित गर्नुहोस् ।")
                 .setConfirmText("CONFIRM")
-                .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                .setCancelable(false);
+                sweetAlertDialog.setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
                     @Override
                     public void onClick(SweetAlertDialog sDialog) {
                         String customerId = Base64.encodeToString(id.getBytes(), Base64.DEFAULT);

@@ -224,4 +224,7 @@
     <string name="todaysincome">आजको लेनदेन हेर्नुहोस्</string>
     <string name="heading"><font size="12">360 Transport Solutions\n Gaushala, Kathmandu, Nepal\n<font size="6">Contact no. :01-4421344</font>\n------------------------------</font></string>
 
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="downloading">Downloading</string>
 </resources>

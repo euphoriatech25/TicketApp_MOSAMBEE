@@ -46,6 +46,9 @@ android {
         cleanedAnnotations
         compile.exclude group: 'org.jetbrains', module: 'annotations'
     }
+    lintOptions {
+        abortOnError false
+    }
 }
 
 dependencies {

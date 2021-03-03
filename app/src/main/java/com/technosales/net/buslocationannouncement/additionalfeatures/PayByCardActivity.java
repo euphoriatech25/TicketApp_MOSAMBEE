@@ -662,6 +662,7 @@ public class PayByCardActivity extends BaseActivity {
 //            writing details to blocks
                 String newRefHash = Base64.encodeToString(newWritableHash.getBytes(), Base64.DEFAULT);
                 String newBalance = Base64.encodeToString(String.valueOf(reducedValue).getBytes(), Base64.DEFAULT);
+                Log.i(TAG, "startTransactionProcess: "+reducedValue);
                         if (GeneralUtils.isNetworkAvailable(PayByCardActivity.this)) {
                             if (!isFinishing()) {
                                 setNewTransaction(newBalance, newRefHash, ticketId, tranCurrentHash, pClick);
@@ -807,6 +808,7 @@ public class PayByCardActivity extends BaseActivity {
                         public void onClick(SweetAlertDialog sDialog) {
                             sDialog.dismiss();
                             sDialog.dismissWithAnimation();
+                            startActivity(new Intent(PayByCardActivity.this,TicketAndTracking.class));
                             finish();
                         }
                     }).show();

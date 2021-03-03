@@ -2,24 +2,30 @@ package com.technosales.net.buslocationannouncement.activity;
 
 import android.Manifest;
 import android.app.AlarmManager;
+import android.app.DownloadManager;
 import android.app.PendingIntent;
 import android.app.ProgressDialog;
+import android.content.ActivityNotFoundException;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
-import android.os.RemoteException;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
-import android.telecom.CallScreeningService;
+import android.provider.Settings;
 import android.text.InputFilter;
 import android.text.InputType;
 import android.util.Log;
@@ -35,6 +41,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -44,6 +51,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearSnapHelper;
 import androidx.recyclerview.widget.RecyclerView;
@@ -56,11 +64,9 @@ import com.mikepenz.materialdrawer.model.DividerDrawerItem;
 import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
 import com.mikepenz.materialdrawer.model.SecondaryDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
-import com.morefun.yapi.engine.DeviceServiceEngine;
 import com.technosales.net.buslocationannouncement.APIToken.TokenManager;
+import com.technosales.net.buslocationannouncement.BuildConfig;
 import com.technosales.net.buslocationannouncement.R;
-import com.technosales.net.buslocationannouncement.SDKManager;
-import com.technosales.net.buslocationannouncement.mosambeesupport.Printer;
 import com.technosales.net.buslocationannouncement.pojo.ApiError;
 import com.technosales.net.buslocationannouncement.pojo.CallResponse;
 import com.technosales.net.buslocationannouncement.serverconn.RetrofitInterface;
@@ -97,15 +103,12 @@ import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 import static com.technosales.net.buslocationannouncement.trackcar.MainFragment.KEY_ACCURACY;
 import static com.technosales.net.buslocationannouncement.trackcar.MainFragment.KEY_DEVICE;
 import static com.technosales.net.buslocationannouncement.trackcar.MainFragment.KEY_DISTANCE;
 import static com.technosales.net.buslocationannouncement.trackcar.MainFragment.KEY_INTERVAL;
 import static com.technosales.net.buslocationannouncement.trackcar.MainFragment.KEY_URL;
-import static com.technosales.net.buslocationannouncement.utils.UtilStrings.CALL_REGISTER_CHECK;
 import static com.technosales.net.buslocationannouncement.utils.UtilStrings.USER_NUMBER;
 
 public class TicketAndTracking extends AppCompatActivity implements GetPricesFares.OnPriceUpdate {
@@ -149,6 +152,16 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
     TokenManager tokenManager;
     private String isOnlineCheck;
     String stationChange="false";
+    private boolean isDownloadStarted = false;
+    private ProgressBar progressBar;
+    String link = "http://202.52.240.149:82/task/files/download/374v";
+    private static final String apkPathLocal = "/Download/test.apk";
+    private DownloadManager manager;
+    private long downloadId;
+    private boolean finishDownload = false;
+    private AlertDialog progressDownloadDialog;
+    private TextView percentageProgress;
+    Handler handler = new Handler();
 
     public static Bitmap getBitmapFromView(View view) {
         Bitmap returnedBitmap = Bitmap.createBitmap(view.getWidth(), view.getHeight(), Bitmap.Config.ARGB_8888);
@@ -515,6 +528,8 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
 
         final PrimaryDrawerItem checkBalance = new PrimaryDrawerItem().withName("Check Balance");
 
+        final PrimaryDrawerItem updateApp = new PrimaryDrawerItem().withName("Update App");
+
         Toolbar toolbar = new Toolbar(this);
         mainDrawer = new DrawerBuilder()
                 .withTranslucentNavigationBar(true)
@@ -529,9 +544,9 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
                         new DividerDrawerItem(),
                         CardOption.withSubItems(IssueCard, CardBlock, CardReissue),
                         new DividerDrawerItem(),
-                        checkBalance
-//                        new DividerDrawerItem(),
-//                        RechargeToIncome,
+                        checkBalance,
+                        new DividerDrawerItem(),
+                       updateApp
 //                        new DividerDrawerItem(),
 //                        Transaction ,
 //                        new DividerDrawerItem(),
@@ -596,6 +611,11 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
                         Intent intent = new Intent(TicketAndTracking.this, ReIssueCard.class);
                         startActivity(intent);
                         mainDrawer.closeDrawer();
+                    }  else if (drawerItem.equals(updateApp)) {
+                       UpdateLatestApp(link);
+
+                        mainDrawer.closeDrawer();
+
                     }
                         return true;
                     }
@@ -717,6 +737,161 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
             }
         });
     }
+
+    private void UpdateLatestApp(String link) {
+
+        if (isDownloadStarted) return;
+//        stopIntervalListener();
+        isDownloadStarted = true;
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            if (!getPackageManager().canRequestPackageInstalls()) {
+                startActivityForResult(new Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES).setData(Uri.parse(String.format("package:%s", getPackageName()))), 1234);
+            } else {
+            }
+        }
+
+        //Storage Permission
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
+        }
+
+        String destination = Environment.getExternalStorageDirectory() + apkPathLocal;
+        final Uri uri = Uri.parse("file://" + destination);
+        Log.i("TAG", "UpdateLatestApp: "+destination);
+        //Delete update file if exists
+        File file = new File(destination);
+        if (file.exists())
+            file.delete();
+
+        //get url of app on server
+        String url = link;
+//        Uri photoURI = FileProvider.getUriForFile(this, getApplicationContext().getPackageName() + ".provider", url);
+        //set download manager
+        DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url))
+                .setDestinationUri(uri)
+                .setTitle(getString(R.string.app_name))
+                .setDescription("Downloading")// Description of the Download Notification
+                .setAllowedOverMetered(true)// Set if download is allowed on Mobile network
+                .setAllowedOverRoaming(true);
+
+        // get download service and enqueue file
+        manager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
+        downloadId = manager.enqueue(request);
+
+        //set BroadcastReceiver to install app when .apk is downloaded
+        BroadcastReceiver onComplete = new BroadcastReceiver() {
+            public void onReceive(Context ctxt, Intent intent) {
+                isDownloadStarted = false;
+
+                String PATH = Environment.getExternalStorageDirectory() + apkPathLocal;
+                File file = new File(PATH);
+                if (file.exists()) {
+                    Intent intent1 = new Intent(Intent.ACTION_VIEW);
+                    intent1.setDataAndType(uriFromFile(getApplicationContext(), new File(PATH)), "application/vnd.android.package-archive");
+                    intent1.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    intent1.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                    try {
+                        getApplicationContext().startActivity(intent1);
+                    } catch (ActivityNotFoundException e) {
+                        e.printStackTrace();
+                        Log.e("TAG", "Error in opening the file!");
+                    }
+                } else {
+//                    Toast.makeText(getApplicationContext(),"installing",Toast.LENGTH_LONG).show();
+                }
+            }
+
+        };
+        //register receiver for when .apk download is compete
+        registerReceiver(onComplete, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
+
+        mainDrawer.closeDrawer();
+        showDownloadDialog();
+
+        new Thread(() -> {
+            int progress;
+            while (!finishDownload) {
+                Cursor cursor = manager.query(new DownloadManager.Query().setFilterById(downloadId));
+                if (cursor.moveToFirst()) {
+                    int status = cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS));
+                    switch (status) {
+                        case DownloadManager.STATUS_FAILED: {
+                            finishDownload = true;
+                            break;
+                        }
+                        case DownloadManager.STATUS_PAUSED:
+                            break;
+                        case DownloadManager.STATUS_PENDING:
+                            break;
+                        case DownloadManager.STATUS_RUNNING: {
+                            final long total = cursor.getLong(cursor.getColumnIndex(DownloadManager.COLUMN_TOTAL_SIZE_BYTES));
+                            if (total >= 0) {
+                                final long downloaded = cursor.getLong(cursor.getColumnIndex(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR));
+                                progress = (int) ((downloaded * 100L) / total);
+
+                                publishProgress(progress);
+                                // if you use downloadmanger in async task, here you can use like this to display progress.
+                                // Don't forget to do the division in long to get more digits rather than double.
+                                //  publishProgress((int) ((downloaded * 100L) / total));
+                            }
+                            break;
+                        }
+                        case DownloadManager.STATUS_SUCCESSFUL: {
+                            progress = 100;
+                            progressBar.setProgress(progress);
+                            // if you use aysnc task
+                            publishProgress(100);
+                            finishDownload = true;
+                            break;
+                        }
+                    }
+                }
+                cursor.close();
+            }
+
+        }).start();
+    }
+
+    public Uri uriFromFile(Context context, File file) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            return FileProvider.getUriForFile(context, BuildConfig.APPLICATION_ID + ".provider", file);
+        } else {
+            return Uri.fromFile(file);
+        }
+//                unregisterReceiver(this);
+//                finish();
+    }
+
+
+    public void publishProgress(int progress) {
+        handler.post(() -> {
+            progressBar.setProgress(progress);
+            percentageProgress.setText(String.valueOf(progress));
+            if (progress == 100) {
+                progressDownloadDialog.dismiss();
+            }
+        });
+    }
+    public void showDownloadDialog() {
+        final AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
+        dialogBuilder.setCancelable(false);
+        dialogBuilder.setTitle(getString(R.string.downloading));
+        LayoutInflater inflater = this.getLayoutInflater();
+        View dialogView = inflater.inflate(R.layout.dialog_progress_bar, null);
+        dialogBuilder.setView(dialogView);
+        dialogBuilder.setNegativeButton(getString(R.string.cancel), (dialogInterface, i) -> {
+            manager.remove(downloadId);
+            dialogInterface.dismiss();
+        });
+
+        progressBar = dialogView.findViewById(R.id.progress_horizontal);
+        percentageProgress = dialogView.findViewById(R.id.percentage_progress);
+        progressDownloadDialog = dialogBuilder.create();
+        progressDownloadDialog.show();
+    }
+
 
     private boolean CardBlockProcess() {
         final AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -848,7 +1023,7 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
                                       SharedPreferences.Editor myEdit = sharedPreferences.edit();
                                       myEdit.putString("userNum", numberInput.getText().toString());
                                       myEdit.apply();
-                                      getCallDetails(numberInput.getText().toString(), callResponse.getData().getServerNumber());
+                                      getCallDetails(numberInput.getText().toString(), callResponse.getData().getServerNumber(),mAlertDialog);
                                   }
                               }
 
@@ -870,7 +1045,7 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
         return true;
     }
 
-    private void getCallDetails(String userNum, final String serverNum) {
+    private void getCallDetails(String userNum, final String serverNum, AlertDialog mAlertDialog1) {
         final AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
 
@@ -899,7 +1074,7 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
                 pClick.setMessage("कृपया पर्खनुहोस्...");
                 pClick.setCancelable(true);
                 pClick.show();
-                getNumberFromServer(userNum, serverNum,pClick);
+                getNumberFromServer(userNum, serverNum,pClick,mAlertDialog1,mAlertDialog);
             }
         });
 
@@ -911,11 +1086,11 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
                 });
     }
 
-    private void getNumberFromServer(String num, String userNum, ProgressDialog pClick) {
-//        Intent intent = new Intent(TicketAndTracking.this, IssueCardActivity.class);
-//        intent.putExtra(USER_NUMBER,num);
-//        startActivity(intent);
-
+    private void getNumberFromServer(String num, String userNum, ProgressDialog pClick, AlertDialog alertDialog1, AlertDialog mAlertDialog1) {
+        Intent intent = new Intent(TicketAndTracking.this, IssueCardActivity.class);
+        intent.putExtra(USER_NUMBER,num);
+        startActivity(intent);
+        finish();
 //        TODO
         RetrofitInterface post = ServiceConfig.createServiceWithAuth(RetrofitInterface.class);
         Call<CallResponse> call = post.getNumber(num,userNum);
@@ -925,10 +1100,12 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
                 if (response.isSuccessful()) {
                     pClick.dismiss();
                     if (userNum != null&&num!=null) {
-                            Intent intent = new Intent(TicketAndTracking.this, IssueCardActivity.class);
-                            intent.putExtra(USER_NUMBER,num);
-                            startActivity(intent);
-                            finish();
+//                            Intent intent = new Intent(TicketAndTracking.this, IssueCardActivity.class);
+//                            intent.putExtra(USER_NUMBER,num);
+//                            startActivity(intent);
+//                            finish();
+                        alertDialog1.dismiss();
+                        mAlertDialog1.dismiss();
                     }
                 }else if(response.code()==404){
                     pClick.dismiss();

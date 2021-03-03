@@ -73,13 +73,7 @@
             android:name=".activity.ReIssueCard"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar"
             android:windowSoftInputMode="stateHidden" />
-        <activity
-            android:name=".transactionstatement.TransactionStatement"
-            android:windowSoftInputMode="stateHidden"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
-        <activity
-            android:name=".NCF.EncrptDecrypt"
-            android:windowSoftInputMode="stateHidden" />
+
         <activity
             android:name=".activity.CheckBalanceActivity"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
@@ -91,7 +85,6 @@
             android:name="com.google.android.gms.vision.DEPENDENCIES"
             android:value="barcode" />
 
-        <service android:name=".getcurrentlocation.LocationService" />
         <receiver android:name=".trackcar.AutostartReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
@@ -115,6 +108,16 @@
         <service android:name=".trackcar.TrackingService" />
 
         <service android:name=".trackcar.TrackingService$HideNotificationService" />
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.provider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/provider_paths" />
+        </provider>
 
     </application>
     <uses-feature
