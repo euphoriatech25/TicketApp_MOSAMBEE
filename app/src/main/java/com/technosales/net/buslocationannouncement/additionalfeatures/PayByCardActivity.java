@@ -5,7 +5,6 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -13,10 +12,8 @@ import android.os.RemoteException;
 import android.util.Base64;
 import android.util.Log;
 import android.view.Gravity;
-import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -27,13 +24,13 @@ import com.technosales.net.buslocationannouncement.APIToken.TokenManager;
 import com.technosales.net.buslocationannouncement.R;
 import com.technosales.net.buslocationannouncement.activity.CheckBalanceActivity;
 import com.technosales.net.buslocationannouncement.activity.HelperLogin;
+import com.technosales.net.buslocationannouncement.activity.ReIssueCard;
 import com.technosales.net.buslocationannouncement.activity.TicketAndTracking;
 import com.technosales.net.buslocationannouncement.base.BaseActivity;
 import com.technosales.net.buslocationannouncement.helper.DatabaseHelper;
 import com.technosales.net.buslocationannouncement.mosambeesupport.BeepLEDTest;
 import com.technosales.net.buslocationannouncement.mosambeesupport.M1CardHandlerMosambee;
 import com.technosales.net.buslocationannouncement.mosambeesupport.Printer;
-import com.technosales.net.buslocationannouncement.pojo.ApiError;
 import com.technosales.net.buslocationannouncement.pojo.BlockList;
 import com.technosales.net.buslocationannouncement.pojo.RouteStationList;
 import com.technosales.net.buslocationannouncement.pojo.TicketInfoList;
@@ -50,7 +47,6 @@ import java.util.Map;
 
 import at.favre.lib.crypto.bcrypt.BCrypt;
 import cn.pedant.SweetAlert.SweetAlertDialog;
-import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -201,6 +197,9 @@ public class PayByCardActivity extends BaseActivity {
                         startActivity(getIntent());
                         finish();
                         overridePendingTransition(0, 0);
+                    break;
+                case 505:
+                    Toast.makeText(PayByCardActivity.this, msg.obj.toString(), Toast.LENGTH_SHORT).show();
                     break;
                 case 200:
                     if(msg.obj.toString().equalsIgnoreCase("Success")){
@@ -1017,7 +1016,7 @@ public class PayByCardActivity extends BaseActivity {
 
             if (!printTransaction.equalsIgnoreCase("")) {
                 try {
-                    Printer.Print(PayByCardActivity.this, printTransaction);
+                    Printer.Print(PayByCardActivity.this, printTransaction, handlerTransaction);
                 } catch (RemoteException e) {
                     e.printStackTrace();
                 }
@@ -1102,7 +1101,7 @@ public class PayByCardActivity extends BaseActivity {
 
             if (!printTransaction.equalsIgnoreCase("")) {
                     try {
-                        Printer.Print(PayByCardActivity.this, printTransaction);
+                        Printer.Print(PayByCardActivity.this, printTransaction, handlerTransaction);
                     } catch (RemoteException e) {
                         e.printStackTrace();
                     }
@@ -1198,7 +1197,7 @@ public class PayByCardActivity extends BaseActivity {
 
             if (!printTransaction.equalsIgnoreCase("")) {
                 try {
-                    Printer.Print(PayByCardActivity.this, printTransaction);
+                    Printer.Print(PayByCardActivity.this, printTransaction, handlerTransaction);
                 } catch (RemoteException e) {
                     e.printStackTrace();
                 }

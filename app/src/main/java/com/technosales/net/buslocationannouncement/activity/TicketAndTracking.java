@@ -23,6 +23,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.RemoteException;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
@@ -67,6 +68,7 @@ import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 import com.technosales.net.buslocationannouncement.APIToken.TokenManager;
 import com.technosales.net.buslocationannouncement.BuildConfig;
 import com.technosales.net.buslocationannouncement.R;
+import com.technosales.net.buslocationannouncement.mosambeesupport.Printer;
 import com.technosales.net.buslocationannouncement.pojo.ApiError;
 import com.technosales.net.buslocationannouncement.pojo.CallResponse;
 import com.technosales.net.buslocationannouncement.serverconn.RetrofitInterface;
@@ -154,14 +156,25 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
     String stationChange="false";
     private boolean isDownloadStarted = false;
     private ProgressBar progressBar;
-    String link = "http://202.52.240.149:82/task/files/download/374v";
-    private static final String apkPathLocal = "/Download/test.apk";
+    String link = "http://202.52.240.149:82/thermalv1.apk";
+    private static final String apkPathLocal = "/Download/test2.apk";
     private DownloadManager manager;
     private long downloadId;
     private boolean finishDownload = false;
     private AlertDialog progressDownloadDialog;
     private TextView percentageProgress;
     Handler handler = new Handler();
+
+    private Handler printHandler = new Handler() {
+        public void handleMessage(android.os.Message msg) {
+            switch (msg.what) {
+                case 505:
+                    Toast.makeText(TicketAndTracking.this, msg.obj.toString(), Toast.LENGTH_SHORT).show();
+                default:
+                    break;
+            }
+        }
+    };
 
     public static Bitmap getBitmapFromView(View view) {
         Bitmap returnedBitmap = Bitmap.createBitmap(view.getWidth(), view.getHeight(), Bitmap.Config.ARGB_8888);
@@ -239,7 +252,6 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
   normalDiscountToggle.setColorOn(getResources().getColor(R.color.colorAccent));*/
         onLocationChanged=preferences.getBoolean(UtilStrings.LOCATION_CHANGE, false);
 
-
        if(onLocationChanged){
            getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.LOCATION_CHANGE, false).apply();
            startActivity(getIntent());
@@ -295,7 +307,7 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
   }*/
 
         if (mode == UtilStrings.MODE_1) {
-            priceListView.setAdapter(new PriceAdapter(priceLists, this));
+            priceListView.setAdapter(new PriceAdapter(priceLists, this,printHandler));
             mode_selector.setText(getString(R.string.normal_mode));
         } else if (mode == UtilStrings.MODE_2) {
             priceListView.setAdapter(new PriceAdapterPlaces(priceLists, this));
@@ -557,9 +569,9 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
                     public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
 //                        mainDrawer.closeDrawer();
                         if (drawerItem.equals(Normal)) {
-                            priceListView.setAdapter(new PriceAdapter(priceLists, view.getContext()));
+                            priceListView.setAdapter(new PriceAdapter(priceLists, view.getContext(),printHandler));
                             setMode(UtilStrings.MODE_1, 4, getString(R.string.normal_mode));
-                            priceListView.setAdapter(new PriceAdapter(priceLists, TicketAndTracking.this));
+                            priceListView.setAdapter(new PriceAdapter(priceLists, TicketAndTracking.this,printHandler));
                             recreate();
                             mainDrawer.closeDrawer();
 
@@ -1087,10 +1099,7 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
     }
 
     private void getNumberFromServer(String num, String userNum, ProgressDialog pClick, AlertDialog alertDialog1, AlertDialog mAlertDialog1) {
-        Intent intent = new Intent(TicketAndTracking.this, IssueCardActivity.class);
-        intent.putExtra(USER_NUMBER,num);
-        startActivity(intent);
-        finish();
+
 //        TODO
         RetrofitInterface post = ServiceConfig.createServiceWithAuth(RetrofitInterface.class);
         Call<CallResponse> call = post.getNumber(num,userNum);
@@ -1100,20 +1109,26 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
                 if (response.isSuccessful()) {
                     pClick.dismiss();
                     if (userNum != null&&num!=null) {
-//                            Intent intent = new Intent(TicketAndTracking.this, IssueCardActivity.class);
-//                            intent.putExtra(USER_NUMBER,num);
-//                            startActivity(intent);
-//                            finish();
+                            Intent intent = new Intent(TicketAndTracking.this, IssueCardActivity.class);
+                            intent.putExtra(USER_NUMBER,num);
+                            startActivity(intent);
+                            finish();
                         alertDialog1.dismiss();
                         mAlertDialog1.dismiss();
                     }
                 }else if(response.code()==404){
                     pClick.dismiss();
+                    alertDialog1.dismiss();
+                    mAlertDialog1.dismiss();
                     handleErrors(response.errorBody());
                 }else if(response.code()==403){
                     pClick.dismiss();
+                    alertDialog1.dismiss();
+                    mAlertDialog1.dismiss();
                     handleErrors(response.errorBody());
                 }else {
+                    alertDialog1.dismiss();
+                    mAlertDialog1.dismiss();
                     pClick.dismiss();
                 }
             }
@@ -1152,7 +1167,7 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
         mode_selector.setText(modeStr);
         switch (modeType) {
             case UtilStrings.MODE_1:
-                priceListView.setAdapter(new PriceAdapter(priceLists, this));
+                priceListView.setAdapter(new PriceAdapter(priceLists, this,printHandler));
                 break;
             case UtilStrings.MODE_2:
 //                price bata dekhaune yo chai
@@ -1206,8 +1221,7 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
     public void setPriceLists(boolean discountToogle) {
         priceLists = databaseHelper.priceLists(discountToogle);
         if (mode == UtilStrings.MODE_1) {
-
-            priceListView.setAdapter(new PriceAdapter(priceLists, TicketAndTracking.this));
+            priceListView.setAdapter(new PriceAdapter(priceLists, TicketAndTracking.this,printHandler));
         } else {
             priceListView.setAdapter(new PriceAdapterPlaces(priceLists, TicketAndTracking.this));
         }

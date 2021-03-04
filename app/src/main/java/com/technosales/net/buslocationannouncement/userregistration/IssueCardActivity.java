@@ -1,31 +1,21 @@
 package com.technosales.net.buslocationannouncement.userregistration;
 
-import android.Manifest;
-import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
-import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
-import android.telephony.TelephonyManager;
 import android.util.Base64;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AlertDialog;
-import androidx.core.app.ActivityCompat;
-
+import com.technosales.net.buslocationannouncement.activity.ReIssueCard;
 import com.technosales.net.buslocationannouncement.callcontrol.IncomingCallReceiver;
 import com.technosales.net.buslocationannouncement.R;
 import com.technosales.net.buslocationannouncement.activity.TicketAndTracking;
@@ -111,11 +101,13 @@ public class IssueCardActivity extends BaseActivity implements ICreateAccount.Vi
                     setCardNUm(msg.obj.toString());
                     stopThread=true;
                     break;
-
+                case 505:
+                    Toast.makeText(IssueCardActivity.this, msg.obj.toString(), Toast.LENGTH_SHORT).show();
+                    break;
                 case 200:
                         try {
                             sweetAlertDialog.dismissWithAnimation();
-                            Printer.Print(IssueCardActivity.this, printData);
+                            Printer.Print(IssueCardActivity.this, printData, handler);
                         } catch (RemoteException e) {
                             e.printStackTrace();
                         }

@@ -8,12 +8,15 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.os.RemoteException;
 import android.text.Layout;
 import android.text.StaticLayout;
 import android.text.TextPaint;
 import android.util.Log;
 
+import com.morefun.yapi.ServiceResult;
 import com.morefun.yapi.device.printer.MultipleAppPrinter;
 import com.morefun.yapi.device.printer.OnPrintListener;
 import com.morefun.yapi.device.printer.PrinterConfig;
@@ -25,7 +28,7 @@ import com.technosales.net.buslocationannouncement.utils.GeneralUtils;
 public class Printer {
     private static final String TAG = "PrinterTest";
 
-    public static void Print( Context context, String path) throws RemoteException {
+    public static void Print(Context context, String path, Handler handler) throws RemoteException {
         DeviceServiceEngine mSDKManager;
         mSDKManager = SDKManager.getInstance().getDeviceServiceEngine();
         if (mSDKManager == null) {
@@ -42,7 +45,7 @@ public class Printer {
         Bitmap icon1 = BitmapFactory.decodeResource(context.getResources(), R.drawable.download);
         Bitmap smallIcon = GeneralUtils.getResizedBitmap(icon, 40);
         Bitmap img=GeneralUtils.mergeToPin(icon1,smallIcon);
-        PrintImage(mSDKManager, img,bmpHeader,bmp);
+        PrintImage(mSDKManager, img,bmpHeader,bmp,handler);
     }
 
 
@@ -80,14 +83,13 @@ public class Printer {
     }
 
 
-    public static void PrintImage(DeviceServiceEngine engine, Bitmap icon, Bitmap header, Bitmap value) throws RemoteException {
+    public static void PrintImage(DeviceServiceEngine engine, Bitmap icon, Bitmap header, Bitmap value, Handler handler) throws RemoteException {
         MultipleAppPrinter printer = engine.getMultipleAppPrinter();
         Bundle config = new Bundle();
         config.putInt(PrinterConfig.COMMON_GRAYLEVEL, 30);
         printer.printImage(icon, new OnPrintListener.Stub() {
             @Override
             public void onPrintResult(int result) throws RemoteException {
-                Log.d(TAG, "onPrintResult = " + result);
                 printer.printImage(header, new OnPrintListener.Stub() {
                     @Override
                     public void onPrintResult(int result) throws RemoteException {
@@ -95,7 +97,12 @@ public class Printer {
                         printer.printImage(value, new OnPrintListener.Stub() {
                             @Override
                             public void onPrintResult(int result) throws RemoteException {
-                                Log.d(TAG, "onPrintResult = " + result);
+                                if(result== -1005){
+                                    Message messageCardId = new Message();
+                                    messageCardId.what = 505;
+                                    messageCardId.obj = "मुद्रण कागज समाप्त भयो। कृपया जाँच गर्नुहोस्।";
+                                    handler.sendMessage(messageCardId);
+                                }
                             }
                         }, config);
                     }

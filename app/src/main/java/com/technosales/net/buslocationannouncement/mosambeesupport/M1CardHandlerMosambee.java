@@ -505,12 +505,13 @@ public class M1CardHandlerMosambee {
                 int ret2 = m1CardHandler.writeBlock((byte) customerDetailsBlock[1], customerUpdatedValue[1].getBytes());
                 int ret3 = m1CardHandler.writeBlock((byte) customerDetailsBlock[2], customerUpdatedValue[2].getBytes());
 
-                int ret5 = 0;
+
                 int ret4 = m1CardHandler.authority(M1KeyTypeConstrants.KEYTYPE_B, SECTOR_TRANSATION, KEY_B, uid);
                 if (ret4 == ServiceResult.Success) {
-                    ret5 = m1CardHandler.writeBlock((byte) customerDetailsBlock[3], customerUpdatedValue[3].getBytes());
+                    int   ret5 = m1CardHandler.writeBlock((byte) customerDetailsBlock[3], customerUpdatedValue[3].getBytes());
+                    Log.i(TAG, "writeCustomerReIssue: " + ret1 + ret2 + ret3 + ret4 + ret5);
                 }
-                Log.i(TAG, "writeCustomerReIssue: " + ret1 + ret2 + ret3 + ret4 + ret5);
+
                 if (ret1 == ServiceResult.Success && ret2 == ServiceResult.Success && ret3 == ServiceResult.Success && ret4 == ServiceResult.Success) {
                     Message messageSuccess = new Message();
                     messageSuccess.what = 200;

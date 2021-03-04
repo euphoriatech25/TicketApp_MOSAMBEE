@@ -25,7 +25,6 @@ import androidx.appcompat.app.AlertDialog;
 import com.hornet.dateconverter.DateConverter;
 import com.hornet.dateconverter.Model;
 import com.technosales.net.buslocationannouncement.APIToken.TokenManager;
-import com.technosales.net.buslocationannouncement.additionalfeatures.PayByCardActivity;
 import com.technosales.net.buslocationannouncement.mosambeesupport.M1CardHandlerMosambee;
 import com.technosales.net.buslocationannouncement.mosambeesupport.Printer;
 import com.technosales.net.buslocationannouncement.pojo.ApiError;
@@ -58,7 +57,6 @@ import static com.technosales.net.buslocationannouncement.utils.UtilStrings.CUST
 import static com.technosales.net.buslocationannouncement.utils.UtilStrings.CUSTOMER_HASH;
 import static com.technosales.net.buslocationannouncement.utils.UtilStrings.NULL;
 import static com.technosales.net.buslocationannouncement.utils.UtilStrings.PAYMENT_CASH;
-import static com.technosales.net.buslocationannouncement.utils.UtilStrings.SHARED_PREFERENCES;
 import static com.technosales.net.buslocationannouncement.utils.UtilStrings.STATUS;
 import static com.technosales.net.buslocationannouncement.utils.UtilStrings.TRANSACTION_TYPE_LOAD;
 
@@ -119,11 +117,14 @@ public class CheckBalanceActivity extends BaseActivity {
                         Toast.makeText(CheckBalanceActivity.this, "Timeout Please restart", Toast.LENGTH_SHORT).show();
                     }
                     break;
+                case 505:
+                    Toast.makeText(CheckBalanceActivity.this, msg.obj.toString(), Toast.LENGTH_SHORT).show();
+                    break;
                 case 200:
                     Log.i("TAG", "handleMessage: " + msg.obj.toString());
                             if (!rechargeBill.equalsIgnoreCase("")) {
                                 try {
-                                    Printer.Print(CheckBalanceActivity.this, rechargeBill);
+                                    Printer.Print(CheckBalanceActivity.this, rechargeBill, rechargeHandler);
                                     pDialog1.dismissWithAnimation();
                                 } catch (RemoteException e) {
                                     e.printStackTrace();

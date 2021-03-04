@@ -69,7 +69,7 @@ public class ReIssueCard extends BaseActivity implements View.OnClickListener {
                     if (msg.obj.toString().equalsIgnoreCase("Success")) {
                         try {
                             sweetAlertDialog.dismissWithAnimation();
-                            Printer.Print(ReIssueCard.this, printData);
+                            Printer.Print(ReIssueCard.this, printData,handler);
                         } catch (RemoteException e) {
                             e.printStackTrace();
                         }
@@ -77,6 +77,9 @@ public class ReIssueCard extends BaseActivity implements View.OnClickListener {
                         startActivity(new Intent(ReIssueCard.this, TicketAndTracking.class));
                         finish();
                     }
+                    break;
+                    case 505:
+                        Toast.makeText(ReIssueCard.this, msg.obj.toString(), Toast.LENGTH_SHORT).show();
                     break;
                 default:
                     break;

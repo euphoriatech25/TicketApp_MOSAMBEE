@@ -285,7 +285,7 @@ public class QrCodeScanner extends BaseActivity implements View.OnClickListener 
                     + GeneralUtils.getUnicodeNumber(String.valueOf(day)) + " " +
                     GeneralUtils.getUnicodeNumber(GeneralUtils.getTime());
             try {
-                Printer.Print(QrCodeScanner.this, printTransaction);
+                Printer.Print(QrCodeScanner.this, printTransaction, handler);
             } catch (RemoteException e) {
                 e.printStackTrace();
             }
@@ -373,7 +373,7 @@ public class QrCodeScanner extends BaseActivity implements View.OnClickListener 
                     + GeneralUtils.getUnicodeNumber(String.valueOf(day)) + " " +
                     GeneralUtils.getUnicodeNumber(GeneralUtils.getTime());
             try {
-                Printer.Print(QrCodeScanner.this, printTransaction);
+                Printer.Print(QrCodeScanner.this, printTransaction, handler);
             } catch (RemoteException e) {
                 e.printStackTrace();
             }
@@ -461,7 +461,7 @@ public class QrCodeScanner extends BaseActivity implements View.OnClickListener 
                     + GeneralUtils.getUnicodeNumber(String.valueOf(day)) + " " +
                     GeneralUtils.getUnicodeNumber(GeneralUtils.getTime());
             try {
-                Printer.Print(QrCodeScanner.this, printTransaction);
+                Printer.Print(QrCodeScanner.this, printTransaction, handler);
             } catch (RemoteException e) {
                 e.printStackTrace();
             }

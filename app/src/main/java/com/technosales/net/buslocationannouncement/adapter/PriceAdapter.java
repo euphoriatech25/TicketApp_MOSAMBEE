@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
+import android.os.Handler;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -21,8 +22,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.hornet.dateconverter.DateConverter;
 import com.hornet.dateconverter.Model;
-import com.morefun.yapi.engine.DeviceServiceEngine;
-import com.technosales.net.buslocationannouncement.SDKManager;
 import com.technosales.net.buslocationannouncement.additionalfeatures.PayByCardActivity;
 import com.technosales.net.buslocationannouncement.additionalfeatures.QrCodeScanner;
 import com.technosales.net.buslocationannouncement.R;
@@ -39,7 +38,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.technosales.net.buslocationannouncement.utils.UtilStrings.NULL;
-import static com.technosales.net.buslocationannouncement.utils.UtilStrings.PAYMENT_CARD;
 import static com.technosales.net.buslocationannouncement.utils.UtilStrings.STATUS;
 import static com.technosales.net.buslocationannouncement.utils.UtilStrings.TRANSACTION_TYPE_PAYMENT;
 
@@ -63,11 +61,12 @@ public class PriceAdapter extends RecyclerView.Adapter<PriceAdapter.MyViewHolder
     private String busName;
     private String discountType;
     private int paymentType = 0;
+   private Handler handler;
 
-
-    public PriceAdapter(List<PriceList> priceLists, Context context) {
+    public PriceAdapter(List<PriceList> priceLists, Context context,Handler handler) {
         this.priceLists = priceLists;
         this.context = context;
+        this.handler=handler;
     }
 
 
@@ -261,7 +260,7 @@ public class PriceAdapter extends RecyclerView.Adapter<PriceAdapter.MyViewHolder
                             Toast.makeText(context, "टिकट सफलतापूर्वक काटियो।", Toast.LENGTH_SHORT).show();
 
                             try {
-                                Printer.Print(context, printTransaction);
+                                Printer.Print(context, printTransaction, handler);
                             } catch (RemoteException e) {
                                 e.printStackTrace();
                             }

@@ -8,6 +8,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
+import android.os.Handler;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -25,8 +26,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.hornet.dateconverter.DateConverter;
 import com.hornet.dateconverter.Model;
-import com.morefun.yapi.engine.DeviceServiceEngine;
-import com.technosales.net.buslocationannouncement.SDKManager;
 import com.technosales.net.buslocationannouncement.additionalfeatures.PayByCardActivity;
 import com.technosales.net.buslocationannouncement.R;
 import com.technosales.net.buslocationannouncement.activity.TicketAndTracking;
@@ -70,6 +69,7 @@ public class PriceAdapterPlaces extends RecyclerView.Adapter<PriceAdapterPlaces.
     private int orderPos = 0;
     private String toGetOff = "";
     private int route_type;
+    Handler handler;
 
     public PriceAdapterPlaces(List<PriceList> priceLists, Context context) {
         this.priceLists = priceLists;
@@ -589,7 +589,7 @@ public class PriceAdapterPlaces extends RecyclerView.Adapter<PriceAdapterPlaces.
 //                ((TicketAndTracking) context).paraPrint(printTransaction);
 //            }
             try {
-                Printer.Print(context, printTransaction);
+                Printer.Print(context, printTransaction, handler);
             } catch (RemoteException e) {
                 e.printStackTrace();
             }

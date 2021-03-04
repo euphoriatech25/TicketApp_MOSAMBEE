@@ -11,12 +11,10 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.location.Location;
 import android.os.Build;
+import android.os.Handler;
 import android.os.RemoteException;
-import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
-import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -31,8 +29,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.hornet.dateconverter.DateConverter;
 import com.hornet.dateconverter.Model;
-import com.morefun.yapi.engine.DeviceServiceEngine;
-import com.technosales.net.buslocationannouncement.SDKManager;
 import com.technosales.net.buslocationannouncement.additionalfeatures.PayByCardActivity;
 import com.technosales.net.buslocationannouncement.R;
 import com.technosales.net.buslocationannouncement.activity.TicketAndTracking;
@@ -80,7 +76,7 @@ public class PriceAdapterPrices extends RecyclerView.Adapter<PriceAdapterPrices.
     private String price;
     private int routeStationListSize;
     private TextToVoice textToVoice;
-
+    private Handler handler;
     public PriceAdapterPrices(List<RouteStationList> routeStationLists, Context context, DatabaseHelper databaseHelper) {
         this.routeStationLists = routeStationLists;
         this.context = context;
@@ -1080,7 +1076,7 @@ public class PriceAdapterPrices extends RecyclerView.Adapter<PriceAdapterPrices.
                     Toast.makeText(context, "टिकट सफलतापूर्वक काटियो।", Toast.LENGTH_SHORT).show();
 
                     try {
-                        Printer.Print(context, printTransaction);
+                        Printer.Print(context, printTransaction, handler);
                     } catch (RemoteException e) {
                         e.printStackTrace();
                     }
