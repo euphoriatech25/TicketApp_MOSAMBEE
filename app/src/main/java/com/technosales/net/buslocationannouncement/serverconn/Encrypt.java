@@ -60,7 +60,6 @@ public class Encrypt
 
         return Base64.encodeToString(aesDataJson.getBytes("UTF-8"), Base64.DEFAULT);
     }
-
     public static String  decrypt(byte[] keyValue, String ivValue, String encryptedData, String macValue) throws Exception {
         Key key = new SecretKeySpec(keyValue, "AES");
         byte[] iv = Base64.decode(ivValue.getBytes("UTF-8"), Base64.DEFAULT);

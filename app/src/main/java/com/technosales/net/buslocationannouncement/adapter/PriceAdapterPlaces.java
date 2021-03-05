@@ -71,9 +71,10 @@ public class PriceAdapterPlaces extends RecyclerView.Adapter<PriceAdapterPlaces.
     private int route_type;
     Handler handler;
 
-    public PriceAdapterPlaces(List<PriceList> priceLists, Context context) {
+    public PriceAdapterPlaces(List<PriceList> priceLists, Context context, Handler printHandler) {
         this.priceLists = priceLists;
         this.context = context;
+        this.handler=printHandler;
     }
 
 

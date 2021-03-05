@@ -65,7 +65,7 @@ public class UtilStrings {
     public static final String ADVERTISEMENTS_URL = TICKET_URL + "adv/getAdvertisement/";
 
 
-    public static final String SECRET_KEY = "b\"}x7Fõ§L Ú‚fi¾‹¨xÚU¦ûöÝ›÷cx13&áx03;é Õš\"";
+    public static final String SECRET_KEY = "L+poNDg7gEEwUVOfHPAmYlgmmHilt9GgpAEF44Dgb64=";
 
 
     //for passengers

@@ -23,7 +23,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
-import android.os.RemoteException;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
@@ -68,7 +67,6 @@ import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 import com.technosales.net.buslocationannouncement.APIToken.TokenManager;
 import com.technosales.net.buslocationannouncement.BuildConfig;
 import com.technosales.net.buslocationannouncement.R;
-import com.technosales.net.buslocationannouncement.mosambeesupport.Printer;
 import com.technosales.net.buslocationannouncement.pojo.ApiError;
 import com.technosales.net.buslocationannouncement.pojo.CallResponse;
 import com.technosales.net.buslocationannouncement.serverconn.RetrofitInterface;
@@ -156,8 +154,8 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
     String stationChange="false";
     private boolean isDownloadStarted = false;
     private ProgressBar progressBar;
-    String link = "http://202.52.240.149:82/thermalv1.apk";
-    private static final String apkPathLocal = "/Download/test2.apk";
+    String link = "http://202.52.240.149:82/ticketapp.apk";
+    private static final String apkPathLocal = "/Download/ticketapp.apk";
     private DownloadManager manager;
     private long downloadId;
     private boolean finishDownload = false;
@@ -250,14 +248,17 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
 
   /*normalDiscountToggle.setColorOff(getResources().getColor(android.R.color.black));
   normalDiscountToggle.setColorOn(getResources().getColor(R.color.colorAccent));*/
-        onLocationChanged=preferences.getBoolean(UtilStrings.LOCATION_CHANGE, false);
 
-       if(onLocationChanged){
-           getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.LOCATION_CHANGE, false).apply();
-           startActivity(getIntent());
-           finish();
-           overridePendingTransition(0, 0);
-       }
+
+
+//        onLocationChanged=preferences.getBoolean(UtilStrings.LOCATION_CHANGE, false);
+//
+//       if(onLocationChanged){
+//           getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.LOCATION_CHANGE, false).apply();
+//           startActivity(getIntent());
+//           finish();
+//           overridePendingTransition(0, 0);
+//       }
 
 
 
@@ -270,7 +271,7 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
 
         }
         routeStationListsForInfinite = databaseHelper.routeStationLists();
-        priceAdapterPrices = new PriceAdapterPrices(routeStationListsForInfinite, this, databaseHelper);
+        priceAdapterPrices = new PriceAdapterPrices(routeStationListsForInfinite, this, databaseHelper,printHandler);
 
 
         gridLayoutManager = new GridLayoutManager(this, spanCount);
@@ -310,7 +311,7 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
             priceListView.setAdapter(new PriceAdapter(priceLists, this,printHandler));
             mode_selector.setText(getString(R.string.normal_mode));
         } else if (mode == UtilStrings.MODE_2) {
-            priceListView.setAdapter(new PriceAdapterPlaces(priceLists, this));
+            priceListView.setAdapter(new PriceAdapterPlaces(priceLists, this,printHandler));
             mode_selector.setText(getString(R.string.price_mode));
         } else if (mode == UtilStrings.MODE_3) {
             //            priceListView.setAdapter(new PriceAdapterPrices(databaseHelper.routeStationLists(),TicketAndTracking.this));
@@ -588,7 +589,7 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
                             mainDrawer.closeDrawer();
 
                         } else if (drawerItem.equals(Price)) {
-                            priceListView.setAdapter(new PriceAdapterPlaces(priceLists, TicketAndTracking.this));
+                            priceListView.setAdapter(new PriceAdapterPlaces(priceLists, TicketAndTracking.this,printHandler));
                             setMode(UtilStrings.MODE_2, 4, getString(R.string.price_mode));
                             recreate();
                             mainDrawer.closeDrawer();
@@ -1171,7 +1172,7 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
                 break;
             case UtilStrings.MODE_2:
 //                price bata dekhaune yo chai
-                priceListView.setAdapter(new PriceAdapterPlaces(priceLists, this));
+                priceListView.setAdapter(new PriceAdapterPlaces(priceLists, this, printHandler));
                 break;
             case UtilStrings.MODE_3:
 //                 location bata dekhaune
@@ -1223,7 +1224,7 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
         if (mode == UtilStrings.MODE_1) {
             priceListView.setAdapter(new PriceAdapter(priceLists, TicketAndTracking.this,printHandler));
         } else {
-            priceListView.setAdapter(new PriceAdapterPlaces(priceLists, TicketAndTracking.this));
+            priceListView.setAdapter(new PriceAdapterPlaces(priceLists, TicketAndTracking.this, printHandler));
         }
         /*saveBitmap(getBitmapFromView(priceListView));*/
         setTotal();
@@ -1475,29 +1476,4 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
         return "";
     }
 
-//    public void paraPrint(String printData) {
-//        RxUtils.runInBackgroud(new Runnable() {
-//            @Override
-//            public void run() {
-//                ReceiptPrintParam receiptPrintParam = new ReceiptPrintParam();
-//                String printType = "error";
-//                if (GeneralUtils.needBtPrint()) {
-//                    Printer.printA60Receipt("", "", printType);
-//                } else {
-//                    receiptPrintParam.print(printData, new PrintListenerImpl(TicketAndTracking.this));
-//                    Device.beepOk();
-//                    runOnUiThread(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            recreate();
-//                        }
-//                    });
-//
-////                    overridePendingTransition(0, 0);
-////                    startActivity(getIntent());
-//                    overridePendingTransition(0, 0);
-//                }
-//            }
-//        });
-//    }
 }

@@ -27,6 +27,7 @@ import com.technosales.net.buslocationannouncement.additionalfeatures.QrCodeScan
 import com.technosales.net.buslocationannouncement.R;
 import com.technosales.net.buslocationannouncement.activity.TicketAndTracking;
 import com.technosales.net.buslocationannouncement.helper.DatabaseHelper;
+import com.technosales.net.buslocationannouncement.mosambeesupport.BeepLEDTest;
 import com.technosales.net.buslocationannouncement.mosambeesupport.Printer;
 import com.technosales.net.buslocationannouncement.pojo.PriceList;
 import com.technosales.net.buslocationannouncement.pojo.RouteStationList;
@@ -116,7 +117,6 @@ public class PriceAdapter extends RecyclerView.Adapter<PriceAdapter.MyViewHolder
             public void onClick(DialogInterface dialog, int item) {
                 dialog.dismiss();
                 switch (item) {
-
                     case 0: //card
                         payByCard(priceList, position);
                         break;
@@ -127,11 +127,8 @@ public class PriceAdapter extends RecyclerView.Adapter<PriceAdapter.MyViewHolder
                         payByQR(priceList, position);
                         break;
                 }
-
             }
         }).show();
-
-
     }
 
     public void payByCash(final PriceList priceList, int position) {
@@ -258,7 +255,11 @@ public class PriceAdapter extends RecyclerView.Adapter<PriceAdapter.MyViewHolder
 
                             ((TicketAndTracking)context).recreate();
                             Toast.makeText(context, "टिकट सफलतापूर्वक काटियो।", Toast.LENGTH_SHORT).show();
-
+                            try {
+                                BeepLEDTest.beepSuccess();
+                            } catch (RemoteException e) {
+                                e.printStackTrace();
+                            }
                             try {
                                 Printer.Print(context, printTransaction, handler);
                             } catch (RemoteException e) {

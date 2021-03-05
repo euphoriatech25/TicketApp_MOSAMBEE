@@ -41,6 +41,7 @@ import com.technosales.net.buslocationannouncement.additionalfeatures.QrCodeScan
 import com.technosales.net.buslocationannouncement.utils.TextToVoice;
 import com.technosales.net.buslocationannouncement.utils.UtilStrings;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.technosales.net.buslocationannouncement.utils.UtilStrings.NULL;
@@ -77,10 +78,12 @@ public class PriceAdapterPrices extends RecyclerView.Adapter<PriceAdapterPrices.
     private int routeStationListSize;
     private TextToVoice textToVoice;
     private Handler handler;
-    public PriceAdapterPrices(List<RouteStationList> routeStationLists, Context context, DatabaseHelper databaseHelper) {
+
+    public PriceAdapterPrices(List<RouteStationList> routeStationLists, Context context, DatabaseHelper databaseHelper, Handler printHandler) {
         this.routeStationLists = routeStationLists;
         this.context = context;
         this.databaseHelper = databaseHelper;
+        this.handler = printHandler;
     }
 
     @Override
@@ -116,6 +119,8 @@ public class PriceAdapterPrices extends RecyclerView.Adapter<PriceAdapterPrices.
             double startLng = Double.parseDouble(preferences.getString(UtilStrings.LONGITUDE, "0.0"));
             double endLat = Double.parseDouble(routeStationLists.get(i).station_lat);
             double endLng = Double.parseDouble(routeStationLists.get(i).station_lng);
+//            Log.i("TAG", "onClick: "+startLat+"::"+startLng);
+
             distance = GeneralUtils.calculateDistance(startLat, startLng, endLat, endLng);
             if (i == 0) {
                 nearest = distance;

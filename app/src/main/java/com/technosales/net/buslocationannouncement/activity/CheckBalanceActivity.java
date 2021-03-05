@@ -25,6 +25,7 @@ import androidx.appcompat.app.AlertDialog;
 import com.hornet.dateconverter.DateConverter;
 import com.hornet.dateconverter.Model;
 import com.technosales.net.buslocationannouncement.APIToken.TokenManager;
+import com.technosales.net.buslocationannouncement.mosambeesupport.BeepLEDTest;
 import com.technosales.net.buslocationannouncement.mosambeesupport.M1CardHandlerMosambee;
 import com.technosales.net.buslocationannouncement.mosambeesupport.Printer;
 import com.technosales.net.buslocationannouncement.pojo.ApiError;
@@ -367,7 +368,7 @@ public class CheckBalanceActivity extends BaseActivity {
             int day = outputOfConversion.getDay();
             Log.i("getNepaliDate", "year=" + year + ",month:" + month + ",day:" + day);
 
-            rechargeBill = passenger_name + "\n" + "पहिला भएको रकम रु. " + GeneralUtils.getUnicodeNumber(passenger_pre_amount) + "\n"
+            rechargeBill ="यात्रीको नाम :-"+ passenger_name + "\n" + "पहिला भएको रकम रु. " + GeneralUtils.getUnicodeNumber(passenger_pre_amount) + "\n"
                     + "थपिएको रकम  रु. " + GeneralUtils.getUnicodeNumber(String.valueOf(amount)) + "\n" + "अब बाँकी रकम रु. " + GeneralUtils.getUnicodeNumber(String.valueOf(newAmount)) + " " + "\n\n" +
                     GeneralUtils.getNepaliMonth(String.valueOf(month)) + " "
                     + GeneralUtils.getUnicodeNumber(String.valueOf(day)) + " " +
@@ -376,6 +377,11 @@ public class CheckBalanceActivity extends BaseActivity {
     }
 
     void showNoInternet() {
+        try {
+            BeepLEDTest.beepError();
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
         new SweetAlertDialog(CheckBalanceActivity.this, SweetAlertDialog.ERROR_TYPE)
                 .setTitleText("Error!")
                 .setContentText("No internet")
@@ -481,7 +487,9 @@ public class CheckBalanceActivity extends BaseActivity {
                         tv_message.setText("पर्खनुहोस...");
                         checkCustomerBalance(cardNum, tv_message, tv_amount);
                     } else {
-                        showNoInternet();
+                        if(!isFinishing()){
+                            showNoInternet();
+                        }
                     }
                 }
             }
@@ -494,7 +502,9 @@ public class CheckBalanceActivity extends BaseActivity {
                 tv_message.setText("पर्खनुहोस...");
                 checkCustomerBalance(cardNum, tv_message, tv_amount);
             } else {
-                showNoInternet();
+                if(!isFinishing()){
+                    showNoInternet();
+                }
             }
         }
     }

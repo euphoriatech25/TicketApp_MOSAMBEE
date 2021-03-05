@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.RemoteException;
 import android.util.Base64;
 import android.util.Log;
 import android.view.WindowManager;
@@ -18,6 +19,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.bumptech.glide.Glide;
 import com.technosales.net.buslocationannouncement.APIToken.TokenManager;
 import com.technosales.net.buslocationannouncement.R;
+import com.technosales.net.buslocationannouncement.mosambeesupport.BeepLEDTest;
 import com.technosales.net.buslocationannouncement.mosambeesupport.M1CardHandlerMosambee;
 import com.technosales.net.buslocationannouncement.pojo.ApiError;
 import com.technosales.net.buslocationannouncement.serverconn.Encrypt;
@@ -34,6 +36,7 @@ import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
 import java.security.Key;
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.AlgorithmParameterSpec;
 import java.util.Arrays;
@@ -47,6 +50,7 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
+import cn.pedant.SweetAlert.SweetAlertDialog;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -62,26 +66,14 @@ public class HelperLogin extends AppCompatActivity {
     SharedPreferences preferences;
     HelperModel helperDetails;
     ProgressDialog pClick;
+
     private String deviceId;
     private ImageView helperLogin;
     private int TIME_DELAY = 30000;
     private boolean stopThread;
-    byte[] cipherText;
     private TokenManager tokenManager;
     private DatabaseHelper databaseHelper;
-
-    Cipher cipher;
-     SecretKeySpec key;
     private AlgorithmParameterSpec spec;
-
-    SecretKey secretKey;
-    byte[] secretKeyen;
-    String strSecretKey;
-    byte[] IV = new byte[16];
-    KeyGenerator keyGenerator;
-    SecureRandom random;
-    String sonuc;
-
     private Handler handler = new Handler() {
         public void handleMessage(android.os.Message msg) {
             switch (msg.what) {
@@ -110,25 +102,11 @@ public class HelperLogin extends AppCompatActivity {
     };
 
 
-    Thread thread = new Thread(new Runnable() {
-        @Override
-        public void run() {
-            while (!Thread.interrupted() && !stopThread)
-                try {
-                    Thread.sleep(TIME_DELAY);
-                    runOnUiThread(new Runnable() // start actions in UI thread
-                    {
-                        @Override
-                        public void run() {
-                            Log.i("TAG", "run:0000000000000000000000 ");
-                            int[] value = {};
-                            M1CardHandlerMosambee.read_miCard(handler, value, "HelperLogin");
-                        }
-                    });
-                } catch (InterruptedException e) {
-                }
-        }
-    });
+    public static byte[] decoderfun(String enval) {
+        byte[] conVal = Base64.decode(enval, Base64.DEFAULT);
+        return conVal;
+
+    }
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -150,33 +128,31 @@ public class HelperLogin extends AppCompatActivity {
         stopThread = false;
         int[] value = {};
         M1CardHandlerMosambee.read_miCard(handler, value, "HelperLogin");
-        thread.start();
-        byte[] data = Base64.decode("eyJpdiI6IjhhaUFla25NVGtiSGdkeGJlbkdvWkE9PSIsInZhbHVlIjoianBYWXpabHVSamQrblhmbGtQdGtTQT09IiwibWFjIjoiOGE4NThhODhmMmQwYWM1MTg4NGY1MTc2ZTQ4NmE5ZmVhNWYzNWQ5ZDRlN2JhYWE1ZmU5NDk0MDM5MTgzYzhiNSJ9", Base64.DEFAULT);
-        try {
-            String text = new String(data, "UTF-8");
-            try {
-                JSONObject obj = new JSONObject(text);
-                try {
-//                    Log.i("TAG", "onCreate: "+text+"    "+obj.get("iv").toString()+obj.get("value").toString()+obj.getString("mac"));
-//                    Log.i("TAG", "onCreate: "+  decryptValue(SECRET_KEY.getBytes(),obj.get("iv").toString(),obj.get("value").toString(),obj.getString("mac")));
-                    Encrypt.AesEncryptionData aesEncryptionData=new Encrypt.AesEncryptionData(obj.get("iv").toString(),obj.get("value").toString(),obj.getString("mac"));
-                    Log.i("TAG", "onCreate: "+Encrypt.decrypt(SECRET_KEY.getBytes(),obj.get("iv").toString(),obj.get("value").toString(),obj.getString("mac")));
-                } catch (Exception e) {
-                    System.out.println(e.getLocalizedMessage());
-                    e.printStackTrace();
-                }
 
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
 
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
+//        byte[] data = Base64.decode("eyJpdiI6ImdRQ0RVa1MxTC84UzNZNUxmVG1VWVFcdTAwM2RcdTAwM2QiLCJtYWMiOiIxODZmN2FhOWU4NWY3MjhmNmIyOTc1YmM3OTJiYmU5ODI1NzNiZjRmYjYxYzJlYTZjYmVmMjQ1MWYwMWQwOTJmIiwidmFsdWUiOiJiREJsK0ViaGRJNUF5bFZpUTErakV6aXQxSTh1VHEwbGMyUHNtaTZ6UDd3XHUwMDNkIn0=", Base64.DEFAULT);
+//        try {
+//            String text = new String(data, "UTF-8");
+//            try {
+//                JSONObject obj = new JSONObject(text);
+//                try {
+////                    Log.i("TAG", "onCreate: "+text+"    "+obj.get("iv").toString()+obj.get("value").toString()+obj.getString("mac"));
+////                    Log.i("TAG", "onCreate: "+  decryptValue(SECRET_KEY.getBytes(),obj.get("iv").toString(),obj.get("value").toString(),obj.getString("mac")));
+//                    Log.i("TAG", "onCreate: "+Encrypt.decrypt(value1,obj.get("iv").toString(),obj.get("value").toString(),obj.getString("mac")));
+//                } catch (Exception e) {
+//                    System.out.println(e.getLocalizedMessage());
+//                    e.printStackTrace();
+//                }
+//
+//            } catch (JSONException e) {
+//                e.printStackTrace();
+//            }
+//        } catch (UnsupportedEncodingException e) {
+//            e.printStackTrace();
+//        }
 //
 
     }
-
 
     private void setHelperId(String toString) {
         if (databaseHelper.listBlockList().size() != 0) {
@@ -190,10 +166,12 @@ public class HelperLogin extends AppCompatActivity {
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    pClick.setMessage("कृपया पर्खनुहोस्...");
-                                    pClick.setCancelable(true);
-                                    pClick.show();
-                                    sendHelperDetail(deviceId, card_helper_id,pClick);
+                                    if (!isFinishing()) {
+                                        pClick.setMessage("कृपया पर्खनुहोस्...");
+                                        pClick.setCancelable(true);
+                                        pClick.show();
+                                    }
+                                    sendHelperDetail(deviceId, card_helper_id, pClick);
                                 }
                             });
 
@@ -201,7 +179,7 @@ public class HelperLogin extends AppCompatActivity {
                             Toast.makeText(HelperLogin.this, "कार्ड देखाउनु होस् ", Toast.LENGTH_SHORT).show();
                         }
                     } else {
-                        Toast.makeText(HelperLogin.this, UtilStrings.network, Toast.LENGTH_SHORT).show();
+                        showNoInternet();
                     }
                 } else {
                     Toast.makeText(HelperLogin.this, "यो कार्ड ब्लक गरिएको छ।", Toast.LENGTH_SHORT).show();
@@ -213,7 +191,7 @@ public class HelperLogin extends AppCompatActivity {
 
             if (GeneralUtils.isNetworkAvailable(HelperLogin.this)) {
                 if (deviceId != null && card_helper_id != null) {
-                   pClick.setMessage("कृपया पर्खनुहोस्...");
+                    pClick.setMessage("कृपया पर्खनुहोस्...");
                     pClick.setCancelable(true);
                     pClick.show();
                     sendHelperDetail(deviceId, card_helper_id, pClick);
@@ -223,7 +201,7 @@ public class HelperLogin extends AppCompatActivity {
                     Toast.makeText(HelperLogin.this, "कार्ड देखाउनु होस् ", Toast.LENGTH_SHORT).show();
                 }
             } else {
-                Toast.makeText(HelperLogin.this, UtilStrings.network, Toast.LENGTH_SHORT).show();
+                showNoInternet();
             }
         }
     }
@@ -245,10 +223,58 @@ public class HelperLogin extends AppCompatActivity {
         super.onDestroy();
     }
 
+   public void showNoInternet() {
+        try {
+            BeepLEDTest.beepError();
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+        new SweetAlertDialog(HelperLogin.this, SweetAlertDialog.ERROR_TYPE)
+                .setTitleText("Error!")
+                .setContentText("No internet")
+                .setConfirmText("close")
+                .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                    @Override
+                    public void onClick(SweetAlertDialog sDialog) {
+
+                        sDialog.dismissWithAnimation();
+                    }
+                })
+                .show();
+    }
+
     private void sendHelperDetail(String deviceId, String card_helper_id, ProgressDialog pClick) {
+        byte[] value1 = decoderfun(SECRET_KEY);
+        try {
+            Log.i("TAG", "sendHelperDetail: " + Encrypt.encrypt(value1, card_helper_id));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        byte[] data = new byte[0];
+        try {
+            data = Base64.decode(Encrypt.encrypt(value1, card_helper_id), Base64.DEFAULT);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        String text = null;
+        try {
+            text = new String(data, "UTF-8");
+            try {
+                JSONObject obj = new JSONObject(text);
+                try {
+                    Log.i("TAG", "onCreate: " + Encrypt.decrypt(value1, obj.get("iv").toString(), obj.get("value").toString(), obj.getString("mac")));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+
         RetrofitInterface retrofitInterface = ServerConfigNew.createService(RetrofitInterface.class);
-
-
 
         Call<HelperModel> call = retrofitInterface.helperLogin(card_helper_id, deviceId);
         call.enqueue(new Callback<HelperModel>() {
@@ -286,7 +312,7 @@ public class HelperLogin extends AppCompatActivity {
 
             @Override
             public void onFailure(Call<HelperModel> call, Throwable t) {
-                 pClick.dismiss();
+                pClick.dismiss();
                 if (t.getMessage() != null) {
                     Toast.makeText(HelperLogin.this, t.getMessage(), Toast.LENGTH_SHORT).show();
                 }
@@ -307,40 +333,7 @@ public class HelperLogin extends AppCompatActivity {
             Toast.makeText(this, "something went wrong", Toast.LENGTH_SHORT).show();
         }
     }
-    public  String decryptValue(byte[] keyValue, String ivValue, String encryptedData, String macValue) throws Exception {
-        Key key = new SecretKeySpec(keyValue, "AES");
-        byte[] iv = Base64.decode(ivValue.getBytes("UTF-8"), Base64.DEFAULT);
-        byte[] decodedValue = Base64.decode(encryptedData.getBytes("UTF-8"), Base64.DEFAULT);
 
-        SecretKeySpec macKey = new SecretKeySpec(keyValue, "HmacSHA256");
-        Mac hmacSha256 = Mac.getInstance("HmacSHA256");
-        hmacSha256.init(macKey);
-        hmacSha256.update(ivValue.getBytes("UTF-8"));
-        byte[] calcMac = hmacSha256.doFinal(encryptedData.getBytes("UTF-8"));
-        byte[] mac = Hex.decodeHex(macValue.toCharArray());
-        if (!secureEquals(calcMac, mac))
-            return null; // or throw exception
-
-        Cipher c = Cipher.getInstance("AES/CBC/PKCS7Padding"); // or PKCS5Padding
-        c.init(Cipher.DECRYPT_MODE, key, new IvParameterSpec(iv));
-        byte[] decValue = c.doFinal(decodedValue);
-
-        int firstQuoteIndex = 0;
-        while(decValue[firstQuoteIndex] != (byte)'"') firstQuoteIndex++;
-        return new String(Arrays.copyOfRange(decValue, firstQuoteIndex + 1, decValue.length-2));
-    }
-
-    /* Constant-time compare to prevent timing attacks on invalid authentication tags. */
-    public static boolean secureEquals(final byte[] known, final byte[] user) {
-        int knownLen = known.length;
-        int userLen = user.length;
-
-        int result = knownLen ^ userLen;
-        for (int i = 0; i < knownLen; i++) {
-            result |= known[i] ^ user[i % userLen];
-        }
-        return result == 0;
-    }
     @Override
     public void onBackPressed() {
         stopThread = true;

@@ -43,7 +43,7 @@ public class Printer {
 
         Bitmap icon = BitmapFactory.decodeResource(context.getResources(), R.drawable.person);
         Bitmap icon1 = BitmapFactory.decodeResource(context.getResources(), R.drawable.download);
-        Bitmap smallIcon = GeneralUtils.getResizedBitmap(icon, 40);
+        Bitmap smallIcon = GeneralUtils.getResizedBitmap(icon, 35);
         Bitmap img=GeneralUtils.mergeToPin(icon1,smallIcon);
         PrintImage(mSDKManager, img,bmpHeader,bmp,handler);
     }

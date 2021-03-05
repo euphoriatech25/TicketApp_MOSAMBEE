@@ -29,6 +29,7 @@ import android.util.Log;
 import com.technosales.net.buslocationannouncement.R;
 import com.technosales.net.buslocationannouncement.activity.TicketAndTracking;
 import com.technosales.net.buslocationannouncement.helper.DatabaseHelper;
+import com.technosales.net.buslocationannouncement.mosambeesupport.M1CardHandlerMosambee;
 import com.technosales.net.buslocationannouncement.pojo.AdvertiseList;
 import com.technosales.net.buslocationannouncement.pojo.RouteStationList;
 import com.technosales.net.buslocationannouncement.utils.GeneralUtils;
@@ -196,9 +197,10 @@ public class TrackingController implements PositionProvider.PositionListener, Ne
                             preOrderId = currentOrderId;
 
                             Intent i1 = new Intent(context, TicketAndTracking.class);
+                            i1.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                            i1.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
                             i1.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                             context.startActivity(i1);
-                            context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.LOCATION_CHANGE, true).apply();
                             speakStation(routeStationList.station_name, nextStation, currentOrderId);
                         }
                         break;
@@ -258,9 +260,10 @@ public class TrackingController implements PositionProvider.PositionListener, Ne
                             preOrderId = currentOrderId;
 
                             Intent i1 = new Intent(context, TicketAndTracking.class);
+                            i1.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                            i1.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
                             i1.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                             context.startActivity(i1);
-                            context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.LOCATION_CHANGE, true).apply();
+                            context.startActivity(i1);
                             speakStation(routeStationList.station_name, nextStation, currentOrderId);
                         }
                         break;

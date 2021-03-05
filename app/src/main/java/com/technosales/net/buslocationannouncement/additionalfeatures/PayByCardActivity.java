@@ -178,7 +178,6 @@ public class PayByCardActivity extends BaseActivity {
 
                     case 404:
                         Toast.makeText(PayByCardActivity.this, "Card is not authorized", Toast.LENGTH_SHORT).show();
-                        getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.LOCATION_CHANGE, true).apply();
                         startActivity(new Intent(PayByCardActivity.this,TicketAndTracking.class));
                         finish();
                     break;
@@ -209,7 +208,7 @@ public class PayByCardActivity extends BaseActivity {
                             } catch (RemoteException e) {
                                 e.printStackTrace();
                             }
-                            Log.i(TAG, "handleMessage: "+ticketId+""+tranCurrentHash);
+
                             if (source != null && source.equalsIgnoreCase(UtilStrings.PLACE)) {
                                 price(ticketId,tranCurrentHash);
                             } else if (source != null && source.equalsIgnoreCase(UtilStrings.PRICE)) {
@@ -232,7 +231,6 @@ public class PayByCardActivity extends BaseActivity {
         @Override
         public void run() {
             while (!Thread.interrupted() && !stopThread4) {
-                Log.i(TAG, "run: " + ticketSecondId + ticketSecondAmount + ticketSecondHash);
                 if (!ticketSecondId.equalsIgnoreCase("") && !ticketSecondAmount.equalsIgnoreCase("")&&!ticketSecondHash.equalsIgnoreCase("")) {
                     thread3.interrupt();
                     stopThread4 = true;
@@ -246,7 +244,6 @@ public class PayByCardActivity extends BaseActivity {
         @Override
         public void run() {
             while (!Thread.interrupted() && !stopThread3) {
-                Log.i(TAG, "run: thread 2 : " + (!ticketFirstId.equalsIgnoreCase("") && !ticketFirstAmount.equalsIgnoreCase("") && !ticketFirstHash.equalsIgnoreCase("")));
                 if (!ticketFirstId.equalsIgnoreCase("") && !ticketFirstAmount.equalsIgnoreCase("") && !ticketFirstHash.equalsIgnoreCase("")) {
                     thread2.interrupt();
                     stopThread3 = true;
@@ -493,7 +490,6 @@ public class PayByCardActivity extends BaseActivity {
                             String[]newTranNoList={newTranNo};
                             int[]newTranNoListBlock={CUSTOMER_TRANSACTION_NO};
                             M1CardHandlerMosambee.write_miCard(handlerTransaction, newTranNoList, newTranNoListBlock,"OfflineTransactionNoUpdate");
-
                             startTransactionProcess(hashFromFirstTransaction);
                         }
                     } else if (response.code() == 400) {
@@ -506,8 +502,8 @@ public class PayByCardActivity extends BaseActivity {
                             String newTranNo = Base64.encodeToString("0".getBytes(), Base64.DEFAULT);
                             String[]newTranNoList={newTranNo};
                             int[]newTranNoListBlock={CUSTOMER_TRANSACTION_NO};
-                           M1CardHandlerMosambee.write_miCard(handlerTransaction, newTranNoList, newTranNoListBlock,"OfflineTransactionNoUpdate");
-                            startTransactionProcess(latestTransHash);
+                            M1CardHandlerMosambee.write_miCard(handlerTransaction, newTranNoList, newTranNoListBlock,"OfflineTransactionNoUpdate");
+                            startTransactionProcess(transactionHash);
                         }
                     } else if (response.code() == 404) {
                         firstTransactionStatus=404;
@@ -758,7 +754,6 @@ public class PayByCardActivity extends BaseActivity {
                         public void onClick(SweetAlertDialog sweetAlertDialog) {
                             sweetAlertDialog.dismiss();
                             sweetAlertDialog.dismissWithAnimation();
-                            getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.LOCATION_CHANGE, true).apply();
                             startActivity(new Intent(PayByCardActivity.this, TicketAndTracking.class));
                             finish();
                         }
@@ -787,7 +782,6 @@ public class PayByCardActivity extends BaseActivity {
                         public void onClick(SweetAlertDialog sDialog) {
                             sDialog.dismiss();
                             sDialog.dismissWithAnimation();
-                            getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.LOCATION_CHANGE, true).apply();
                             startActivity(new Intent(PayByCardActivity.this, TicketAndTracking.class));
                             finish();
                         }
