@@ -61,7 +61,7 @@
         app:colorBorder="#2403fc"
         app:on="false" />
 
-    
+
     <TextView
         android:id="@+id/mode_selector"
         android:layout_width="wrap_content"
@@ -80,6 +80,35 @@
         android:text="Mode"
         android:textColor="@android:color/black"
         android:textStyle="bold|italic" />
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:gravity="end"
+        android:layout_marginEnd="10dp"
+        android:layout_marginTop="25dp"
+        android:layout_below="@+id/mode_selector"
+        android:layout_toEndOf="@+id/normalDiscountToggle">
+
+        <TextView
+            android:text="यात्रीहरूको संख्या :- "
+            android:layout_width="wrap_content"
+            android:drawableTint="@android:color/black"
+            android:gravity="center"
+            android:textColor="@android:color/black"
+            android:textStyle="bold|italic"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/totalPassenger"
+            android:drawableTint="@android:color/black"
+            android:gravity="center"
+            android:textColor="@android:color/black"
+            android:textStyle="bold|italic"
+            android:text="0"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/priceListView"

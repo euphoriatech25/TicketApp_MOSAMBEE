@@ -23,6 +23,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
@@ -69,6 +70,7 @@ import com.technosales.net.buslocationannouncement.BuildConfig;
 import com.technosales.net.buslocationannouncement.R;
 import com.technosales.net.buslocationannouncement.pojo.ApiError;
 import com.technosales.net.buslocationannouncement.pojo.CallResponse;
+import com.technosales.net.buslocationannouncement.pojo.PassengerCountList;
 import com.technosales.net.buslocationannouncement.serverconn.RetrofitInterface;
 import com.technosales.net.buslocationannouncement.serverconn.ServerConfigNew;
 import com.technosales.net.buslocationannouncement.serverconn.ServiceConfig;
@@ -136,6 +138,7 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
     private TextView route_name;
     private TextView mode_selector;
     private ImageView settingMenu;
+    private TextView totalPassenger;
     private Drawer mainDrawer;
     private Toolbar mainToolBar;
     private int totalTickets;
@@ -162,7 +165,7 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
     private AlertDialog progressDownloadDialog;
     private TextView percentageProgress;
     Handler handler = new Handler();
-
+     int a;
     private Handler printHandler = new Handler() {
         public void handleMessage(android.os.Message msg) {
             switch (msg.what) {
@@ -173,7 +176,18 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
             }
         }
     };
-
+   Thread thread=new Thread(new Runnable() {
+        @Override
+        public void run() {
+            while (!Thread.interrupted())
+                try {
+                    Thread.sleep(30000);
+                    a=a+1;
+                    Log.i("TAG", "run: "+a);
+                } catch (InterruptedException e) {
+                }
+        }
+    });
     public static Bitmap getBitmapFromView(View view) {
         Bitmap returnedBitmap = Bitmap.createBitmap(view.getWidth(), view.getHeight(), Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(returnedBitmap);
@@ -223,6 +237,7 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
         helperName = findViewById(R.id.helperName);
         mainToolBar = findViewById(R.id.mainToolBar);
         mode_selector = findViewById(R.id.mode_selector);
+        totalPassenger = findViewById(R.id.totalPassenger);
         settingMenu = findViewById(R.id.settingMenu);
         setSupportActionBar(mainToolBar);
         Drawable drawable = ContextCompat.getDrawable(getApplicationContext(), R.mipmap.helper_choose);
@@ -237,7 +252,7 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
         mode = preferences.getInt(UtilStrings.MODE, UtilStrings.MODE_3);
 
         preferences.edit().putInt(UtilStrings.ROUTE_LIST_SIZE, databaseHelper.routeStationLists().size()).apply();
-
+        List<PassengerCountList>passengerCountLists=databaseHelper.passengerCountLists();
 
         route_name.setSelected(true);
         route_name.setText(preferences.getString(UtilStrings.DEVICE_NAME, "") + "-" + preferences.getString(UtilStrings.ROUTE_NAME, ""));
@@ -245,22 +260,7 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
         normalDiscountToggle.setLabelOn(getString(R.string.discount_rate));
         normalDiscountToggle.setLabelOff(getString(R.string.normal_rate));
         normalDiscountToggle.setOn(false);
-
-  /*normalDiscountToggle.setColorOff(getResources().getColor(android.R.color.black));
-  normalDiscountToggle.setColorOn(getResources().getColor(R.color.colorAccent));*/
-
-
-
-//        onLocationChanged=preferences.getBoolean(UtilStrings.LOCATION_CHANGE, false);
-//
-//       if(onLocationChanged){
-//           getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.LOCATION_CHANGE, false).apply();
-//           startActivity(getIntent());
-//           finish();
-//           overridePendingTransition(0, 0);
-//       }
-
-
+      thread.start();
 
         initializeDrawer();
         int spanCount = 4;
@@ -299,6 +299,13 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
                 }
             }
         }
+        int totalCount=0;
+        for (int i1 = 0; i1 < passengerCountLists.size(); i1++) {
+            totalCount=totalCount+passengerCountLists.get(i1).passenger_count;
+            Log.i("TAG", "onCreate: "+passengerCountLists.get(i1).passenger_count+":: "+passengerCountLists.get(i1).passenger_lat+":: "+passengerCountLists.get(i1).passenger_lng);
+        }
+        totalPassenger.setText(String.valueOf(totalCount));
+//        Log.i("TAG", "onCreate: "+passengerCountLists.get(2).passenger_lat+" :: "+passengerCountLists.get(2).passenger_lng);
 
         //        databaseHelper.getWritableDatabase().execSQL("DELETE FROM " + DatabaseHelper.PRICE_TABLE);
 
@@ -503,7 +510,9 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
            finish();
         }
 
+
     }
+
 
     public String getNetworkInfo() {
         if (GeneralUtils.isNetworkAvailable(this)) {

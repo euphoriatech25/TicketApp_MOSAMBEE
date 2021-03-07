@@ -31,6 +31,7 @@ import com.technosales.net.buslocationannouncement.R;
 import com.technosales.net.buslocationannouncement.activity.TicketAndTracking;
 import com.technosales.net.buslocationannouncement.helper.DatabaseHelper;
 import com.technosales.net.buslocationannouncement.mosambeesupport.Printer;
+import com.technosales.net.buslocationannouncement.pojo.PassengerCountList;
 import com.technosales.net.buslocationannouncement.pojo.PriceList;
 import com.technosales.net.buslocationannouncement.pojo.RouteStationList;
 import com.technosales.net.buslocationannouncement.pojo.TicketInfoList;
@@ -47,9 +48,10 @@ import static com.technosales.net.buslocationannouncement.utils.UtilStrings.STAT
 import static com.technosales.net.buslocationannouncement.utils.UtilStrings.TRANSACTION_TYPE_PAYMENT;
 
 public class PriceAdapterPlaces extends RecyclerView.Adapter<PriceAdapterPlaces.MyViewHolder> {
+    Handler handler;
     private List<PriceList> priceLists;
     private Context context;
-    private SharedPreferences preferences,preferencesHelper;
+    private SharedPreferences preferences, preferencesHelper;
     private int total_tickets;
     private int total_collections;
     private int total_collections_cash;
@@ -69,12 +71,12 @@ public class PriceAdapterPlaces extends RecyclerView.Adapter<PriceAdapterPlaces.
     private int orderPos = 0;
     private String toGetOff = "";
     private int route_type;
-    Handler handler;
-
+    double endLat;
+    double endLng;
     public PriceAdapterPlaces(List<PriceList> priceLists, Context context, Handler printHandler) {
         this.priceLists = priceLists;
         this.context = context;
-        this.handler=printHandler;
+        this.handler = printHandler;
     }
 
 
@@ -112,7 +114,7 @@ public class PriceAdapterPlaces extends RecyclerView.Adapter<PriceAdapterPlaces.
 ///startProcess
                 preferences = context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0);
                 preferencesHelper = context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES_HELPER, 0);
-                helperId=preferencesHelper.getString(ID_HELPER,"");
+                helperId = preferencesHelper.getString(ID_HELPER, "");
                 databaseHelper = new DatabaseHelper(context);
                 routeStationLists = databaseHelper.routeStationLists();
                 route_type = preferences.getInt(UtilStrings.ROUTE_TYPE, UtilStrings.NON_RING_ROAD);
@@ -124,8 +126,8 @@ public class PriceAdapterPlaces extends RecyclerView.Adapter<PriceAdapterPlaces.
                 for (int i = 0; i < routeStationLists.size(); i++) {
                     double startLat = Double.parseDouble(preferences.getString(UtilStrings.LATITUDE, "0.0"));
                     double startLng = Double.parseDouble(preferences.getString(UtilStrings.LONGITUDE, "0.0"));
-                    double endLat = Double.parseDouble(routeStationLists.get(i).station_lat);
-                    double endLng = Double.parseDouble(routeStationLists.get(i).station_lng);
+                     endLat = Double.parseDouble(routeStationLists.get(i).station_lat);
+                     endLng = Double.parseDouble(routeStationLists.get(i).station_lng);
                     distance = GeneralUtils.calculateDistance(startLat, startLng, endLat, endLng);
                     if (i == 0) {
                         nearest = distance;
@@ -133,7 +135,7 @@ public class PriceAdapterPlaces extends RecyclerView.Adapter<PriceAdapterPlaces.
                     } else {
                         if (distance < nearest) {
                             nearest = distance;
-                             positionNew = i;
+                            positionNew = i;
                             nearest_name = routeStationLists.get(i).station_name;
                             if (route_type == UtilStrings.NON_RING_ROAD) {
                                 nearestDistance = routeStationLists.get(i).station_distance;
@@ -263,18 +265,18 @@ public class PriceAdapterPlaces extends RecyclerView.Adapter<PriceAdapterPlaces.
                                 switch (item) {
 
                                     case 0: //card
-                                        payByCard(priceList, toGetOff, nearest_name,position);
+                                        payByCard(priceList, toGetOff, nearest_name, position);
                                         dialog1.dismiss();
                                         dialog.dismiss();
 
                                         break;
                                     case 1: //cash
-                                        payByCash(priceList,position);
+                                        payByCash(priceList, position);
                                         dialog1.dismiss();
                                         dialog.dismiss();
                                         break;
                                     case 2: //QR Code
-                                        payByQR(priceList, toGetOff, nearest_name,position);
+                                        payByQR(priceList, toGetOff, nearest_name, position);
                                         dialog1.dismiss();
                                         dialog.dismiss();
                                         break;
@@ -434,6 +436,13 @@ public class PriceAdapterPlaces extends RecyclerView.Adapter<PriceAdapterPlaces.
                 intent.putExtra(UtilStrings.TICKET_TYPE, ticketType);
                 intent.putExtra(UtilStrings.DISCOUNT_TYPE, discountType);
             }
+
+            PassengerCountList passengerCountList = new PassengerCountList();
+            passengerCountList.passenger_count = 1;
+            passengerCountList.passenger_lat = endLat;
+            passengerCountList.passenger_lng = endLng;
+            databaseHelper.insertPassengerCountList(passengerCountList);
+
             ((TicketAndTracking) context).finish();
             context.startActivity(intent);
         } else {
@@ -443,7 +452,7 @@ public class PriceAdapterPlaces extends RecyclerView.Adapter<PriceAdapterPlaces.
     }
 
     private void payByCash(PriceList priceList, int position) {
-        processingPayment(priceList,position);
+        processingPayment(priceList, position);
     }
 
     private void payByQR(PriceList priceList, String toGetOff, String nearest_name, int position) {
@@ -465,6 +474,13 @@ public class PriceAdapterPlaces extends RecyclerView.Adapter<PriceAdapterPlaces.
                 intent.putExtra(UtilStrings.TICKET_TYPE, ticketType);
                 intent.putExtra(UtilStrings.DISCOUNT_TYPE, discountType);
             }
+
+            PassengerCountList passengerCountList = new PassengerCountList();
+            passengerCountList.passenger_count = 1;
+            passengerCountList.passenger_lat = endLat;
+            passengerCountList.passenger_lng = endLng;
+            databaseHelper.insertPassengerCountList(passengerCountList);
+
             ((TicketAndTracking) context).finish();
             context.startActivity(intent);
         } else {
@@ -494,7 +510,7 @@ public class PriceAdapterPlaces extends RecyclerView.Adapter<PriceAdapterPlaces.
 
 
             String helperAmt = preferencesHelper.getString(UtilStrings.AMOUNT_HELPER, "");
-            int newHelperAmt = Integer.parseInt(helperAmt) +  Integer.parseInt(priceList.price_value);
+            int newHelperAmt = Integer.parseInt(helperAmt) + Integer.parseInt(priceList.price_value);
             preferencesHelper.edit().putString(UtilStrings.AMOUNT_HELPER, String.valueOf(newHelperAmt)).apply();
 
 
@@ -521,7 +537,7 @@ public class PriceAdapterPlaces extends RecyclerView.Adapter<PriceAdapterPlaces.
 //                valueOfTickets = String.valueOf(total_tickets);
 //            }
 
-            valueOfTickets = String.format("%04d",total_tickets);
+            valueOfTickets = String.format("%04d", total_tickets);
             dateConverter = new DateConverter();
             String dates[] = GeneralUtils.getFullDate().split("-");
             int dateYear = Integer.parseInt(dates[0]);
@@ -536,42 +552,49 @@ public class PriceAdapterPlaces extends RecyclerView.Adapter<PriceAdapterPlaces.
             int day = outputOfConversion.getDay();
             Log.i("getNepaliDate", "year=" + year + ",month:" + month + ",day:" + day);
 
-            String isOnline=  ((TicketAndTracking) context).getNetworkInfo();
+            String isOnline = ((TicketAndTracking) context).getNetworkInfo();
 
 
             TicketInfoList ticketInfoList = new TicketInfoList();
-            ticketInfoList.ticket_id = deviceId.substring(deviceId.length() - 2) +  GeneralUtils.getTicketDate() + GeneralUtils.getTicketTime() + "" + valueOfTickets;
+            ticketInfoList.ticket_id = deviceId.substring(deviceId.length() - 2) + GeneralUtils.getTicketDate() + GeneralUtils.getTicketTime() + "" + valueOfTickets;
             ticketInfoList.transactionAmount = String.valueOf(Integer.parseInt(priceList.price_value));
             ticketInfoList.helper_id = helperId;
-            ticketInfoList.device_id=deviceId;
-            ticketInfoList.device_time = GeneralUtils.getFullDate()+" "+GeneralUtils.getTime();
-            ticketInfoList.transactionMedium=UtilStrings.PAYMENT_CASH;
+            ticketInfoList.device_id = deviceId;
+            ticketInfoList.device_time = GeneralUtils.getFullDate() + " " + GeneralUtils.getTime();
+            ticketInfoList.transactionMedium = UtilStrings.PAYMENT_CASH;
             ticketInfoList.transactionType = TRANSACTION_TYPE_PAYMENT;
             ticketInfoList.lat = latitude;
             ticketInfoList.lng = longitude;
             ticketInfoList.userType = ticketType;
-            ticketInfoList.transactionFee=NULL;
-            ticketInfoList.transactionCommission=NULL;
-            ticketInfoList.isOnline=isOnline;
-            ticketInfoList.offlineRefId=NULL;
-            ticketInfoList.status=STATUS;
-            ticketInfoList.passenger_id=NULL;
-            ticketInfoList.referenceHash=NULL;
-            ticketInfoList.referenceId=NULL;
+            ticketInfoList.transactionFee = NULL;
+            ticketInfoList.transactionCommission = NULL;
+            ticketInfoList.isOnline = isOnline;
+            ticketInfoList.offlineRefId = NULL;
+            ticketInfoList.status = STATUS;
+            ticketInfoList.passenger_id = NULL;
+            ticketInfoList.referenceHash = NULL;
+            ticketInfoList.referenceId = NULL;
             databaseHelper.insertTicketInfo(ticketInfoList);
 
 
-            String printTransaction = "बस नम्बर :- "+busName + "(नगद)" + "\n" +
-                    "टिकट नम्बर :-"+ GeneralUtils.getUnicodeNumber(ticketInfoList.ticket_id) + "\n" +
-                    "रकम :- "+ "रु." + GeneralUtils.getUnicodeNumber(ticketInfoList.transactionAmount) + discountType + "\n" +
-                    "दूरी :-"+ nearest_name + "-" + toGetOff + "\n" +
+            String printTransaction = "बस नम्बर :- " + busName + "(नगद)" + "\n" +
+                    "टिकट नम्बर :-" + GeneralUtils.getUnicodeNumber(ticketInfoList.ticket_id) + "\n" +
+                    "रकम :- " + "रु." + GeneralUtils.getUnicodeNumber(ticketInfoList.transactionAmount) + discountType + "\n" +
+                    "दूरी :-" + nearest_name + "-" + toGetOff + "\n" +
                     "जारी मिति :-" + GeneralUtils.getNepaliMonth(String.valueOf(month)) + " "
                     + GeneralUtils.getUnicodeNumber(String.valueOf(day)) + " " +
                     GeneralUtils.getUnicodeNumber(GeneralUtils.getTime());
 
 
-                  ((TicketAndTracking)context).recreate();
-                  Toast.makeText(context, "टिकट सफलतापूर्वक काटियो।", Toast.LENGTH_SHORT).show();
+            ((TicketAndTracking) context).recreate();
+            Toast.makeText(context, "टिकट सफलतापूर्वक काटियो।", Toast.LENGTH_SHORT).show();
+
+            Log.i("TAG", "processingPayment: "+endLat+"::::"+endLng);
+            PassengerCountList passengerCountList = new PassengerCountList();
+            passengerCountList.passenger_count = 1;
+            passengerCountList.passenger_lat = endLat;
+            passengerCountList.passenger_lng = endLng;
+            databaseHelper.insertPassengerCountList(passengerCountList);
 
 //                    busName +"\n" +
 //                    GeneralUtils.getUnicodeNumber(ticketInfoList.ticket_id) +"(नगद)"+ "\n" +
@@ -580,7 +603,6 @@ public class PriceAdapterPlaces extends RecyclerView.Adapter<PriceAdapterPlaces.
 //                    GeneralUtils.getNepaliMonth(String.valueOf(month)) + " "
 //                    + GeneralUtils.getUnicodeNumber(String.valueOf(day)) + " " +
 //                    GeneralUtils.getUnicodeNumber(GeneralUtils.getTime());
-
 
 
 //            String status = PrinterTester.getInstance().getStatus();

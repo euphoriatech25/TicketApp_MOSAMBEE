@@ -136,11 +136,6 @@ public class TrackingController implements PositionProvider.PositionListener, Ne
 
     @Override
     public void onPositionUpdate(Position position) {
-        double lat=position.getLatitude();
-        double lng=position.getLatitude();
-
-        context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putString(UtilStrings.LATITUDE_CONSTANT, String.valueOf(lat)).apply();
-        context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putString(UtilStrings.LATITUDE_CONSTANT, String.valueOf(lng)).apply();
 
         try {
             StatusActivity.addMessage(context.getString(R.string.status_location_update));
@@ -199,8 +194,10 @@ public class TrackingController implements PositionProvider.PositionListener, Ne
                             Intent i1 = new Intent(context, TicketAndTracking.class);
                             i1.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                             i1.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                            i1.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
                             i1.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                             context.startActivity(i1);
+
                             speakStation(routeStationList.station_name, nextStation, currentOrderId);
                         }
                         break;
@@ -262,6 +259,7 @@ public class TrackingController implements PositionProvider.PositionListener, Ne
                             Intent i1 = new Intent(context, TicketAndTracking.class);
                             i1.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                             i1.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                            i1.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
                             i1.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                             context.startActivity(i1);
                             speakStation(routeStationList.station_name, nextStation, currentOrderId);

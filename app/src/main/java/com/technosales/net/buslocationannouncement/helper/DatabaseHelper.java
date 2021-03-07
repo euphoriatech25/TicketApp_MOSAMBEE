@@ -31,6 +31,7 @@ import com.technosales.net.buslocationannouncement.network.TicketInfoDataPush;
 import com.technosales.net.buslocationannouncement.pojo.AdvertiseList;
 import com.technosales.net.buslocationannouncement.pojo.BlockListModel;
 import com.technosales.net.buslocationannouncement.pojo.HelperList;
+import com.technosales.net.buslocationannouncement.pojo.PassengerCountList;
 import com.technosales.net.buslocationannouncement.pojo.PriceList;
 import com.technosales.net.buslocationannouncement.pojo.RouteStationList;
 import com.technosales.net.buslocationannouncement.pojo.TicketInfoList;
@@ -73,6 +74,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String TICKET_TABLE = "ticket_table";
     public static final String TICKET_TABLE_TXT = "ticket_table_txt";
     public static final String BLOCK_LIST_TABLE_TXT = "block_list_table_txt";
+    public static final String PASSENGER_COUNT_TABLE = "passenger_count_txt";
     public static final String TICKET_ID = "ticket_id";
     public static final String TRANSACTION_TYPE = "transactionType";
     public static final String TRANSACTION_MEDIUM = "transactionMedium";
@@ -101,7 +103,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String ADVERTISEMENT_COUNT = "ad_count";
     public static final String ADVERTISEMENT_TYPE = "ad_type";
     private static final String STATION_NAME_ENG = "name_english";
-    private static final String CARD_ID = "card_id";
+
+    private static final String NUMBER_OF_PASSENGERS = "no_of_passensers";
+    private static final String PASSENGER_LAT = "passenger_lat";
+    private static final String PASSENGER_LNG = "passenger_lng";
     private final Context context;
     private SQLiteDatabase db;
 
@@ -212,6 +217,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 MOBILE_NO + " TEXT)");
 
 
+        db.execSQL("CREATE TABLE " + PASSENGER_COUNT_TABLE + "(" +
+                "id INTEGER PRIMARY KEY AUTOINCREMENT," +
+                NUMBER_OF_PASSENGERS + " TEXT," +  PASSENGER_LAT + " TEXT," +
+                PASSENGER_LNG + " TEXT)");
+
+
     }
 
     @Override
@@ -234,6 +245,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS " + TICKET_TABLE_TXT + ";");
         db.execSQL("DROP TABLE IF EXISTS " + ADVERTISEMENT_TABLE + ";");
         db.execSQL("DROP TABLE IF EXISTS " + BLOCK_LIST_TABLE_TXT + ";");
+        db.execSQL("DROP TABLE IF EXISTS " + PASSENGER_COUNT_TABLE + ";");
         onCreate(db);
     }
 
@@ -325,6 +337,17 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         contentValues.put(IDENTIFICATION, blockListModel.identificationId);
         contentValues.put(MOBILE_NO, blockListModel.mobileNo);
         sqLiteDatabase.insert(BLOCK_LIST_TABLE_TXT, null, contentValues);
+    }
+
+
+    public void insertPassengerCountList(PassengerCountList passengerCountList) {
+        ContentValues contentValues = new ContentValues();
+        SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
+        contentValues.put(NUMBER_OF_PASSENGERS, passengerCountList.passenger_count);
+        contentValues.put(PASSENGER_LAT, passengerCountList.passenger_lat);
+        contentValues.put(PASSENGER_LNG, passengerCountList.passenger_lng);
+        sqLiteDatabase.insert(PASSENGER_COUNT_TABLE, null, contentValues);
+        Log.i(TAG, "insertPassengerCountList: "+passengerCountList.passenger_lat+":: "+passengerCountList.passenger_lng);
     }
 
     public float distancesFromStart() {
@@ -687,10 +710,26 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             Log.i("routeStation", routeStationList.station_name + "::" + routeStationList.station_id);
         }
         c.close();
-
-
         return routeStationLists;
+    }
 
+    public List<PassengerCountList> passengerCountLists() {
+        List<PassengerCountList> passengerCountLists = new ArrayList<>();
+
+        String sql = "SELECT * FROM " + PASSENGER_COUNT_TABLE;
+
+        Cursor c = getWritableDatabase().rawQuery(sql, null);
+        while (c.moveToNext()) {
+            PassengerCountList passengerCountList = new PassengerCountList();
+            passengerCountList.passenger_count = c.getInt(c.getColumnIndex(NUMBER_OF_PASSENGERS));
+            passengerCountList.passenger_lat = c.getDouble(c.getColumnIndex(PASSENGER_LAT));
+            passengerCountList.passenger_lng= c.getDouble(c.getColumnIndex(PASSENGER_LNG));
+
+
+            passengerCountLists.add(passengerCountList);
+        }
+        c.close();
+        return passengerCountLists;
     }
 
     public String nextStation(int stationOrder) {
