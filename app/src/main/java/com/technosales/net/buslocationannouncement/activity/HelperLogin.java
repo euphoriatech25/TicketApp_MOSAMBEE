@@ -129,29 +129,6 @@ public class HelperLogin extends AppCompatActivity {
         int[] value = {};
         M1CardHandlerMosambee.read_miCard(handler, value, "HelperLogin");
 
-
-//        byte[] data = Base64.decode("eyJpdiI6ImdRQ0RVa1MxTC84UzNZNUxmVG1VWVFcdTAwM2RcdTAwM2QiLCJtYWMiOiIxODZmN2FhOWU4NWY3MjhmNmIyOTc1YmM3OTJiYmU5ODI1NzNiZjRmYjYxYzJlYTZjYmVmMjQ1MWYwMWQwOTJmIiwidmFsdWUiOiJiREJsK0ViaGRJNUF5bFZpUTErakV6aXQxSTh1VHEwbGMyUHNtaTZ6UDd3XHUwMDNkIn0=", Base64.DEFAULT);
-//        try {
-//            String text = new String(data, "UTF-8");
-//            try {
-//                JSONObject obj = new JSONObject(text);
-//                try {
-////                    Log.i("TAG", "onCreate: "+text+"    "+obj.get("iv").toString()+obj.get("value").toString()+obj.getString("mac"));
-////                    Log.i("TAG", "onCreate: "+  decryptValue(SECRET_KEY.getBytes(),obj.get("iv").toString(),obj.get("value").toString(),obj.getString("mac")));
-//                    Log.i("TAG", "onCreate: "+Encrypt.decrypt(value1,obj.get("iv").toString(),obj.get("value").toString(),obj.getString("mac")));
-//                } catch (Exception e) {
-//                    System.out.println(e.getLocalizedMessage());
-//                    e.printStackTrace();
-//                }
-//
-//            } catch (JSONException e) {
-//                e.printStackTrace();
-//            }
-//        } catch (UnsupportedEncodingException e) {
-//            e.printStackTrace();
-//        }
-//
-
     }
 
     private void setHelperId(String toString) {
@@ -246,37 +223,8 @@ public class HelperLogin extends AppCompatActivity {
     private void sendHelperDetail(String deviceId, String card_helper_id, ProgressDialog pClick) {
         byte[] value1 = decoderfun(SECRET_KEY);
         try {
-            Log.i("TAG", "sendHelperDetail: " + Encrypt.encrypt(value1, card_helper_id));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        byte[] data = new byte[0];
-        try {
-            data = Base64.decode(Encrypt.encrypt(value1, card_helper_id), Base64.DEFAULT);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        String text = null;
-        try {
-            text = new String(data, "UTF-8");
-            try {
-                JSONObject obj = new JSONObject(text);
-                try {
-                    Log.i("TAG", "onCreate: " + Encrypt.decrypt(value1, obj.get("iv").toString(), obj.get("value").toString(), obj.getString("mac")));
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-
         RetrofitInterface retrofitInterface = ServerConfigNew.createService(RetrofitInterface.class);
-
-        Call<HelperModel> call = retrofitInterface.helperLogin(card_helper_id, deviceId);
+        Call<HelperModel> call = retrofitInterface.helperLogin(Encrypt.encrypt(value1, card_helper_id), deviceId);
         call.enqueue(new Callback<HelperModel>() {
             @Override
             public void onResponse(Call<HelperModel> call, Response<HelperModel> response) {
@@ -318,6 +266,9 @@ public class HelperLogin extends AppCompatActivity {
                 }
             }
         });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void handleErrors(ResponseBody responseBody) {

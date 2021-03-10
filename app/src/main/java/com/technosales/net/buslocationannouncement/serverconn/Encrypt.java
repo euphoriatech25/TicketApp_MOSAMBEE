@@ -79,8 +79,11 @@ public class Encrypt
         byte[] decValue = c.doFinal(decodedValue);
 
         int firstQuoteIndex = 0;
-        while (decValue[firstQuoteIndex] != (byte) '"') firstQuoteIndex++;
-        return new String(Arrays.copyOfRange(decValue, firstQuoteIndex + 1, decValue.length - 2));
+        try {
+            while (decValue[firstQuoteIndex] != (byte) '"') firstQuoteIndex++;
+        }catch (ArrayIndexOutOfBoundsException e){
+        }
+        return new String(Arrays.copyOfRange(decValue, firstQuoteIndex +2, decValue.length - 2));
     }
 
 

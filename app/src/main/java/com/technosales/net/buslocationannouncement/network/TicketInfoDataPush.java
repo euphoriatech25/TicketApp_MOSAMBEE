@@ -2,6 +2,7 @@ package com.technosales.net.buslocationannouncement.network;
 
 import android.content.Context;
 import android.content.Intent;
+import android.util.Base64;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -15,6 +16,7 @@ import com.technosales.net.buslocationannouncement.activity.CheckBalanceActivity
 import com.technosales.net.buslocationannouncement.activity.HelperLogin;
 import com.technosales.net.buslocationannouncement.activity.TicketAndTracking;
 import com.technosales.net.buslocationannouncement.pojo.ApiError;
+import com.technosales.net.buslocationannouncement.serverconn.Encrypt;
 import com.technosales.net.buslocationannouncement.serverconn.RetrofitInterface;
 import com.technosales.net.buslocationannouncement.serverconn.ServerConfigNew;
 import com.technosales.net.buslocationannouncement.helper.DatabaseHelper;
@@ -35,22 +37,31 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 import static android.content.Context.MODE_PRIVATE;
+import static com.technosales.net.buslocationannouncement.utils.UtilStrings.SECRET_KEY;
 
 public class TicketInfoDataPush {
 
     public static void pushTicketData(final Context context, final List<TicketInfoList> ticketInfoLists) {
      TokenManager tokenManager;
+
         tokenManager = TokenManager.getInstance(TicketBusApp.getContext().getSharedPreferences("prefs", MODE_PRIVATE));
         context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.DATA_SENDING, true).apply();
+        byte[] value1 = decoderfun(SECRET_KEY);
         if (GeneralUtils.isNetworkAvailable(context)) {
             for (int i = 0; i < ticketInfoLists.size(); i++) {
                 final TicketInfoList ticketInfoList = ticketInfoLists.get(i);
+                 String amt = null;
+                try {
+                    amt= Encrypt.encrypt(value1, ticketInfoList.transactionAmount);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
                 Map<String, Object> params = new HashMap<>();
                 params.put("helper_id", ticketInfoList.helper_id);
                 params.put("ticket_id", ticketInfoList.ticket_id);
                 params.put("transactionType", ticketInfoList.transactionType);
                 params.put("device_time", ticketInfoList.device_time);
-                params.put("transactionAmount", ticketInfoList.transactionAmount);
+                params.put("transactionAmount",amt);
                 params.put("transactionMedium", ticketInfoList.transactionMedium);
                 params.put("lat", ticketInfoList.lat);
                 params.put("lng", ticketInfoList.lng);
@@ -97,6 +108,12 @@ public class TicketInfoDataPush {
             context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.DATA_SENDING, false).apply();
 
         }
+
+    }
+
+    public static byte[] decoderfun(String enval) {
+        byte[] conVal = Base64.decode(enval, Base64.DEFAULT);
+        return conVal;
 
     }
 

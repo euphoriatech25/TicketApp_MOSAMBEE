@@ -104,9 +104,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String ADVERTISEMENT_TYPE = "ad_type";
     private static final String STATION_NAME_ENG = "name_english";
 
-    private static final String NUMBER_OF_PASSENGERS = "no_of_passensers";
-    private static final String PASSENGER_LAT = "passenger_lat";
-    private static final String PASSENGER_LNG = "passenger_lng";
+    private static final String PASSENGER_STATION_POSITION = "passenger_station_position";
+    private static final String PASSENGER_DIRECTION = "passenger_direction";
     private final Context context;
     private SQLiteDatabase db;
 
@@ -219,8 +218,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         db.execSQL("CREATE TABLE " + PASSENGER_COUNT_TABLE + "(" +
                 "id INTEGER PRIMARY KEY AUTOINCREMENT," +
-                NUMBER_OF_PASSENGERS + " TEXT," +  PASSENGER_LAT + " TEXT," +
-                PASSENGER_LNG + " TEXT)");
+                 PASSENGER_STATION_POSITION + " TEXT," +
+                PASSENGER_DIRECTION + " TEXT)");
 
 
     }
@@ -343,11 +342,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public void insertPassengerCountList(PassengerCountList passengerCountList) {
         ContentValues contentValues = new ContentValues();
         SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
-        contentValues.put(NUMBER_OF_PASSENGERS, passengerCountList.passenger_count);
-        contentValues.put(PASSENGER_LAT, passengerCountList.passenger_lat);
-        contentValues.put(PASSENGER_LNG, passengerCountList.passenger_lng);
+        contentValues.put(PASSENGER_STATION_POSITION, passengerCountList.passenger_station_position);
+        contentValues.put(PASSENGER_DIRECTION, passengerCountList.passenger_direction);
         sqLiteDatabase.insert(PASSENGER_COUNT_TABLE, null, contentValues);
-        Log.i(TAG, "insertPassengerCountList: "+passengerCountList.passenger_lat+":: "+passengerCountList.passenger_lng);
+        Log.i(TAG, "insertPassengerCountList: "+passengerCountList.passenger_station_position+":: "+passengerCountList.passenger_direction);
     }
 
     public float distancesFromStart() {
@@ -634,6 +632,20 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         getWritableDatabase().execSQL(sql);
     }
 
+    public void updatePassengerCountForward(Integer position) {
+        String sql = "DELETE FROM " + PASSENGER_COUNT_TABLE  +  " WHERE " + PASSENGER_STATION_POSITION + ">=" +position;
+        getWritableDatabase().execSQL(sql);
+    }
+
+    public void updatePassengerCountBackward(Integer position) {
+        String sql = "DELETE FROM " + PASSENGER_COUNT_TABLE  +  " WHERE " + PASSENGER_STATION_POSITION + "<=" +position;
+        getWritableDatabase().execSQL(sql);
+    }
+
+    public void clearAllFromPassengerTime() {
+        String sql = "DELETE FROM " + PASSENGER_COUNT_TABLE;
+        getWritableDatabase().execSQL(sql);
+    }
     public List<PriceList> priceLists(boolean normalDiscount) {
         List<PriceList> priceLists = new ArrayList<>();
 
@@ -721,9 +733,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         Cursor c = getWritableDatabase().rawQuery(sql, null);
         while (c.moveToNext()) {
             PassengerCountList passengerCountList = new PassengerCountList();
-            passengerCountList.passenger_count = c.getInt(c.getColumnIndex(NUMBER_OF_PASSENGERS));
-            passengerCountList.passenger_lat = c.getDouble(c.getColumnIndex(PASSENGER_LAT));
-            passengerCountList.passenger_lng= c.getDouble(c.getColumnIndex(PASSENGER_LNG));
+            passengerCountList.passenger_station_position = c.getInt(c.getColumnIndex(PASSENGER_STATION_POSITION));
+            passengerCountList.passenger_direction = c.getString(c.getColumnIndex(PASSENGER_DIRECTION));
 
 
             passengerCountLists.add(passengerCountList);

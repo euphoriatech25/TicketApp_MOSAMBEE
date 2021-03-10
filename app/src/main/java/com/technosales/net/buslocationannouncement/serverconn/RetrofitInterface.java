@@ -97,6 +97,9 @@ public interface RetrofitInterface {
     @GET("call_record_verification")
     Call<CallResponse> getNumber(@Query("mobile_number") String mobile_number,@Query("server_number") String server_number);
 
+    @FormUrlEncoded
+    @POST(UtilStrings.UPDATE_PASSENGER_COUNT)
+    Call<ResponseBody> updatePassengerCount(@Field("device_id") String device_id, @Field("current_passenger_number") String passengerCount);
 
 
     @GET("get_server_number")

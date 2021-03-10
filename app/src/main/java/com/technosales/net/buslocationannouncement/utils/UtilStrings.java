@@ -128,6 +128,7 @@ public class UtilStrings {
     public static final String TOKEN = "auth/token";
 
     public static final String TRANSATION_STATEMENT = "transaction/transaction-statement";
+    public static final String UPDATE_PASSENGER_COUNT = "update-passenger-number";
 
 
     public static final String SOURCE = "source";
@@ -180,6 +181,7 @@ public class UtilStrings {
     public static final String NULL = "";
 
     public static final String USER_NUMBER ="userNum";
+    public static final String TEST ="TEST";
 
     public static final String CALL_REGISTER_CHECK = "http://202.52.240.149:82/";
     public static final String LOCATION_CHANGE = "location_change";

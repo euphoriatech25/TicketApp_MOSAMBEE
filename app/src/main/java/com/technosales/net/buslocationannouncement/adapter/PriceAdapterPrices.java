@@ -148,8 +148,6 @@ public class PriceAdapterPrices extends RecyclerView.Adapter<PriceAdapterPrices.
 
         forward = preferences.getBoolean(UtilStrings.FORWARD, true);
         if (forward) {
-//            Log.i("TAG", "onBindViewHolder: " + forward + " " + orderPos);
-
             if (routeStationModelList.station_order <= orderPos) {
                 if (position == orderPos - 1) {
                     holder.routeStationItem.setTextColor(Color.parseColor("#c72893"));
@@ -192,14 +190,6 @@ public class PriceAdapterPrices extends RecyclerView.Adapter<PriceAdapterPrices.
                                 }
                                 Log.i("nearest", "asdasda" + startLat + "::" + startLng + "::" + endLat + "::" + endLng);
                             }
-
-
-//                        orderPos = routeStationLists.get(positionNew).station_order;
-//                        nearestName = routeStationLists.get(positionNew).station_name;
-//                        currentStationLat = Double.parseDouble(routeStationLists.get(positionNew).station_lat);
-//                        currentStationLng = Double.parseDouble(routeStationLists.get(positionNew).station_lng);
-//                        currentStationDistance = routeStationLists.get(positionNew).station_distance;
-//                        currentStationId = routeStationLists.get(positionNew).station_id;
 
                             if (routeType == UtilStrings.NON_RING_ROAD) {
                                 price = databaseHelper.priceWrtDistance(Math.abs(currentStationDistance - routeStationModelList.station_distance), ((TicketAndTracking) context).normalDiscountToggle.isOn());
@@ -350,13 +340,6 @@ public class PriceAdapterPrices extends RecyclerView.Adapter<PriceAdapterPrices.
                             }
 
 
-//                        orderPos = routeStationLists.get(positionNew).station_order;
-//                        nearestName = routeStationLists.get(positionNew).station_name;
-//                        currentStationLat = Double.parseDouble(routeStationLists.get(positionNew).station_lat);
-//                        currentStationLng = Double.parseDouble(routeStationLists.get(positionNew).station_lng);
-//                        currentStationDistance = routeStationLists.get(positionNew).station_distance;
-//                        currentStationId = routeStationLists.get(positionNew).station_id;
-
                             if (routeType == UtilStrings.NON_RING_ROAD) {
                                 price = databaseHelper.priceWrtDistance(Math.abs(currentStationDistance - routeStationModelList.station_distance), ((TicketAndTracking) context).normalDiscountToggle.isOn());
                                 totalDistance = Math.abs(currentStationDistance - routeStationModelList.station_distance);
@@ -480,8 +463,7 @@ public class PriceAdapterPrices extends RecyclerView.Adapter<PriceAdapterPrices.
                                 double startLng = Double.parseDouble(preferences.getString(UtilStrings.LONGITUDE, "0.0"));
                                 double endLat = Double.parseDouble(routeStationLists.get(i).station_lat);
                                 double endLng = Double.parseDouble(routeStationLists.get(i).station_lng);
-                                destination_latitude=endLat;
-                                destination_longitude=endLng;
+
                                 distance = GeneralUtils.calculateDistance(startLat, startLng, endLat, endLng);
                                 if (i == 0) {
                                     nearest = distance;
@@ -964,11 +946,7 @@ public class PriceAdapterPrices extends RecyclerView.Adapter<PriceAdapterPrices.
                 intent.putExtra(UtilStrings.TICKET_TYPE, ticketType);
                 intent.putExtra(UtilStrings.DISCOUNT_TYPE, discountType);
             }
-            PassengerCountList passengerCountList = new PassengerCountList();
-            passengerCountList.passenger_count = 1;
-            passengerCountList.passenger_lat = destination_latitude;
-            passengerCountList.passenger_lng = destination_longitude;
-            databaseHelper.insertPassengerCountList(passengerCountList);
+
             ((TicketAndTracking) context).finish();
             context.startActivity(intent);
         } else {
@@ -992,6 +970,20 @@ public class PriceAdapterPrices extends RecyclerView.Adapter<PriceAdapterPrices.
                 helperId = preferencesHelper.getString(UtilStrings.ID_HELPER, "");
                 busName = preferences.getString(UtilStrings.DEVICE_NAME, "");
 
+                Log.i("TAG", "processingPayment: "+orderPos+"::::"+forward);
+
+                PassengerCountList passengerCountList = new PassengerCountList();
+                passengerCountList.passenger_station_position=orderPos;
+                passengerCountList.passenger_direction=String.valueOf(forward);
+                databaseHelper.insertPassengerCountList(passengerCountList);
+
+
+                Log.i("TAG", "onClick: "+ routeStationModelList.station_lat+"   "+routeStationModelList.station_lng);
+//                PassengerCountList passengerCountList = new PassengerCountList();
+//                passengerCountList.passenger_count = 1;
+//                passengerCountList.passenger_lat =27.7224953;
+//                passengerCountList.passenger_lng = 85.2927741;
+//                databaseHelper.insertPassengerCountList(passengerCountList);
 
                 Log.i("isdataSending", "" + preferences.getBoolean(UtilStrings.DATA_SENDING, false));
 
@@ -1093,11 +1085,7 @@ public class PriceAdapterPrices extends RecyclerView.Adapter<PriceAdapterPrices.
                             GeneralUtils.getUnicodeNumber(GeneralUtils.getTime());
                     ((TicketAndTracking)context).recreate();
                     Toast.makeText(context, "टिकट सफलतापूर्वक काटियो।", Toast.LENGTH_SHORT).show();
-                    PassengerCountList passengerCountList = new PassengerCountList();
-                    passengerCountList.passenger_count = 1;
-                    passengerCountList.passenger_lat = destination_latitude;
-                    passengerCountList.passenger_lng = destination_longitude;
-                    databaseHelper.insertPassengerCountList(passengerCountList);
+
                     try {
                         Printer.Print(context, printTransaction, handler);
                     } catch (RemoteException e) {

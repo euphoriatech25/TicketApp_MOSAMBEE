@@ -30,6 +30,7 @@ import com.technosales.net.buslocationannouncement.mosambeesupport.M1CardHandler
 import com.technosales.net.buslocationannouncement.mosambeesupport.Printer;
 import com.technosales.net.buslocationannouncement.pojo.ApiError;
 import com.technosales.net.buslocationannouncement.R;
+import com.technosales.net.buslocationannouncement.serverconn.Encrypt;
 import com.technosales.net.buslocationannouncement.serverconn.RetrofitInterface;
 import com.technosales.net.buslocationannouncement.serverconn.ServerConfigNew;
 import com.technosales.net.buslocationannouncement.base.BaseActivity;
@@ -58,6 +59,7 @@ import static com.technosales.net.buslocationannouncement.utils.UtilStrings.CUST
 import static com.technosales.net.buslocationannouncement.utils.UtilStrings.CUSTOMER_HASH;
 import static com.technosales.net.buslocationannouncement.utils.UtilStrings.NULL;
 import static com.technosales.net.buslocationannouncement.utils.UtilStrings.PAYMENT_CASH;
+import static com.technosales.net.buslocationannouncement.utils.UtilStrings.SECRET_KEY;
 import static com.technosales.net.buslocationannouncement.utils.UtilStrings.STATUS;
 import static com.technosales.net.buslocationannouncement.utils.UtilStrings.TRANSACTION_TYPE_LOAD;
 
@@ -218,8 +220,14 @@ public class CheckBalanceActivity extends BaseActivity {
         String valueOfTickets = "";
 
         valueOfTickets = String.format("%04d", total_tickets);
-
+        byte[] value1 = decoderfun(SECRET_KEY);
         String dateTime = GeneralUtils.getTicketDate() + GeneralUtils.getTicketTime();
+        String amt= null;
+        try {
+            amt = Encrypt.encrypt(value1, String.valueOf(amount));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         if(passenserId.length()>0&&transactionHash.length()>0) {
             if (!helperString.equalsIgnoreCase("")) {
                 if (!helperString.equalsIgnoreCase(passenserId)) {
@@ -233,7 +241,7 @@ public class CheckBalanceActivity extends BaseActivity {
                         params.put("ticket_id", ticketId);
                         params.put("transactionType", TRANSACTION_TYPE_LOAD);
                         params.put("device_time", dateTime);
-                        params.put("transactionAmount", amount);
+                        params.put("transactionAmount", amt);
                         params.put("transactionMedium", PAYMENT_CASH);
                         params.put("lat", latitude);
                         params.put("lng", longitude);
@@ -347,6 +355,12 @@ public class CheckBalanceActivity extends BaseActivity {
         } else {
             Toast.makeText(this, "something went wrong", Toast.LENGTH_SHORT).show();
         }
+
+    }
+
+    public static byte[] decoderfun(String enval) {
+        byte[] conVal = Base64.decode(enval, Base64.DEFAULT);
+        return conVal;
 
     }
     private void printDetails(int newAmount, int amount) {

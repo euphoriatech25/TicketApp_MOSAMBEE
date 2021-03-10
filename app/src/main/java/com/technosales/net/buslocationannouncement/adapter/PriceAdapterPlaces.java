@@ -438,9 +438,9 @@ public class PriceAdapterPlaces extends RecyclerView.Adapter<PriceAdapterPlaces.
             }
 
             PassengerCountList passengerCountList = new PassengerCountList();
-            passengerCountList.passenger_count = 1;
-            passengerCountList.passenger_lat = endLat;
-            passengerCountList.passenger_lng = endLng;
+//            passengerCountList.passenger_count = 1;
+//            passengerCountList.passenger_lat = endLat;
+//            passengerCountList.passenger_lng = endLng;
             databaseHelper.insertPassengerCountList(passengerCountList);
 
             ((TicketAndTracking) context).finish();
@@ -476,9 +476,9 @@ public class PriceAdapterPlaces extends RecyclerView.Adapter<PriceAdapterPlaces.
             }
 
             PassengerCountList passengerCountList = new PassengerCountList();
-            passengerCountList.passenger_count = 1;
-            passengerCountList.passenger_lat = endLat;
-            passengerCountList.passenger_lng = endLng;
+//            passengerCountList.passenger_count = 1;
+//            passengerCountList.passenger_lat = endLat;
+//            passengerCountList.passenger_lng = endLng;
             databaseHelper.insertPassengerCountList(passengerCountList);
 
             ((TicketAndTracking) context).finish();
@@ -528,15 +528,6 @@ public class PriceAdapterPlaces extends RecyclerView.Adapter<PriceAdapterPlaces.
             }
             ((TicketAndTracking) context).setTotal();
             String valueOfTickets = "";
-//            if (total_tickets < 10) {
-//                valueOfTickets = "00" + String.valueOf(total_tickets);
-//
-//            } else if (total_tickets > 9 && total_tickets < 100) {
-//                valueOfTickets = "0" + String.valueOf(total_tickets);
-//            } else {
-//                valueOfTickets = String.valueOf(total_tickets);
-//            }
-
             valueOfTickets = String.format("%04d", total_tickets);
             dateConverter = new DateConverter();
             String dates[] = GeneralUtils.getFullDate().split("-");
@@ -589,28 +580,12 @@ public class PriceAdapterPlaces extends RecyclerView.Adapter<PriceAdapterPlaces.
             ((TicketAndTracking) context).recreate();
             Toast.makeText(context, "टिकट सफलतापूर्वक काटियो।", Toast.LENGTH_SHORT).show();
 
-            Log.i("TAG", "processingPayment: "+endLat+"::::"+endLng);
+            Log.i("TAG", "processingPayment: "+orderPos+"::::"+orderPos);
             PassengerCountList passengerCountList = new PassengerCountList();
-            passengerCountList.passenger_count = 1;
-            passengerCountList.passenger_lat = endLat;
-            passengerCountList.passenger_lng = endLng;
+            passengerCountList.passenger_station_position=orderPos;
+            passengerCountList.passenger_direction=String.valueOf(forward);
             databaseHelper.insertPassengerCountList(passengerCountList);
 
-//                    busName +"\n" +
-//                    GeneralUtils.getUnicodeNumber(ticketInfoList.ticket_id) +"(नगद)"+ "\n" +
-//                    "रु." + GeneralUtils.getUnicodeNumber(ticketInfoList.transactionAmount) + discountType + "\n" +
-//                    nearest_name + "-" + toGetOff + "\n" +
-//                    GeneralUtils.getNepaliMonth(String.valueOf(month)) + " "
-//                    + GeneralUtils.getUnicodeNumber(String.valueOf(day)) + " " +
-//                    GeneralUtils.getUnicodeNumber(GeneralUtils.getTime());
-
-
-//            String status = PrinterTester.getInstance().getStatus();
-//            if(status.equalsIgnoreCase("Out of paper ")){
-//                Toast.makeText(context, "मुद्रण कागज समाप्त भयो।", Toast.LENGTH_SHORT).show();
-//            }else {
-//                ((TicketAndTracking) context).paraPrint(printTransaction);
-//            }
             try {
                 Printer.Print(context, printTransaction, handler);
             } catch (RemoteException e) {
