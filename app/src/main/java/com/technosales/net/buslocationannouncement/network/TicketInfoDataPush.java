@@ -46,11 +46,11 @@ public class TicketInfoDataPush {
 
         tokenManager = TokenManager.getInstance(TicketBusApp.getContext().getSharedPreferences("prefs", MODE_PRIVATE));
         context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.DATA_SENDING, true).apply();
-        byte[] value1 = decoderfun(SECRET_KEY);
-        if (GeneralUtils.isNetworkAvailable(context)) {
+       if (GeneralUtils.isNetworkAvailable(context)) {
             for (int i = 0; i < ticketInfoLists.size(); i++) {
                 final TicketInfoList ticketInfoList = ticketInfoLists.get(i);
-                 String amt = null;
+                byte[] value1 = GeneralUtils.decoderfun(SECRET_KEY);
+                String amt = null;
                 try {
                     amt= Encrypt.encrypt(value1, ticketInfoList.transactionAmount);
                 } catch (Exception e) {
@@ -111,11 +111,7 @@ public class TicketInfoDataPush {
 
     }
 
-    public static byte[] decoderfun(String enval) {
-        byte[] conVal = Base64.decode(enval, Base64.DEFAULT);
-        return conVal;
 
-    }
 
     private static void handleError(ResponseBody errorBody, Context context, String ticket_id) {
         ApiError apiErrors = GeneralUtils.convertErrors(errorBody);

@@ -67,7 +67,7 @@ public class PriceAdapterPrices extends RecyclerView.Adapter<PriceAdapterPrices.
     private String busName;
     private int total_tickets;
     private int total_collections;
-    private int total_collections_cash;
+    private int total_collections_cash,total_passenger;
     private String deviceId;
     private double destination_latitude;
     private double destination_longitude;
@@ -103,6 +103,7 @@ public class PriceAdapterPrices extends RecyclerView.Adapter<PriceAdapterPrices.
         preferencesHelper = context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES_HELPER, 0);
         routeType = preferences.getInt(UtilStrings.ROUTE_TYPE, UtilStrings.NON_RING_ROAD);
         routeStationListSize = preferences.getInt(UtilStrings.ROUTE_LIST_SIZE, 0);
+       total_passenger=  preferences.getInt(UtilStrings.TOTAL_PASSENGERS, 0);
 
         if (((TicketAndTracking) context).normalDiscountToggle.isOn()) {
             holder.routeStationItem.setTextColor(context.getResources().getColorStateList(R.color.discount_txt_color));
@@ -912,7 +913,12 @@ public class PriceAdapterPrices extends RecyclerView.Adapter<PriceAdapterPrices.
                 intent.putExtra(UtilStrings.DISCOUNT_TYPE, discountType);
             }
 
-            ((TicketAndTracking) context).finish();
+            PassengerCountList passengerCountList = new PassengerCountList();
+            passengerCountList.passenger_station_position=orderPos;
+            passengerCountList.passenger_direction=String.valueOf(forward);
+            databaseHelper.insertPassengerCountList(passengerCountList);
+
+//            ((TicketAndTracking) context).finish();
             context.startActivity(intent);
         } else {
             Toast.makeText(context, "सहायक छान्नुहोस् ।", Toast.LENGTH_SHORT).show();
@@ -946,8 +952,12 @@ public class PriceAdapterPrices extends RecyclerView.Adapter<PriceAdapterPrices.
                 intent.putExtra(UtilStrings.TICKET_TYPE, ticketType);
                 intent.putExtra(UtilStrings.DISCOUNT_TYPE, discountType);
             }
+            PassengerCountList passengerCountList = new PassengerCountList();
+            passengerCountList.passenger_station_position=orderPos;
+            passengerCountList.passenger_direction=String.valueOf(forward);
+            databaseHelper.insertPassengerCountList(passengerCountList);
 
-            ((TicketAndTracking) context).finish();
+//            ((TicketAndTracking) context).finish();
             context.startActivity(intent);
         } else {
             Toast.makeText(context, "सहायक छान्नुहोस् ।", Toast.LENGTH_SHORT).show();
@@ -972,6 +982,10 @@ public class PriceAdapterPrices extends RecyclerView.Adapter<PriceAdapterPrices.
 
                 Log.i("TAG", "processingPayment: "+orderPos+"::::"+forward);
 
+
+                total_passenger=total_passenger+1;
+                preferences.edit().putInt(UtilStrings.TOTAL_PASSENGERS, total_passenger).apply();
+
                 PassengerCountList passengerCountList = new PassengerCountList();
                 passengerCountList.passenger_station_position=orderPos;
                 passengerCountList.passenger_direction=String.valueOf(forward);
@@ -979,11 +993,7 @@ public class PriceAdapterPrices extends RecyclerView.Adapter<PriceAdapterPrices.
 
 
                 Log.i("TAG", "onClick: "+ routeStationModelList.station_lat+"   "+routeStationModelList.station_lng);
-//                PassengerCountList passengerCountList = new PassengerCountList();
-//                passengerCountList.passenger_count = 1;
-//                passengerCountList.passenger_lat =27.7224953;
-//                passengerCountList.passenger_lng = 85.2927741;
-//                databaseHelper.insertPassengerCountList(passengerCountList);
+
 
                 Log.i("isdataSending", "" + preferences.getBoolean(UtilStrings.DATA_SENDING, false));
 
@@ -1083,7 +1093,7 @@ public class PriceAdapterPrices extends RecyclerView.Adapter<PriceAdapterPrices.
                             "जारी मिति :-"+ GeneralUtils.getNepaliMonth(String.valueOf(month)) + " "
                             + GeneralUtils.getUnicodeNumber(String.valueOf(day)) + " " +
                             GeneralUtils.getUnicodeNumber(GeneralUtils.getTime());
-                    ((TicketAndTracking)context).recreate();
+//                    ((TicketAndTracking)context).recreate();
                     Toast.makeText(context, "टिकट सफलतापूर्वक काटियो।", Toast.LENGTH_SHORT).show();
 
                     try {

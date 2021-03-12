@@ -438,12 +438,11 @@ public class PriceAdapterPlaces extends RecyclerView.Adapter<PriceAdapterPlaces.
             }
 
             PassengerCountList passengerCountList = new PassengerCountList();
-//            passengerCountList.passenger_count = 1;
-//            passengerCountList.passenger_lat = endLat;
-//            passengerCountList.passenger_lng = endLng;
+            passengerCountList.passenger_station_position=orderPos;
+            passengerCountList.passenger_direction=String.valueOf(forward);
             databaseHelper.insertPassengerCountList(passengerCountList);
 
-            ((TicketAndTracking) context).finish();
+//            ((TicketAndTracking) context).finish();
             context.startActivity(intent);
         } else {
             Toast.makeText(context, "सहायक छान्नुहोस् ।", Toast.LENGTH_SHORT).show();
@@ -476,12 +475,12 @@ public class PriceAdapterPlaces extends RecyclerView.Adapter<PriceAdapterPlaces.
             }
 
             PassengerCountList passengerCountList = new PassengerCountList();
-//            passengerCountList.passenger_count = 1;
-//            passengerCountList.passenger_lat = endLat;
-//            passengerCountList.passenger_lng = endLng;
+            passengerCountList.passenger_station_position=orderPos;
+            passengerCountList.passenger_direction=String.valueOf(forward);
             databaseHelper.insertPassengerCountList(passengerCountList);
 
-            ((TicketAndTracking) context).finish();
+
+//            ((TicketAndTracking) context).finish();
             context.startActivity(intent);
         } else {
             Toast.makeText(context, "सहायक छान्नुहोस् ।", Toast.LENGTH_SHORT).show();
@@ -577,10 +576,12 @@ public class PriceAdapterPlaces extends RecyclerView.Adapter<PriceAdapterPlaces.
                     GeneralUtils.getUnicodeNumber(GeneralUtils.getTime());
 
 
-            ((TicketAndTracking) context).recreate();
+//            ((TicketAndTracking) context).recreate();
+
             Toast.makeText(context, "टिकट सफलतापूर्वक काटियो।", Toast.LENGTH_SHORT).show();
 
             Log.i("TAG", "processingPayment: "+orderPos+"::::"+orderPos);
+
             PassengerCountList passengerCountList = new PassengerCountList();
             passengerCountList.passenger_station_position=orderPos;
             passengerCountList.passenger_direction=String.valueOf(forward);

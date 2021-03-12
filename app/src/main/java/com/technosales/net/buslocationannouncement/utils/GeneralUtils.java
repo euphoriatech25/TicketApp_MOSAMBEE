@@ -15,6 +15,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Environment;
+import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -48,7 +49,11 @@ import retrofit2.Converter;
 public class GeneralUtils {
     private static final String[] BT_PRINT_DEVICE = {"A60", "Aries8", "Aries6"};
 
+    public static byte[] decoderfun(String enval) {
+        byte[] conVal = Base64.decode(enval, Base64.DEFAULT);
+        return conVal;
 
+    }
     public static Bitmap mergeToPin(Bitmap firstImage, Bitmap secondImage) {
             Bitmap result = Bitmap.createBitmap(firstImage.getWidth() + secondImage.getWidth(), firstImage.getHeight(), firstImage.getConfig());
             Canvas canvas = new Canvas(result);

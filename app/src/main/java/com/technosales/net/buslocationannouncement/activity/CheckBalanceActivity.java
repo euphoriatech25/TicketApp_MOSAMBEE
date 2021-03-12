@@ -112,13 +112,10 @@ public class CheckBalanceActivity extends BaseActivity {
                     }
                     break;
                 case 102:
-                    if (msg.obj.toString() != null) {
                         Log.i("TAG", "handleMessage: " + msg.obj.toString());
                         transactionHash=msg.obj.toString();
                         stopThread=true;
-                    } else {
-                        Toast.makeText(CheckBalanceActivity.this, "Timeout Please restart", Toast.LENGTH_SHORT).show();
-                    }
+                        thread.interrupt();
                     break;
                 case 505:
                     Toast.makeText(CheckBalanceActivity.this, msg.obj.toString(), Toast.LENGTH_SHORT).show();

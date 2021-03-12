@@ -160,6 +160,7 @@ public class HelperLogin extends AppCompatActivity {
                     }
                 } else {
                     Toast.makeText(HelperLogin.this, "यो कार्ड ब्लक गरिएको छ।", Toast.LENGTH_SHORT).show();
+                    finish();
                 }
             }
         } else {

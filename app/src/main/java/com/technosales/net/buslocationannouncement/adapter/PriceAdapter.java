@@ -253,7 +253,7 @@ public class PriceAdapter extends RecyclerView.Adapter<PriceAdapter.MyViewHolder
                                     + GeneralUtils.getUnicodeNumber(String.valueOf(day)) + " " +
                                     GeneralUtils.getUnicodeNumber(GeneralUtils.getTime());
 
-                            ((TicketAndTracking)context).recreate();
+//                            ((TicketAndTracking)context).recreate();
                             Toast.makeText(context, "टिकट सफलतापूर्वक काटियो।", Toast.LENGTH_SHORT).show();
                             try {
                                 BeepLEDTest.beepSuccess();
@@ -305,7 +305,7 @@ public class PriceAdapter extends RecyclerView.Adapter<PriceAdapter.MyViewHolder
             }
 
             context.startActivity(intent);
-            ((TicketAndTracking) context).finish();
+//            ((TicketAndTracking) context).finish();
         }else {
             Toast.makeText(context, "सहायक छान्नुहोस् ।", Toast.LENGTH_SHORT).show();
             ((TicketAndTracking) context).helperName.setText("सहायक छान्नुहोस् ।");
@@ -331,7 +331,7 @@ public class PriceAdapter extends RecyclerView.Adapter<PriceAdapter.MyViewHolder
                 intent.putExtra(UtilStrings.DISCOUNT_TYPE, discountType);
             }
              context.startActivity(intent);
-            ((TicketAndTracking) context).finish();
+//            ((TicketAndTracking) context).finish();
         }else {
             Toast.makeText(context, "सहायक छान्नुहोस् ।", Toast.LENGTH_SHORT).show();
             ((TicketAndTracking) context).helperName.setText("सहायक छान्नुहोस् ।");

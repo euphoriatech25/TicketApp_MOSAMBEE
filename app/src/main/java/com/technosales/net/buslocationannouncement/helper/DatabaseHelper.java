@@ -719,7 +719,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             routeStationList.station_distance = c.getFloat(c.getColumnIndex(STATION_DISTANCE));
 
             routeStationLists.add(routeStationList);
-            Log.i("routeStation", routeStationList.station_name + "::" + routeStationList.station_id);
+//            Log.i("routeStation", routeStationList.station_name + "::" + routeStationList.station_id);
         }
         c.close();
         return routeStationLists;
@@ -920,7 +920,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         } else {
             GeneralUtils.writeInTxt(txtFile, data);
         }
-
     }
 
     public void clearTxtTable() {

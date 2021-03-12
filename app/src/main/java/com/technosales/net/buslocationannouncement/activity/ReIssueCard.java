@@ -59,11 +59,7 @@ public class ReIssueCard extends BaseActivity implements View.OnClickListener {
         public void handleMessage(android.os.Message msg) {
             switch (msg.what) {
                 case 100:
-                    if (msg.obj.toString() != null) {
-                        setCardNUm(msg.obj.toString());
-                    } else {
-                        Toast.makeText(ReIssueCard.this, "Please show card properly", Toast.LENGTH_SHORT).show();
-                    }
+                    setCardNUm(msg.obj.toString());
                     break;
                 case 200:
                     if (msg.obj.toString().equalsIgnoreCase("Success")) {

@@ -333,20 +333,6 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
         getNearestLocToTop();
 
 
-//        to count passenger list and update list
-        double Lat = Double.parseDouble(preferences.getString(UtilStrings.LATITUDE, "0.0"));
-        double Lng = Double.parseDouble(preferences.getString(UtilStrings.LONGITUDE, "0.0"));
-
-//        for (int i1 = 0; i1 < passengerCountLists.size(); i1++) {
-//            totalCount = totalCount + passengerCountLists.get(i1).passenger_count;
-//            Log.i("TAG", "onCreate: " + passengerCountLists.get(i1).passenger_count + ":: " + passengerCountLists.get(i1).passenger_lat + ":: " + passengerCountLists.get(i1).passenger_lng);
-//
-//        }
-        if (passengerCountLists != null) {
-            totalPassenger.setText(String.valueOf(passengerCountLists.size()));
-        }
-
-
         priceLists = databaseHelper.priceLists(normalDiscountToggle.isOn());
 
         if (mode == UtilStrings.MODE_1) {
@@ -559,21 +545,6 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
         int routeStationListSize = preferences.getInt(UtilStrings.ROUTE_LIST_SIZE, 0);
 
 
-        for (int i1 = 0; i1 < databaseHelper.passengerCountLists().size(); i1++) {
-
-
-        }
-
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                if (passengerCountLists != null) {
-                    Log.i(TAG, "sadikshya: "+passengerCountLists.size());
-                    totalPassenger.setText(String.valueOf(passengerCountLists.size()));
-                }
-            }
-        });
-
         for (int i = 0; i < routeStationListSize; i++) {
             double startLat = Double.parseDouble(preferences.getString(UtilStrings.LATITUDE, "0.0"));
             double startLng = Double.parseDouble(preferences.getString(UtilStrings.LONGITUDE, "0.0"));
@@ -587,12 +558,10 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
                 if (distance < nearest) {
                     nearest = distance;
                     orderPos = routeStationLists.get(i).station_order;
-                    Log.i(TAG, "getNearestLocToTop: "+routeStationLists.get(i).station_name);
                     gridLayoutManager.scrollToPositionWithOffset(orderPos - 1, 10);
-
+//                    updateTotalPassengerCount(orderPos);
                 }
             }
-
         }
     }
 
@@ -793,24 +762,24 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
                 TextView income_issue = dialogView.findViewById(R.id.income_issue);
                 TextView income_ticket = dialogView.findViewById(R.id.income_ticket);
 
-                if (!helperAmt.equalsIgnoreCase("")) {
-                    helperBalanceDrawer.setText("वर्तमान ब्यालेन्स :- " + "रू " + GeneralUtils.getUnicodeNumber(helperAmt));
+                if (!preferencesHelper.getString(UtilStrings.AMOUNT_HELPER, "").equalsIgnoreCase("")) {
+                    helperBalanceDrawer.setText("वर्तमान ब्यालेन्स :- " + "रू " + GeneralUtils.getUnicodeNumber(preferencesHelper.getString(UtilStrings.AMOUNT_HELPER, "")));
                 } else {
                     helperBalanceDrawer.setVisibility(View.GONE);
                 }
 
-                if (incomeIssue > 0) {
-                    income_issue.setText("कार्ड जारी/रिचार्ज मार्फत :- " + "रू " + GeneralUtils.getUnicodeNumber(String.valueOf(incomeIssue)));
+                if (preferences.getInt(UtilStrings.TOTAL_COLLECTIONS_CARD, 0) > 0) {
+                    income_issue.setText("कार्ड जारी/रिचार्ज मार्फत :- " + "रू " + GeneralUtils.getUnicodeNumber(String.valueOf(preferences.getInt(UtilStrings.TOTAL_COLLECTIONS_CARD, 0))));
                 } else {
                     income_issue.setVisibility(View.GONE);
                 }
 
 
-                if (incomeTicket > 0) {
-                    income_ticket.setText("टिकटको माध्यमबाट :- " + "रू " + GeneralUtils.getUnicodeNumber(String.valueOf(incomeTicket))
-                            + "\n" + "कार्ड मार्फत :-" + "रू " + GeneralUtils.getUnicodeNumber(String.valueOf(incomeByCard))
-                            + "\n" + "नगद मार्फत :-" + "रू " + GeneralUtils.getUnicodeNumber(String.valueOf(incomeByCash))
-                            + "\n" + "QR मार्फत  :-" + "रू " + GeneralUtils.getUnicodeNumber(String.valueOf(incomeByQR)));
+                if ( preferences.getInt(UtilStrings.TOTAL_COLLECTIONS, 0) > 0) {
+                    income_ticket.setText("टिकटको माध्यमबाट :- " + "रू " + GeneralUtils.getUnicodeNumber(String.valueOf( preferences.getInt(UtilStrings.TOTAL_COLLECTIONS, 0)))
+                            + "\n" + "कार्ड मार्फत :-" + "रू " + GeneralUtils.getUnicodeNumber(String.valueOf(preferences.getInt(UtilStrings.TOTAL_COLLECTIONS_BY_CARD, 0)))
+                            + "\n" + "नगद मार्फत :-" + "रू " + GeneralUtils.getUnicodeNumber(String.valueOf(preferences.getInt(UtilStrings.TOTAL_COLLECTIONS_BY_CASH, 0)))
+                            + "\n" + "QR मार्फत  :-" + "रू " + GeneralUtils.getUnicodeNumber(String.valueOf(preferences.getInt(UtilStrings.TOTAL_COLLECTIONS_BY_QR, 0))));
 
                 } else {
                     income_ticket.setVisibility(View.GONE);
@@ -1336,6 +1305,9 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
         //        totalCollectionTickets.setText("Total Tickets :" + String.valueOf(totalTickets) + "\n Total Colletions :" + String.valueOf(totalCollections));
         totalCollectionTickets.setText(getString(R.string.total_tickets) + GeneralUtils.getUnicodeNumber(String.valueOf(totalTickets)) + "\n" + getString(R.string.total_collections) + GeneralUtils.getUnicodeNumber(String.valueOf(totalCollections)));
 
+        if (passengerCountLists != null) {
+            totalPassenger.setText(String.valueOf(preferences.getInt(UtilStrings.TOTAL_PASSENGERS, 0)));
+        }
 
     }
 
@@ -1542,5 +1514,21 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
         gridLayoutManager = new GridLayoutManager(this, spanCount);
         priceListView.setLayoutManager(gridLayoutManager);
         getNearestLocToTop();
+
+    }
+
+    private void updateTotalPassengerCount(int orderPos) {
+        if(databaseHelper.passengerCountLists().size()>0){
+//            totalPassenger.setText(String.valueOf(passengerCountLists.size()));
+            for (int i1 = 0; i1 < databaseHelper.passengerCountLists().size(); i1++) {
+                Log.i(TAG, "updateTotalPassengerCount: "+databaseHelper.passengerCountLists().get(i1).passenger_station_position+"  "+databaseHelper.passengerCountLists().get(i1).passenger_direction);
+                if(databaseHelper.passengerCountLists().get(i1).passenger_station_position<=orderPos){
+                    databaseHelper.updatePassengerCountForward(orderPos);
+                }else if(databaseHelper.passengerCountLists().get(i1).passenger_station_position>=orderPos){
+                    databaseHelper.updatePassengerCountBackward(orderPos);
+                }
+            }
+        }
+
     }
 }

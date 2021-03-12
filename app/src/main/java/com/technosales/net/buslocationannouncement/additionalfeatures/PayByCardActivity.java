@@ -34,6 +34,7 @@ import com.technosales.net.buslocationannouncement.mosambeesupport.Printer;
 import com.technosales.net.buslocationannouncement.pojo.BlockList;
 import com.technosales.net.buslocationannouncement.pojo.RouteStationList;
 import com.technosales.net.buslocationannouncement.pojo.TicketInfoList;
+import com.technosales.net.buslocationannouncement.serverconn.Encrypt;
 import com.technosales.net.buslocationannouncement.serverconn.RetrofitInterface;
 import com.technosales.net.buslocationannouncement.serverconn.ServerConfigNew;
 import com.technosales.net.buslocationannouncement.utils.GeneralUtils;
@@ -62,6 +63,7 @@ import static com.technosales.net.buslocationannouncement.utils.UtilStrings.PAYM
 import static com.technosales.net.buslocationannouncement.utils.UtilStrings.SECOND_TRANSACTION_AMT;
 import static com.technosales.net.buslocationannouncement.utils.UtilStrings.SECOND_TRANSACTION_HASH;
 import static com.technosales.net.buslocationannouncement.utils.UtilStrings.SECOND_TRANSACTION_ID;
+import static com.technosales.net.buslocationannouncement.utils.UtilStrings.SECRET_KEY;
 import static com.technosales.net.buslocationannouncement.utils.UtilStrings.STATUS;
 import static com.technosales.net.buslocationannouncement.utils.UtilStrings.TRANSACTION_TYPE_PAYMENT;
 
@@ -89,7 +91,7 @@ public class PayByCardActivity extends BaseActivity {
     Context context;
     ProgressDialog pClick;
     int[] customerDetailsBlock = {CUSTOMERID, CUSTOMER_AMT, CUSTOMER_HASH, CUSTOMER_TRANSACTION_NO};
-
+    int firstTransactionStatus = 0;
     private TokenManager tokenManager;
     private String passengerId = "";
     private String passengerAmt = "";
@@ -106,18 +108,20 @@ public class PayByCardActivity extends BaseActivity {
     private List<RouteStationList> routeStationLists = new ArrayList<>();
     private String isOnlineCheck;
     private String printTransaction;
-    private String ticketFirstId = "", ticketSecondId = "", ticketFirstAmount = "", ticketSecondAmount = "", ticketFirstHash = "",ticketSecondHash = "", latestFirstTranResponseHash;
-    private String ticketId="",tranCurrentHash="";
-    int firstTransactionStatus=0;
+    private String ticketFirstId = "", ticketSecondId = "", ticketFirstAmount = "", ticketSecondAmount = "", ticketFirstHash = "", ticketSecondHash = "", latestFirstTranResponseHash;
+    private String ticketId = "", tranCurrentHash = "";
+
+    String newRefHash;
+    String newBalance;
     private Handler handlerTransaction = new Handler() {
         public void handleMessage(android.os.Message msg) {
             this.obtainMessage();
             switch (msg.what) {
                 case 100:
                     msg.obj.toString();
-                        cardNUmber = msg.obj.toString();
+                    cardNUmber = msg.obj.toString();
                     setCardNUm(msg.obj.toString());
-                        Log.e("TAG", "handleMessage Id: " + msg.obj.toString());
+                    Log.e("TAG", "handleMessage Id: " + msg.obj.toString());
 
                     break;
                 case 101:
@@ -144,8 +148,8 @@ public class PayByCardActivity extends BaseActivity {
 
                 case 105:
 
-                        ticketFirstId = msg.obj.toString();
-                        Log.e("TAG", "handleMessage Id11: " + msg.obj.toString());
+                    ticketFirstId = msg.obj.toString();
+                    Log.e("TAG", "handleMessage Id11: " + msg.obj.toString());
 
                     break;
                 case 106:
@@ -171,37 +175,41 @@ public class PayByCardActivity extends BaseActivity {
                     Log.e("TAG", "handleMessage Id: " + msg.obj.toString());
                     break;
 
-                    case 110:
-                        ticketSecondHash = msg.obj.toString();
+                case 110:
+                    ticketSecondHash = msg.obj.toString();
                     Log.e("TAG", "handleMessage Id: " + msg.obj.toString());
                     break;
-
-                    case 404:
-                        Toast.makeText(PayByCardActivity.this, "Card is not authorized", Toast.LENGTH_SHORT).show();
-                        startActivity(new Intent(PayByCardActivity.this,TicketAndTracking.class));
-                        finish();
+                case 202:
+                    Log.i(TAG, "setNewTransaction: i have reached from offline");
+                    setNewTransaction(newBalance, newRefHash, ticketId, tranCurrentHash, pClick);
                     break;
 
-                    case 405:
-                        Toast.makeText(PayByCardActivity.this, msg.obj.toString(), Toast.LENGTH_SHORT).show();
-                        startActivity(getIntent());
-                        finish();
-                        overridePendingTransition(0, 0);
+                case 404:
+                    Toast.makeText(PayByCardActivity.this, "Card is not authorized", Toast.LENGTH_SHORT).show();
+                    startActivity(new Intent(PayByCardActivity.this, TicketAndTracking.class));
+                    finish();
+                    break;
+
+                case 405:
+                    Toast.makeText(PayByCardActivity.this, msg.obj.toString(), Toast.LENGTH_SHORT).show();
+                    startActivity(getIntent());
+                    finish();
+                    overridePendingTransition(0, 0);
                     break;
 
 
-                    case 500:
-                        Toast.makeText(PayByCardActivity.this, msg.obj.toString(), Toast.LENGTH_SHORT).show();
-                        pClick.dismiss();
-                        startActivity(getIntent());
-                        finish();
-                        overridePendingTransition(0, 0);
+                case 500:
+                    Toast.makeText(PayByCardActivity.this, msg.obj.toString(), Toast.LENGTH_SHORT).show();
+                    pClick.dismiss();
+//                    startActivity(getIntent());
+                    finish();
+                    overridePendingTransition(0, 0);
                     break;
                 case 505:
                     Toast.makeText(PayByCardActivity.this, msg.obj.toString(), Toast.LENGTH_SHORT).show();
                     break;
                 case 200:
-                    if(msg.obj.toString().equalsIgnoreCase("Success")){
+                    Log.i(TAG, "handleMessage: hhhhhhhhh");
                         if (!ticketId.equalsIgnoreCase("") && !tranCurrentHash.equalsIgnoreCase("")) {
                             try {
                                 BeepLEDTest.beepSuccess();
@@ -210,15 +218,15 @@ public class PayByCardActivity extends BaseActivity {
                             }
 
                             if (source != null && source.equalsIgnoreCase(UtilStrings.PLACE)) {
-                                price(ticketId,tranCurrentHash);
+                                price(ticketId, tranCurrentHash);
                             } else if (source != null && source.equalsIgnoreCase(UtilStrings.PRICE)) {
-                                place(ticketId,tranCurrentHash);
+                                place(ticketId, tranCurrentHash);
                             } else {
-                                normal(ticketId,tranCurrentHash);
+                                normal(ticketId, tranCurrentHash);
                             }
                         } else {
                         }
-                    }
+                    
                     break;
                 default:
                     break;
@@ -231,7 +239,7 @@ public class PayByCardActivity extends BaseActivity {
         @Override
         public void run() {
             while (!Thread.interrupted() && !stopThread4) {
-                if (!ticketSecondId.equalsIgnoreCase("") && !ticketSecondAmount.equalsIgnoreCase("")&&!ticketSecondHash.equalsIgnoreCase("")) {
+                if (!ticketSecondId.equalsIgnoreCase("") && !ticketSecondAmount.equalsIgnoreCase("") && !ticketSecondHash.equalsIgnoreCase("")) {
                     thread3.interrupt();
                     stopThread4 = true;
                     sendCardTransactionToServerSecond(ticketSecondId, ticketSecondAmount, pClick);
@@ -269,7 +277,7 @@ public class PayByCardActivity extends BaseActivity {
                             currentAmount.setText(GeneralUtils.getUnicodeNumber(passengerAmt));
                         }
                     });
-                        getCustomerDetails();
+                    getCustomerDetails();
 
 
                 } else {
@@ -325,7 +333,6 @@ public class PayByCardActivity extends BaseActivity {
         total_collections_card = total_collections_card + Integer.parseInt(amount);
 
 
-
         station_name = getIntent().getStringExtra(UtilStrings.STATION_NAME);
         tokenManager = TokenManager.getInstance(getSharedPreferences("prefs", MODE_PRIVATE));
 
@@ -339,7 +346,7 @@ public class PayByCardActivity extends BaseActivity {
         stopThread4 = false;
 
 
-        M1CardHandlerMosambee.read_miCard(handlerTransaction, customerDetailsBlock,"PayByCardActivity");
+        M1CardHandlerMosambee.read_miCard(handlerTransaction, customerDetailsBlock, "PayByCardActivity");
         (thread1).start();
 
         if (GeneralUtils.isNetworkAvailable(this)) {
@@ -348,12 +355,6 @@ public class PayByCardActivity extends BaseActivity {
             isOnlineCheck = "false";
         }
     }
-
-
-    public interface OnSearchListener {
-        void onSearchResult(int retCode, Bundle bundle);
-    }
-
 
     private void getCustomerDetails() {
         Log.i(TAG, "getCustomerDetails: " + (passengerId.equalsIgnoreCase("") && passengerAmt.equalsIgnoreCase("") && transactionHash.equalsIgnoreCase("") && passengerTranNo.equalsIgnoreCase("")));
@@ -374,7 +375,7 @@ public class PayByCardActivity extends BaseActivity {
                             Window window = pClick.getWindow();
                             WindowManager.LayoutParams wlp = window.getAttributes();
                             wlp.gravity = Gravity.AXIS_PULL_BEFORE;
-                             wlp.flags &= ~WindowManager.LayoutParams.FLAG_DIM_BEHIND;
+                            wlp.flags &= ~WindowManager.LayoutParams.FLAG_DIM_BEHIND;
                             window.setAttributes(wlp);
 //                          window.setBackgroundDrawable(getDrawable(R.color.gray_btn_bg_color));
 
@@ -438,7 +439,7 @@ public class PayByCardActivity extends BaseActivity {
         getOfflineTransactionExecuted = true;
 
         int[] firstOfflineTranBlock = {FIRST_TRANSACTION_ID, FIRST_TRANSACTION_AMT, FIRST_TRANSACTION_HASH};
-        M1CardHandlerMosambee.read_miCard(handlerTransaction, firstOfflineTranBlock,"GetFirstOfflineTransaction");
+        M1CardHandlerMosambee.read_miCard(handlerTransaction, firstOfflineTranBlock, "GetFirstOfflineTransaction");
         thread2.start();
     }
 
@@ -448,14 +449,21 @@ public class PayByCardActivity extends BaseActivity {
         thread2.interrupt();
         stopThread3 = true;
         Log.i(TAG, "sendCardTransactionToServer: " + "reached here " + finalCusFirstTransId + " " + finalCusFirstTransAmt + " " + finalCusFirstTransHash);
-        String newHash = BCrypt.withDefaults().hashToString(10, (finalCusFirstTransHash + finalCusFirstTransId + passengerId + finalCusFirstTransAmt).toCharArray());
+        byte[] value1 = GeneralUtils.decoderfun(SECRET_KEY);
+        String amt = null;
+        try {
+            amt = Encrypt.encrypt(value1, finalCusFirstTransAmt);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        Log.i(TAG, "sendCardTransactionToServer: " + finalCusFirstTransHash + " " + transactionHash);
         if (GeneralUtils.isNetworkAvailable(this)) {
             Map<String, Object> params = new HashMap<>();
             params.put("helper_id", helperId);
             params.put("ticket_id", finalCusFirstTransId);
             params.put("transactionType", TRANSACTION_TYPE_PAYMENT);
-            params.put("device_time", GeneralUtils.getDate()+""+GeneralUtils.getTime());
-            params.put("transactionAmount", finalCusFirstTransAmt);
+            params.put("device_time", GeneralUtils.getDate() + "" + GeneralUtils.getTime());
+            params.put("transactionAmount", amt);
             params.put("transactionMedium", PAYMENT_CARD);
             params.put("lat", latitude);
             params.put("lng", longitude);
@@ -479,45 +487,45 @@ public class PayByCardActivity extends BaseActivity {
                     if (response.code() == 200) {
                         TraModel response1 = response.body();
                         String hashFromFirstTransaction = response1.getData().getTransaction().getReferenceHash();
-                        firstTransactionStatus=200;
+                        firstTransactionStatus = 200;
                         if (passengerTranNo.equalsIgnoreCase("2")) {
-                            latestFirstTranResponseHash=hashFromFirstTransaction;
+                            latestFirstTranResponseHash = hashFromFirstTransaction;
                             getSecondTransaction();
                         } else if (passengerTranNo.equalsIgnoreCase("1")) {
 
                             String newTranNo = Base64.encodeToString("0".getBytes(), Base64.DEFAULT);
 
-                            String[]newTranNoList={newTranNo};
-                            int[]newTranNoListBlock={CUSTOMER_TRANSACTION_NO};
-                            M1CardHandlerMosambee.write_miCard(handlerTransaction, newTranNoList, newTranNoListBlock,"OfflineTransactionNoUpdate");
+                            String[] newTranNoList = {newTranNo};
+                            int[] newTranNoListBlock = {CUSTOMER_TRANSACTION_NO};
+                            M1CardHandlerMosambee.write_miCard(handlerTransaction, newTranNoList, newTranNoListBlock, "OfflineTransactionNoUpdate");
                             startTransactionProcess(hashFromFirstTransaction);
                         }
                     } else if (response.code() == 400) {
-                        firstTransactionStatus=400;
+                        firstTransactionStatus = 400;
                         thread2.interrupt();
                         stopThread3 = true;
                         if (passengerTranNo.equalsIgnoreCase("2")) {
                             getSecondTransaction();
                         } else if (passengerTranNo.equalsIgnoreCase("1")) {
                             String newTranNo = Base64.encodeToString("0".getBytes(), Base64.DEFAULT);
-                            String[]newTranNoList={newTranNo};
-                            int[]newTranNoListBlock={CUSTOMER_TRANSACTION_NO};
-                            M1CardHandlerMosambee.write_miCard(handlerTransaction, newTranNoList, newTranNoListBlock,"OfflineTransactionNoUpdate");
+                            String[] newTranNoList = {newTranNo};
+                            int[] newTranNoListBlock = {CUSTOMER_TRANSACTION_NO};
+                            M1CardHandlerMosambee.write_miCard(handlerTransaction, newTranNoList, newTranNoListBlock, "OfflineTransactionNoUpdate");
                             startTransactionProcess(transactionHash);
                         }
                     } else if (response.code() == 404) {
-                        firstTransactionStatus=404;
+                        firstTransactionStatus = 404;
                         if (passengerTranNo.equalsIgnoreCase("2")) {
                             getSecondTransaction();
                         } else if (passengerTranNo.equalsIgnoreCase("1")) {
                             String newTranNo = Base64.encodeToString("0".getBytes(), Base64.DEFAULT);
-                            String[]newTranNoList={newTranNo};
-                            int[]newTranNoListBlock={CUSTOMER_TRANSACTION_NO};
-                            M1CardHandlerMosambee.write_miCard(handlerTransaction, newTranNoList, newTranNoListBlock,"OfflineTransactionNoUpdate");
+                            String[] newTranNoList = {newTranNo};
+                            int[] newTranNoListBlock = {CUSTOMER_TRANSACTION_NO};
+                            M1CardHandlerMosambee.write_miCard(handlerTransaction, newTranNoList, newTranNoListBlock, "OfflineTransactionNoUpdate");
 
                             startTransactionProcess(latestTransHash);
                         } else if (response.code() == 401) {
-                            firstTransactionStatus=401;
+                            firstTransactionStatus = 401;
                             startActivity(new Intent(PayByCardActivity.this, HelperLogin.class));
                             finish();
                         }
@@ -535,7 +543,7 @@ public class PayByCardActivity extends BaseActivity {
 
     private void getSecondTransaction() {
         int[] secondOfflineTranBlock = {SECOND_TRANSACTION_ID, SECOND_TRANSACTION_AMT, SECOND_TRANSACTION_HASH};
-        M1CardHandlerMosambee.read_miCard(handlerTransaction, secondOfflineTranBlock,"GetSecondOfflineTransaction");
+        M1CardHandlerMosambee.read_miCard(handlerTransaction, secondOfflineTranBlock, "GetSecondOfflineTransaction");
         thread3.start();
     }
 
@@ -545,23 +553,30 @@ public class PayByCardActivity extends BaseActivity {
         thread3.interrupt();
         stopThread4 = true;
 
-           if(firstTransactionStatus==200){
-               transactionHash=latestFirstTranResponseHash;
-           }else if(firstTransactionStatus==400){
-               transactionHash=ticketSecondHash;
-           }else if(firstTransactionStatus==404){
-               transactionHash=ticketSecondHash;
-           }
-        Log.i(TAG, "sendCardTransactionToServerSecond: " + "i m in sec trans"+ticketSecondId+" "+ticketSecondAmount+" "+transactionHash);
+        if (firstTransactionStatus == 200) {
+            transactionHash = latestFirstTranResponseHash;
+        } else if (firstTransactionStatus == 400) {
+            transactionHash = ticketSecondHash;
+        } else if (firstTransactionStatus == 404) {
+            transactionHash = ticketSecondHash;
+        }
+        Log.i(TAG, "sendCardTransactionToServerSecond: " + "i m in sec trans" + ticketSecondId + " " + ticketSecondAmount + " " + transactionHash);
 
         String newHash = BCrypt.withDefaults().hashToString(10, (transactionHash + ticketSecondId + passengerId + ticketSecondAmount).toCharArray());
+        byte[] value1 = GeneralUtils.decoderfun(SECRET_KEY);
+        String amt = null;
+        try {
+            amt = Encrypt.encrypt(value1, ticketSecondAmount);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         if (GeneralUtils.isNetworkAvailable(this)) {
             Map<String, Object> params = new HashMap<>();
             params.put("helper_id", helperId);
             params.put("ticket_id", ticketSecondId);
             params.put("transactionType", TRANSACTION_TYPE_PAYMENT);
             params.put("device_time", dateTime);
-            params.put("transactionAmount", ticketSecondAmount);
+            params.put("transactionAmount", amt);
             params.put("transactionMedium", PAYMENT_CARD);
             params.put("lat", latitude);
             params.put("lng", longitude);
@@ -585,12 +600,12 @@ public class PayByCardActivity extends BaseActivity {
                     Log.e(TAG, "onResponse:" + response);
 
                     pClick.dismiss();
-                    if (response.code()==200) {
+                    if (response.code() == 200) {
                         TraModel transactionResponse = response.body();
                         String newTranNo = Base64.encodeToString("0".getBytes(), Base64.DEFAULT);
-                        String[]newTranNoList={newTranNo};
-                        int[]newTranNoListBlock={CUSTOMER_TRANSACTION_NO};
-                        M1CardHandlerMosambee.write_miCard(handlerTransaction, newTranNoList, newTranNoListBlock,"OfflineTransactionNoUpdate");
+                        String[] newTranNoList = {newTranNo};
+                        int[] newTranNoListBlock = {CUSTOMER_TRANSACTION_NO};
+                        M1CardHandlerMosambee.write_miCard(handlerTransaction, newTranNoList, newTranNoListBlock, "OfflineTransactionNoUpdate");
 
                         String transactionHash = transactionResponse.getData().getTransaction().getReferenceHash();
                         startTransactionProcess(transactionHash);
@@ -598,18 +613,18 @@ public class PayByCardActivity extends BaseActivity {
                         thread3.interrupt();
                         stopThread4 = true;
                         String newTranNo = Base64.encodeToString("0".getBytes(), Base64.DEFAULT);
-                        String[]newTranNoList={newTranNo};
-                        int[]newTranNoListBlock={CUSTOMER_TRANSACTION_NO};
-                        M1CardHandlerMosambee.write_miCard(handlerTransaction, newTranNoList, newTranNoListBlock,"OfflineTransactionNoUpdate");
+                        String[] newTranNoList = {newTranNo};
+                        int[] newTranNoListBlock = {CUSTOMER_TRANSACTION_NO};
+                        M1CardHandlerMosambee.write_miCard(handlerTransaction, newTranNoList, newTranNoListBlock, "OfflineTransactionNoUpdate");
 
                         startTransactionProcess(latestTransHash);
                     } else if (response.code() == 404) {
                         thread3.interrupt();
                         stopThread4 = true;
                         String newTranNo = Base64.encodeToString("0".getBytes(), Base64.DEFAULT);
-                        String[]newTranNoList={newTranNo};
-                        int[]newTranNoListBlock={CUSTOMER_TRANSACTION_NO};
-                        M1CardHandlerMosambee.write_miCard(handlerTransaction, newTranNoList, newTranNoListBlock,"OfflineTransactionNoUpdate");
+                        String[] newTranNoList = {newTranNo};
+                        int[] newTranNoListBlock = {CUSTOMER_TRANSACTION_NO};
+                        M1CardHandlerMosambee.write_miCard(handlerTransaction, newTranNoList, newTranNoListBlock, "OfflineTransactionNoUpdate");
 
 ////                        handleErrors(response.errorBody());
                         startTransactionProcess(latestTransHash);
@@ -628,7 +643,6 @@ public class PayByCardActivity extends BaseActivity {
 
         }
     }
-
 
     private void startTransactionProcess(String transactionHashLatest) {
         if (!validate()) {
@@ -651,36 +665,35 @@ public class PayByCardActivity extends BaseActivity {
                 tranCurrentHash = BCrypt.withDefaults().hashToString(10, (transactionHashLatest + ticketId + passengerId + GeneralUtils.getUnicodeReverse(amount)).toCharArray());
 
                 String newWritableHash = tranCurrentHash.substring(tranCurrentHash.length() - 9);
-                reducedValue = Integer.valueOf(passengerAmt) - (Integer.valueOf(GeneralUtils.getUnicodeReverse(amount)));
+                reducedValue = Integer.valueOf(passengerAmt)-(Integer.valueOf(GeneralUtils.getUnicodeReverse(amount)));
 
 
 //            writing details to blocks
-                String newRefHash = Base64.encodeToString(newWritableHash.getBytes(), Base64.DEFAULT);
-                String newBalance = Base64.encodeToString(String.valueOf(reducedValue).getBytes(), Base64.DEFAULT);
-                Log.i(TAG, "startTransactionProcess: "+reducedValue);
-                        if (GeneralUtils.isNetworkAvailable(PayByCardActivity.this)) {
-                            if (!isFinishing()) {
-                                setNewTransaction(newBalance, newRefHash, ticketId, tranCurrentHash, pClick);
+                newRefHash  = Base64.encodeToString(newWritableHash.getBytes(), Base64.DEFAULT);
+                newBalance  = Base64.encodeToString(String.valueOf(reducedValue).getBytes(), Base64.DEFAULT);
+                Log.i(TAG, "startTransactionProcess: " + reducedValue);
+                if (GeneralUtils.isNetworkAvailable(PayByCardActivity.this)) {
+                    if (!isFinishing()) {
+                        setNewTransaction(newBalance, newRefHash, ticketId, tranCurrentHash, pClick);
+                    }
+                } else {
+                    if (passengerTranNo.equalsIgnoreCase("2")) {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                errorCardStorageFull();
                             }
-                        } else {
-                            if (passengerTranNo.equalsIgnoreCase("2")) {
-                                runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        errorCardStorageFull();
-                                    }
-                                });
+                        });
+                    } else {
+                        String newRefHash1 = Base64.encodeToString(transactionHashLatest.getBytes(), Base64.DEFAULT);
 
-                            } else {
-                                String newRefHash1 = Base64.encodeToString(transactionHashLatest.getBytes(), Base64.DEFAULT);
-
-                                if (passengerTranNo.equalsIgnoreCase("0")) {
-                                    setFirstOfflineTransaction(newBalance, newRefHash1, newRefHash, ticketId, tranCurrentHash, pClick);
-                                } else if (passengerTranNo.equalsIgnoreCase("1")) {
-                                    secondOfflineTransaction(newBalance, newRefHash1, newRefHash, ticketId, tranCurrentHash, pClick);
-                                }
-                            }
+                        if (passengerTranNo.equalsIgnoreCase("0")) {
+                            setFirstOfflineTransaction(newBalance, newRefHash1, newRefHash, ticketId, tranCurrentHash, pClick);
+                        } else if (passengerTranNo.equalsIgnoreCase("1")) {
+                            secondOfflineTransaction(newBalance, newRefHash1, newRefHash, ticketId, tranCurrentHash, pClick);
                         }
+                    }
+                }
             } else {
                 runOnUiThread(new Runnable() {
                     @Override
@@ -707,15 +720,9 @@ public class PayByCardActivity extends BaseActivity {
         Log.i(TAG, "setSecondOfflineTransaction: " + ticketId + newWritableHash + " " + GeneralUtils.getUnicodeReverse(amount).getBytes() + " " + newTranNo);
         int[] secondOfflineTranBlock = {SECOND_TRANSACTION_ID, SECOND_TRANSACTION_AMT, SECOND_TRANSACTION_HASH, CUSTOMER_TRANSACTION_NO};
         String[] secondOfflineTran = {ticketId, passenserFare, offlineHash, newTranNo};
-        M1CardHandlerMosambee.write_miCard(handlerTransaction,secondOfflineTran,secondOfflineTranBlock,"SecondOfflineTransaction");
+        M1CardHandlerMosambee.write_miCard(handlerTransaction, secondOfflineTran, secondOfflineTranBlock, "SecondOfflineTransaction-Write");
 
-//        for (int i = 0; i < secondOfflineTran.length; i++) {
-////            PiccTransaction.getInstance(piccType).writeData(handlerTransaction, secondOfflineTran[i], secondOfflineTranBlock[i]);
-//            Log.i(TAG, "setSecondOfflineTransaction: " + i);
-//            if (i == 3) {
-//                setNewTransaction(newBalance, newWritableHash, ticketId, tranCurrentHash, pClick);
-//            }
-//        }
+
     }
 
     private void setFirstOfflineTransaction(String newBalance, String offlineHash, String newRefHash, String ticketId, String tranCurrentHash, ProgressDialog pClick) {
@@ -726,20 +733,16 @@ public class PayByCardActivity extends BaseActivity {
 
         String[] firstOfflineTran = {ticketId, passenserFare, offlineHash, newTranNo};
         int[] firstOfflineTranBlock = {FIRST_TRANSACTION_ID, FIRST_TRANSACTION_AMT, FIRST_TRANSACTION_HASH, CUSTOMER_TRANSACTION_NO};
-        M1CardHandlerMosambee.write_miCard(handlerTransaction,firstOfflineTran,firstOfflineTranBlock,"FirstOfflineTransaction");
+        M1CardHandlerMosambee.write_miCard(handlerTransaction, firstOfflineTran, firstOfflineTranBlock, "FirstOfflineTransaction-Write");
 
-//        for (int i = 0; i < firstOfflineTranBlock.length; i++) {
-////            PiccTransaction.getInstance(piccType).writeData(handlerTransaction, firstOfflineTran[i], firstOfflineTranBlock[i]);
-//            if (i == 3) {
-//                setNewTransaction(newBalance, newRefHash, ticketId, tranCurrentHash, pClick);
-//            }
-//        }
+
     }
 
     private void setNewTransaction(String reducedBalance, String trimmedHash, String ticketId, String tranCurrentHash, ProgressDialog pClick) {
+    
         String[] customerUpdatedDetails = {reducedBalance, trimmedHash};
         int[] customerUpdatedDetailsBlock = {CUSTOMER_AMT, CUSTOMER_HASH};
-        M1CardHandlerMosambee.write_miCard(handlerTransaction,customerUpdatedDetails,customerUpdatedDetailsBlock,"PayByCardActivity-UpdateCard");
+        M1CardHandlerMosambee.write_miCard(handlerTransaction, customerUpdatedDetails, customerUpdatedDetailsBlock, "PayByCardActivity-UpdateCard");
 
     }
 
@@ -754,7 +757,7 @@ public class PayByCardActivity extends BaseActivity {
                         public void onClick(SweetAlertDialog sweetAlertDialog) {
                             sweetAlertDialog.dismiss();
                             sweetAlertDialog.dismissWithAnimation();
-                            startActivity(new Intent(PayByCardActivity.this, TicketAndTracking.class));
+//                            startActivity(new Intent(PayByCardActivity.this, TicketAndTracking.class));
                             finish();
                         }
                     })
@@ -782,7 +785,7 @@ public class PayByCardActivity extends BaseActivity {
                         public void onClick(SweetAlertDialog sDialog) {
                             sDialog.dismiss();
                             sDialog.dismissWithAnimation();
-                            startActivity(new Intent(PayByCardActivity.this, TicketAndTracking.class));
+//                            startActivity(new Intent(PayByCardActivity.this, TicketAndTracking.class));
                             finish();
                         }
                     })
@@ -801,7 +804,7 @@ public class PayByCardActivity extends BaseActivity {
                         public void onClick(SweetAlertDialog sDialog) {
                             sDialog.dismiss();
                             sDialog.dismissWithAnimation();
-                            startActivity(new Intent(PayByCardActivity.this,TicketAndTracking.class));
+//                            startActivity(new Intent(PayByCardActivity.this, TicketAndTracking.class));
                             finish();
                         }
                     }).show();
@@ -840,7 +843,7 @@ public class PayByCardActivity extends BaseActivity {
         return hasError;
     }
 
-   public void setCardNUm(String s) {
+    public void setCardNUm(String s) {
         if (cardNUmber != null) {
             if (databaseHelper.listBlockList().size() != 0) {
                 for (int i = 0; i < databaseHelper.listBlockList().size(); i++) {
@@ -858,7 +861,7 @@ public class PayByCardActivity extends BaseActivity {
                             public void run() {
 
                                 Toast.makeText(PayByCardActivity.this, "यो कार्ड ब्लक गरिएको छ। ", Toast.LENGTH_SHORT).show();
-                                startActivity(new Intent(PayByCardActivity.this,TicketAndTracking.class));
+//                                startActivity(new Intent(PayByCardActivity.this, TicketAndTracking.class));
                                 finish();
                             }
                         });
@@ -915,13 +918,13 @@ public class PayByCardActivity extends BaseActivity {
         stopThread3 = true;
         stopThread4 = true;
         super.onBackPressed();
-        startActivity(new Intent(PayByCardActivity.this, TicketAndTracking.class));
+//        startActivity(new Intent(PayByCardActivity.this, TicketAndTracking.class));
         finish();
     }
 
     private void normal(String ticketId, String tranCurrentHash) {
 
-        Log.i("TAG", "place: " +ticketId + " " + tranCurrentHash);
+        Log.i("TAG", "place: " + ticketId + " " + tranCurrentHash);
         ///startProcess
         float distance = 0;
         float nearest = 0;
@@ -966,13 +969,13 @@ public class PayByCardActivity extends BaseActivity {
             int day = outputOfConversion.getDay();
             Log.i("getNepaliDate", "year=" + year + ",month:" + month + ",day:" + day);
 
-            Log.i("TAG", "normal: " +ticketId);
+            Log.i("TAG", "normal: " + ticketId);
             TicketInfoList ticketInfoList = new TicketInfoList();
             ticketInfoList.ticket_id = ticketId;
             ticketInfoList.transactionAmount = GeneralUtils.getUnicodeReverse(amount);
             ticketInfoList.helper_id = helperId;
             ticketInfoList.device_id = deviceId;
-            ticketInfoList.device_time = GeneralUtils.getFullDate()+" "+GeneralUtils.getTime();
+            ticketInfoList.device_time = GeneralUtils.getFullDate() + " " + GeneralUtils.getTime();
             ticketInfoList.transactionMedium = PAYMENT_CARD;
             ticketInfoList.transactionType = TRANSACTION_TYPE_PAYMENT;
             ticketInfoList.lat = latitude;
@@ -992,9 +995,9 @@ public class PayByCardActivity extends BaseActivity {
                     String.valueOf(Integer.parseInt(amount) + "\n" + ticketType + "\n" + GeneralUtils.getFullDate() + "\n" + GeneralUtils.getTime() + "\n" + latitude + "\n" + longitude + "\n " + helperId));
             Log.i("TAG", "rwwwwwwwun: " + reducedValue);
 
-            printTransaction = "बस नम्बर :- "+ busName + " (कार्ड)" +"\n"+
-                    "टिकट नम्बर :-"+ GeneralUtils.getUnicodeNumber(ticketInfoList.ticket_id) +"\n" +
-                    "रकम :- "+"रु." + GeneralUtils.getUnicodeNumber(ticketInfoList.transactionAmount) + discountType + "\n" +
+            printTransaction = "बस नम्बर :- " + busName + " (कार्ड)" + "\n" +
+                    "टिकट नम्बर :-" + GeneralUtils.getUnicodeNumber(ticketInfoList.ticket_id) + "\n" +
+                    "रकम :- " + "रु." + GeneralUtils.getUnicodeNumber(ticketInfoList.transactionAmount) + discountType + "\n" +
                     "जारी मिति :-" + GeneralUtils.getNepaliMonth(String.valueOf(month)) + " "
                     + GeneralUtils.getUnicodeNumber(String.valueOf(day)) + " " +
                     GeneralUtils.getUnicodeNumber(GeneralUtils.getTime());
@@ -1016,7 +1019,7 @@ public class PayByCardActivity extends BaseActivity {
                 }
 
 
-                startActivity(new Intent(PayByCardActivity.this, TicketAndTracking.class));
+//                startActivity(new Intent(PayByCardActivity.this, TicketAndTracking.class));
                 finish();
             } else {
             }
@@ -1062,11 +1065,11 @@ public class PayByCardActivity extends BaseActivity {
             int day = outputOfConversion.getDay();
 
             TicketInfoList ticketInfoList = new TicketInfoList();
-            ticketInfoList.ticket_id =ticketId;
+            ticketInfoList.ticket_id = ticketId;
             ticketInfoList.transactionAmount = GeneralUtils.getUnicodeReverse(amount);
             ticketInfoList.helper_id = helperId;
             ticketInfoList.device_id = deviceId;
-            ticketInfoList.device_time = GeneralUtils.getFullDate()+" "+GeneralUtils.getTime();
+            ticketInfoList.device_time = GeneralUtils.getFullDate() + " " + GeneralUtils.getTime();
             ticketInfoList.transactionMedium = UtilStrings.PAYMENT_CARD;
             ticketInfoList.transactionType = TRANSACTION_TYPE_PAYMENT;
             ticketInfoList.lat = latitude;
@@ -1083,10 +1086,10 @@ public class PayByCardActivity extends BaseActivity {
             databaseHelper.insertTicketInfo(ticketInfoList);
 
 
-            printTransaction =  "बस नम्बर :- "+busName + " (कार्ड)" + "\n" +
-                    "टिकट नम्बर :-"+ GeneralUtils.getUnicodeNumber(ticketInfoList.ticket_id) + "\n" +
-                    "रकम :- "+ "रु." + GeneralUtils.getUnicodeNumber(ticketInfoList.transactionAmount) + discountType + "\n" +
-                    "दूरी :-"+ nearest_name + "-" + toGetOff + "\n" +
+            printTransaction = "बस नम्बर :- " + busName + " (कार्ड)" + "\n" +
+                    "टिकट नम्बर :-" + GeneralUtils.getUnicodeNumber(ticketInfoList.ticket_id) + "\n" +
+                    "रकम :- " + "रु." + GeneralUtils.getUnicodeNumber(ticketInfoList.transactionAmount) + discountType + "\n" +
+                    "दूरी :-" + nearest_name + "-" + toGetOff + "\n" +
                     "जारी मिति :-" + GeneralUtils.getNepaliMonth(String.valueOf(month)) + " "
                     + GeneralUtils.getUnicodeNumber(String.valueOf(day)) + " " +
                     GeneralUtils.getUnicodeNumber(GeneralUtils.getTime());
@@ -1094,14 +1097,14 @@ public class PayByCardActivity extends BaseActivity {
             pClick.dismiss();
 
             if (!printTransaction.equalsIgnoreCase("")) {
-                    try {
-                        Printer.Print(PayByCardActivity.this, printTransaction, handlerTransaction);
-                    } catch (RemoteException e) {
-                        e.printStackTrace();
-                    }
+                try {
+                    Printer.Print(PayByCardActivity.this, printTransaction, handlerTransaction);
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                }
 
 
-                startActivity(new Intent(PayByCardActivity.this, TicketAndTracking.class));
+//                startActivity(new Intent(PayByCardActivity.this, TicketAndTracking.class));
                 finish();
             } else {
                 Log.i("TAG", "onActivate: " + "rrrr");
@@ -1112,7 +1115,7 @@ public class PayByCardActivity extends BaseActivity {
                 public void run() {
                     pClick.dismiss();
                     Toast.makeText(PayByCardActivity.this, "सहयोगी लग ईन छैन", Toast.LENGTH_SHORT).show();
-                    startActivity(new Intent(PayByCardActivity.this, TicketAndTracking.class));
+//                    startActivity(new Intent(PayByCardActivity.this, TicketAndTracking.class));
                     finish();
                 }
             });
@@ -1155,7 +1158,7 @@ public class PayByCardActivity extends BaseActivity {
             ticketInfoList.transactionAmount = GeneralUtils.getUnicodeReverse(amount);
             ticketInfoList.helper_id = helperId;
             ticketInfoList.device_id = deviceId;
-            ticketInfoList.device_time = GeneralUtils.getFullDate()+" "+GeneralUtils.getTime();
+            ticketInfoList.device_time = GeneralUtils.getFullDate() + " " + GeneralUtils.getTime();
             ticketInfoList.transactionMedium = PAYMENT_CARD;
             ticketInfoList.transactionType = TRANSACTION_TYPE_PAYMENT;
             ticketInfoList.lat = latitude;
@@ -1181,11 +1184,11 @@ public class PayByCardActivity extends BaseActivity {
                 strTotal = "null";
             }
 
-            printTransaction =  "बस नम्बर :- "+busName + " (कार्ड)" + "\n" +
-                    "टिकट नम्बर :-"+ GeneralUtils.getUnicodeNumber(ticketInfoList.ticket_id) + "\n" +
+            printTransaction = "बस नम्बर :- " + busName + " (कार्ड)" + "\n" +
+                    "टिकट नम्बर :-" + GeneralUtils.getUnicodeNumber(ticketInfoList.ticket_id) + "\n" +
                     GeneralUtils.getUnicodeNumber(strTotal) + "कि.मी \n रकम :- रु." + GeneralUtils.getUnicodeNumber(ticketInfoList.transactionAmount) + discountType + "\n" +
-                   "दूरी :-"+ nearest_name + "-" + station_name + "\n" +
-                    "जारी मिति :-"+ GeneralUtils.getNepaliMonth(String.valueOf(month)) + " "
+                    "दूरी :-" + nearest_name + "-" + station_name + "\n" +
+                    "जारी मिति :-" + GeneralUtils.getNepaliMonth(String.valueOf(month)) + " "
                     + GeneralUtils.getUnicodeNumber(String.valueOf(day)) + " " +
                     GeneralUtils.getUnicodeNumber(GeneralUtils.getTime());
 
@@ -1197,7 +1200,7 @@ public class PayByCardActivity extends BaseActivity {
                 }
 
 
-                startActivity(new Intent(PayByCardActivity.this, TicketAndTracking.class));
+//                startActivity(new Intent(PayByCardActivity.this, TicketAndTracking.class));
                 finish();
             } else {
                 Log.i("TAG", "onActivate: " + "rrrr");
@@ -1208,11 +1211,15 @@ public class PayByCardActivity extends BaseActivity {
                 public void run() {
 
                     Toast.makeText(PayByCardActivity.this, "सहयोगी लग ईन छैन", Toast.LENGTH_SHORT).show();
-                    startActivity(new Intent(PayByCardActivity.this, TicketAndTracking.class));
+//                    startActivity(new Intent(PayByCardActivity.this, TicketAndTracking.class));
                     finish();
                 }
             });
 
         }
+    }
+
+    public interface OnSearchListener {
+        void onSearchResult(int retCode, Bundle bundle);
     }
 }

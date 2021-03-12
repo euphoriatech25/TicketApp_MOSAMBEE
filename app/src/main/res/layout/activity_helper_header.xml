@@ -44,7 +44,7 @@
 
     <LinearLayout
         android:id="@+id/helperLayout"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:padding="5dp"
@@ -99,7 +99,7 @@
             android:layout_height="35dp"
             android:background="@color/colorPrimaryDark"
             android:drawableStart="@android:drawable/ic_menu_view"
-            android:gravity="center"
+
             android:padding="3dp"
             android:text="@string/todaysincome"
             android:textColor="@color/white_color" />
