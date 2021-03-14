@@ -74,17 +74,17 @@ import java.util.Random;
         private boolean isPaused;
         int position = 0;
 
-        final Handler handlerloop = new Handler(Looper.getMainLooper());
-        final  Runnable runnable=new Runnable() {
-            @Override
-            public void run() {
-                position++;
-                test();
-
-                handlerloop.postDelayed(this, 10000);
-            }
-
-        };
+//        final Handler handlerloop = new Handler(Looper.getMainLooper());
+//        final  Runnable runnable=new Runnable() {
+//            @Override
+//            public void run() {
+//                position++;
+//                test();
+//
+//                handlerloop.postDelayed(this, 10000);
+//            }
+//
+//        };
 
         private TrackingListener mListener;
 
@@ -125,11 +125,9 @@ import java.util.Random;
             wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, getClass().getName());
         }
 
-        public void startHandler(){
-
-            handlerloop.postDelayed(runnable,10000);
-
-        }
+//        public void startHandler(){
+//            handlerloop.postDelayed(runnable,10000);
+//        }
 
         public void start() {
             if (isOnline) {
@@ -156,195 +154,196 @@ import java.util.Random;
         @Override
         public void onPositionUpdate(Position position) {
 
-//            try {
-//                StatusActivity.addMessage(context.getString(R.string.status_location_update));
-//                if (position != null) {
-//                    write(position);
-//                    context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putString(UtilStrings.LATITUDE, String.valueOf(position.getLatitude())).apply();
-//                    context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putString(UtilStrings.LONGITUDE, String.valueOf(position.getLongitude())).apply();
-//
-//                    for (int i = 0; i < routeStationLists.size(); i++) {
-//                        RouteStationList routeStationList = routeStationLists.get(i);
-//                        double stationLat = Double.parseDouble(routeStationList.station_lat);
-//                        double stationLng = Double.parseDouble(routeStationList.station_lng);
-//
-//                        float distance = GeneralUtils.calculateDistance(stationLat, stationLng, position.getLatitude(), position.getLongitude());
-//                        int currentOrder = routeStationList.station_order;
-//                        String currentOrderId = routeStationList.station_id;
-//                        if (distance <= 50) {
-//                            if (!currentOrderId.equals(preOrderId)) {
-//                                if (preOrder < currentOrder) {
-//                                    if (currentOrder == routeStationLists.size()) {
-//                                        nextStation = databaseHelper.nextStation(currentOrder - 1);
-//                                        context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.FORWARD, false).apply();
-//                                    } else {
-//                                        nextStation = databaseHelper.nextStation(currentOrder + 1);
-//                                        context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.FORWARD, true).apply();
-//
-//                                    }
-//                                } else if (preOrder > currentOrder && databaseHelper.lastStation(currentOrderId) == routeStationLists.size()) {
-//                                    nextStation = databaseHelper.nextStation(currentOrder - 1);
-//                                    context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.FORWARD, false).apply();
-//
-//                                } else {
-//                                    if (databaseHelper.getDouble(routeStationList.station_id) > 1) {
-//
-//                                        currentOrder = databaseHelper.nextStationId(routeStationList.station_id);
-//                                        nextStation = databaseHelper.nextStation(currentOrder + 1);
-//                                        context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.FORWARD, true).apply();
-//
-//
-//                                    } else {
-//                                        if (currentOrder != 1) {
-//                                            nextStation = databaseHelper.nextStation(currentOrder - 1);
-//                                            context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.FORWARD, false).apply();
-//
-//                                        } else {
-//                                            nextStation = databaseHelper.nextStation(currentOrder + 1);
-//                                            context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.FORWARD, true).apply();
-//
-//                                        }
-//                                    }
-//
-//                                }
-//                                preOrder = currentOrder;
-//                                preOrderId = currentOrderId;
-//                            }
-//                            break;
-//                        }
-//
-//                    }
-//                }else {
-//
-//                    write(position);
-//                    context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putString(UtilStrings.LATITUDE, String.valueOf(position.getLatitude())).apply();
-//                    context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putString(UtilStrings.LONGITUDE, String.valueOf(position.getLongitude())).apply();
-//
-//                    for (int i = 0; i < routeStationLists.size(); i++) {
-//                        RouteStationList routeStationList = routeStationLists.get(i);
-//                        double stationLat = Double.parseDouble(routeStationList.station_lat);
-//                        double stationLng = Double.parseDouble(routeStationList.station_lng);
-//
-//                        float distance = GeneralUtils.calculateDistance(stationLat, stationLng, position.getLatitude(), position.getLongitude());
-//                        int currentOrder = routeStationList.station_order;
-//                        String currentOrderId = routeStationList.station_id;
-//                        if (distance <= 50) {
-//                            if (!currentOrderId.equals(preOrderId)) {
-//                                if (preOrder < currentOrder) {
-//                                    if (currentOrder == routeStationLists.size()) {
-//                                        nextStation = databaseHelper.nextStation(currentOrder - 1);
-//                                        context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.FORWARD, false).apply();
-//                                    } else {
-//                                        nextStation = databaseHelper.nextStation(currentOrder + 1);
-//                                        context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.FORWARD, true).apply();
-//
-//                                    }
-//                                } else if (preOrder > currentOrder && databaseHelper.lastStation(currentOrderId) == routeStationLists.size()) {
-//                                    nextStation = databaseHelper.nextStation(currentOrder - 1);
-//                                    context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.FORWARD, false).apply();
-//
-//                                } else {
-//                                    if (databaseHelper.getDouble(routeStationList.station_id) > 1) {
-//
-//                                        currentOrder = databaseHelper.nextStationId(routeStationList.station_id);
-//                                        nextStation = databaseHelper.nextStation(currentOrder + 1);
-//                                        context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.FORWARD, true).apply();
-//
-//
-//                                    } else {
-//                                        if (currentOrder != 1) {
-//                                            nextStation = databaseHelper.nextStation(currentOrder - 1);
-//                                            context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.FORWARD, false).apply();
-//
-//                                        } else {
-//                                            nextStation = databaseHelper.nextStation(currentOrder + 1);
-//                                            context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.FORWARD, true).apply();
-//
-//                                        }
-//                                    }
-//                                }
-//                                preOrder = currentOrder;
-//                                preOrderId = currentOrderId;
-//
-//                                Intent i1 = new Intent(context, TicketAndTracking.class);
-//                                i1.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-//                                i1.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-//                                i1.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-//                                i1.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//                                context.startActivity(i1);
-//
-//                            }
-//                            break;
-//                        }
+            try {
+                StatusActivity.addMessage(context.getString(R.string.status_location_update));
+                if (position != null) {
+                    write(position);
+                    context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putString(UtilStrings.LATITUDE, String.valueOf(position.getLatitude())).apply();
+                    context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putString(UtilStrings.LONGITUDE, String.valueOf(position.getLongitude())).apply();
 
-//                    }
-//                }
-//            }catch (Exception e){
-//                e.printStackTrace();
-//            }
-        }
-        private void test() {
-            Log.i(TAG, "test: called");
-            context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putString(UtilStrings.LATITUDE, String.valueOf(databaseHelper.routeStationLists().get(position).station_lat)).apply();
-            context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putString(UtilStrings.LONGITUDE, String.valueOf(databaseHelper.routeStationLists().get(position).station_lng)).apply();
-            for (int i = 0; i < routeStationLists.size(); i++) {
-                RouteStationList routeStationList = routeStationLists.get(i);
-                double stationLat = Double.parseDouble(routeStationList.station_lat);
-                double stationLng = Double.parseDouble(routeStationList.station_lng);
+                    for (int i = 0; i < routeStationLists.size(); i++) {
+                        RouteStationList routeStationList = routeStationLists.get(i);
+                        double stationLat = Double.parseDouble(routeStationList.station_lat);
+                        double stationLng = Double.parseDouble(routeStationList.station_lng);
 
-                float distance = GeneralUtils.calculateDistance(stationLat, stationLng, Double.valueOf(databaseHelper.routeStationLists().get(position).station_lat),Double.valueOf( databaseHelper.routeStationLists().get(position).station_lng));
-                int currentOrder = routeStationList.station_order;
-                String currentOrderId = routeStationList.station_id;
-                if (distance <= 50) {
-                    if (!currentOrderId.equals(preOrderId)) {
-                        if (preOrder < currentOrder) {
-                            if (currentOrder == routeStationLists.size()) {
-                                nextStation = databaseHelper.nextStation(currentOrder - 1);
-                                context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.FORWARD, false).apply();
-                            } else {
-                                nextStation = databaseHelper.nextStation(currentOrder + 1);
-                                context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.FORWARD, true).apply();
+                        float distance = GeneralUtils.calculateDistance(stationLat, stationLng, position.getLatitude(), position.getLongitude());
+                        int currentOrder = routeStationList.station_order;
+                        String currentOrderId = routeStationList.station_id;
+                        if (distance <= 50) {
+                            if (!currentOrderId.equals(preOrderId)) {
+                                if (preOrder < currentOrder) {
+                                    if (currentOrder == routeStationLists.size()) {
+                                        nextStation = databaseHelper.nextStation(currentOrder - 1);
+                                        context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.FORWARD, false).apply();
+                                    } else {
+                                        nextStation = databaseHelper.nextStation(currentOrder + 1);
+                                        context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.FORWARD, true).apply();
 
-                            }
-                        } else if (preOrder > currentOrder && databaseHelper.lastStation(currentOrderId) == routeStationLists.size()) {
-                            nextStation = databaseHelper.nextStation(currentOrder - 1);
-                            context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.FORWARD, false).apply();
-
-                        } else {
-                            if (databaseHelper.getDouble(routeStationList.station_id) > 1) {
-
-                                currentOrder = databaseHelper.nextStationId(routeStationList.station_id);
-                                nextStation = databaseHelper.nextStation(currentOrder + 1);
-                                context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.FORWARD, true).apply();
-
-
-                            } else {
-                                if (currentOrder != 1) {
+                                    }
+                                } else if (preOrder > currentOrder && databaseHelper.lastStation(currentOrderId) == routeStationLists.size()) {
                                     nextStation = databaseHelper.nextStation(currentOrder - 1);
                                     context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.FORWARD, false).apply();
 
                                 } else {
-                                    nextStation = databaseHelper.nextStation(currentOrder + 1);
-                                    context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.FORWARD, true).apply();
+                                    if (databaseHelper.getDouble(routeStationList.station_id) > 1) {
+
+                                        currentOrder = databaseHelper.nextStationId(routeStationList.station_id);
+                                        nextStation = databaseHelper.nextStation(currentOrder + 1);
+                                        context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.FORWARD, true).apply();
+
+
+                                    } else {
+                                        if (currentOrder != 1) {
+                                            nextStation = databaseHelper.nextStation(currentOrder - 1);
+                                            context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.FORWARD, false).apply();
+
+                                        } else {
+                                            nextStation = databaseHelper.nextStation(currentOrder + 1);
+                                            context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.FORWARD, true).apply();
+
+                                        }
+                                    }
 
                                 }
+                                preOrder = currentOrder;
+                                preOrderId = currentOrderId;
                             }
-
+                            break;
                         }
-                        preOrder = currentOrder;
-                        preOrderId = currentOrderId;
-                        Log.i(TAG, "test: qqqqqqqqqqqqwwwwwwwwwwweeeeeeeeeerrrrrrrrrrrrrrr      "+position);
 
                     }
-                    break;
+                    if (mListener!=null){
+                        mListener.onLocationUpdated();
+                    }
+                }else {
+
+                    write(position);
+                    context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putString(UtilStrings.LATITUDE, String.valueOf(position.getLatitude())).apply();
+                    context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putString(UtilStrings.LONGITUDE, String.valueOf(position.getLongitude())).apply();
+
+                    for (int i = 0; i < routeStationLists.size(); i++) {
+                        RouteStationList routeStationList = routeStationLists.get(i);
+                        double stationLat = Double.parseDouble(routeStationList.station_lat);
+                        double stationLng = Double.parseDouble(routeStationList.station_lng);
+
+                        float distance = GeneralUtils.calculateDistance(stationLat, stationLng, position.getLatitude(), position.getLongitude());
+                        int currentOrder = routeStationList.station_order;
+                        String currentOrderId = routeStationList.station_id;
+                        if (distance <= 50) {
+                            if (!currentOrderId.equals(preOrderId)) {
+                                if (preOrder < currentOrder) {
+                                    if (currentOrder == routeStationLists.size()) {
+                                        nextStation = databaseHelper.nextStation(currentOrder - 1);
+                                        context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.FORWARD, false).apply();
+                                    } else {
+                                        nextStation = databaseHelper.nextStation(currentOrder + 1);
+                                        context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.FORWARD, true).apply();
+
+                                    }
+                                } else if (preOrder > currentOrder && databaseHelper.lastStation(currentOrderId) == routeStationLists.size()) {
+                                    nextStation = databaseHelper.nextStation(currentOrder - 1);
+                                    context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.FORWARD, false).apply();
+
+                                } else {
+                                    if (databaseHelper.getDouble(routeStationList.station_id) > 1) {
+
+                                        currentOrder = databaseHelper.nextStationId(routeStationList.station_id);
+                                        nextStation = databaseHelper.nextStation(currentOrder + 1);
+                                        context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.FORWARD, true).apply();
+
+
+                                    } else {
+                                        if (currentOrder != 1) {
+                                            nextStation = databaseHelper.nextStation(currentOrder - 1);
+                                            context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.FORWARD, false).apply();
+
+                                        } else {
+                                            nextStation = databaseHelper.nextStation(currentOrder + 1);
+                                            context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.FORWARD, true).apply();
+
+                                        }
+                                    }
+                                }
+                                preOrder = currentOrder;
+                                preOrderId = currentOrderId;
+
+
+                            }
+                            break;
+                        }
+                    }
+                    if (mListener!=null){
+                        mListener.onLocationUpdated();
+                    }
                 }
-
-            }
-
-            if (mListener!=null){
-                mListener.onLocationUpdated();
+            }catch (Exception e){
+                e.printStackTrace();
             }
         }
+
+
+//        private void test() {
+//            Log.i(TAG, "test: called");
+//            context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putString(UtilStrings.LATITUDE, String.valueOf(databaseHelper.routeStationLists().get(position).station_lat)).apply();
+//            context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putString(UtilStrings.LONGITUDE, String.valueOf(databaseHelper.routeStationLists().get(position).station_lng)).apply();
+//            for (int i = 0; i < routeStationLists.size(); i++) {
+//                RouteStationList routeStationList = routeStationLists.get(i);
+//                double stationLat = Double.parseDouble(routeStationList.station_lat);
+//                double stationLng = Double.parseDouble(routeStationList.station_lng);
+//
+//                float distance = GeneralUtils.calculateDistance(stationLat, stationLng, Double.valueOf(databaseHelper.routeStationLists().get(position).station_lat),Double.valueOf( databaseHelper.routeStationLists().get(position).station_lng));
+//                int currentOrder = routeStationList.station_order;
+//                String currentOrderId = routeStationList.station_id;
+//                if (distance <= 50) {
+//                    if (!currentOrderId.equals(preOrderId)) {
+//                        if (preOrder < currentOrder) {
+//                            if (currentOrder == routeStationLists.size()) {
+//                                nextStation = databaseHelper.nextStation(currentOrder - 1);
+//                                context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.FORWARD, false).apply();
+//                            } else {
+//                                nextStation = databaseHelper.nextStation(currentOrder + 1);
+//                                context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.FORWARD, true).apply();
+//
+//                            }
+//                        } else if (preOrder > currentOrder && databaseHelper.lastStation(currentOrderId) == routeStationLists.size()) {
+//                            nextStation = databaseHelper.nextStation(currentOrder - 1);
+//                            context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.FORWARD, false).apply();
+//
+//                        } else {
+//                            if (databaseHelper.getDouble(routeStationList.station_id) > 1) {
+//
+//                                currentOrder = databaseHelper.nextStationId(routeStationList.station_id);
+//                                nextStation = databaseHelper.nextStation(currentOrder + 1);
+//                                context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.FORWARD, true).apply();
+//
+//
+//                            } else {
+//                                if (currentOrder != 1) {
+//                                    nextStation = databaseHelper.nextStation(currentOrder - 1);
+//                                    context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.FORWARD, false).apply();
+//
+//                                } else {
+//                                    nextStation = databaseHelper.nextStation(currentOrder + 1);
+//                                    context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.FORWARD, true).apply();
+//
+//                                }
+//                            }
+//
+//                        }
+//                        preOrder = currentOrder;
+//                        preOrderId = currentOrderId;
+//                        Log.i(TAG, "test: qqqqqqqqqqqqwwwwwwwwwwweeeeeeeeeerrrrrrrrrrrrrrr      "+position);
+//
+//                    }
+//                    break;
+//                }
+//
+//            }
+//
+//            if (mListener!=null){
+//                mListener.onLocationUpdated();
+//            }
+//        }
 
 
         @Override

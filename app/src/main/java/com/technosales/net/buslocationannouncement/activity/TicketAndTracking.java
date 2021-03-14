@@ -114,7 +114,6 @@ import static com.technosales.net.buslocationannouncement.trackcar.MainFragment.
 import static com.technosales.net.buslocationannouncement.trackcar.MainFragment.KEY_INTERVAL;
 import static com.technosales.net.buslocationannouncement.trackcar.MainFragment.KEY_URL;
 import static com.technosales.net.buslocationannouncement.utils.UtilStrings.USER_NUMBER;
-import static com.technosales.net.buslocationannouncement.utils.UtilStrings.lat;
 
 public class TicketAndTracking extends AppCompatActivity implements GetPricesFares.OnPriceUpdate, TrackingController.TrackingListener {
     private static final int PERMISSION_REQUEST_READ_PHONE_STATE = 1;
@@ -278,7 +277,7 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
         databaseHelper = new DatabaseHelper(this);
         trackingController = new TrackingController(this);
         trackingController.setListener(this);
-        trackingController.startHandler();
+//        trackingController.startHandler();
         startTrackingService(true, false);
 
         /**/
@@ -1349,8 +1348,6 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
             for (int result : grantResults) {
                 if (result != PackageManager.PERMISSION_GRANTED) {
                     granted = false;
-
-
                     break;
                 } else {
 

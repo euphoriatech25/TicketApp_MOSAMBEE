@@ -186,8 +186,6 @@ public class UtilStrings {
     public static final String CALL_REGISTER_CHECK = "http://202.52.240.149:82/";
     public static final String LOCATION_CHANGE = "location_change";
 
-    public static double[] lat ={27.715834806217686,27.7173215,27.7196912,27.7207715,27.7224953,27.72339543777434,27.724865417257252,27.72720553146613};
-    public static double lng[]= {85.28354063630104,85.2837163,85.286876,85.2891934,85.2927741,85.29454976320268,85.29783044010401,85.30480753630398};
 
     public static final String TOTAL_PASSENGERS = "total_passengers";
 }

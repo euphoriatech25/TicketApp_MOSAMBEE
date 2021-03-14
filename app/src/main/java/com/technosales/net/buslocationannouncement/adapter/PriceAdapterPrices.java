@@ -971,7 +971,7 @@ public class PriceAdapterPrices extends RecyclerView.Adapter<PriceAdapterPrices.
     private void processingPayment(RouteStationList routeStationModelList, String price, int position) {
 
         AlertDialog alertDialog = new AlertDialog.Builder(context).create();
-        alertDialog.setTitle("रु." + price + " " + nearestName +routeStationModelList.station_order+ " - " + routeStationModelList.station_name);
+        alertDialog.setTitle("रु." + price + " " + nearestName + " - " + routeStationModelList.station_name);
         alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "OK", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -1087,7 +1087,7 @@ public class PriceAdapterPrices extends RecyclerView.Adapter<PriceAdapterPrices.
                             "जारी मिति :-"+ GeneralUtils.getNepaliMonth(String.valueOf(month)) + " "
                             + GeneralUtils.getUnicodeNumber(String.valueOf(day)) + " " +
                             GeneralUtils.getUnicodeNumber(GeneralUtils.getTime());
-//                    ((TicketAndTracking)context).recreate();
+
                     Toast.makeText(context, "टिकट सफलतापूर्वक काटियो।", Toast.LENGTH_SHORT).show();
 
                     try {

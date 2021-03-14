@@ -75,17 +75,11 @@ public class CustomAuthenticator implements Authenticator {
                     if (res.isSuccessful()) {
                         HelperModel.Token newToken = res.body();
                         tokenManager.saveToken(newToken);
-                        Log.i("TAG", "authenticate: "+ res.body().getAccessToken());
-                        Log.i("TAG", "authenticate: "+ res.body().getRefreshToken());
+                        Log.i("TAG", "authenticate: " + res.body().getAccessToken());
+                        Log.i("TAG", "authenticate: " + res.body().getRefreshToken());
                         return response.request().newBuilder().header("Authorization", "Bearer " + res.body().getAccessToken()).build();
                     }
-                }else if(res.code() == 404){
-                    SharedPreferences preferences = TicketBusApp.getContext().getSharedPreferences(SHARED_PREFERENCES_HELPER, Context.MODE_PRIVATE);
-                    SharedPreferences.Editor editor = preferences.edit();
-                    editor.clear();
-                    editor.apply();
-                    TicketBusApp.getContext().startActivity(new Intent(TicketBusApp.getContext(),HelperLogin.class));
-                    }else  if(res.code() == 401){
+                } else if(res.code() == 401){
                     SharedPreferences preferences = TicketBusApp.getContext().getSharedPreferences(SHARED_PREFERENCES_HELPER, Context.MODE_PRIVATE);
                     SharedPreferences.Editor editor = preferences.edit();
                     editor.clear();
