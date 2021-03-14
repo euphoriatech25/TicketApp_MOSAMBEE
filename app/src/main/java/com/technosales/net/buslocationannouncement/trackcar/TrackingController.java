@@ -209,13 +209,6 @@ import java.util.Random;
 //                                }
 //                                preOrder = currentOrder;
 //                                preOrderId = currentOrderId;
-//
-//                                Intent i1 = new Intent(context, TicketAndTracking.class);
-//                                i1.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-//                                i1.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-//                                i1.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-//                                i1.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//                                context.startActivity(i1);
 //                            }
 //                            break;
 //                        }

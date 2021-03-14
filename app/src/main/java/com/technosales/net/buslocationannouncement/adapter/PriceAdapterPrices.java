@@ -623,12 +623,6 @@ public class PriceAdapterPrices extends RecyclerView.Adapter<PriceAdapterPrices.
                         }
 
 
-//                        orderPos = routeStationLists.get(positionNew).station_order;
-//                        nearestName = routeStationLists.get(positionNew).station_name;
-//                        currentStationLat = Double.parseDouble(routeStationLists.get(positionNew).station_lat);
-//                        currentStationLng = Double.parseDouble(routeStationLists.get(positionNew).station_lng);
-//                        currentStationDistance = routeStationLists.get(positionNew).station_distance;
-//                        currentStationId = routeStationLists.get(positionNew).station_id;
 
                         if (routeType == UtilStrings.NON_RING_ROAD) {
                             price = databaseHelper.priceWrtDistance(Math.abs(currentStationDistance - routeStationModelList.station_distance), ((TicketAndTracking) context).normalDiscountToggle.isOn());
@@ -912,9 +906,10 @@ public class PriceAdapterPrices extends RecyclerView.Adapter<PriceAdapterPrices.
                 intent.putExtra(UtilStrings.TICKET_TYPE, ticketType);
                 intent.putExtra(UtilStrings.DISCOUNT_TYPE, discountType);
             }
-
+            total_passenger=total_passenger+1;
+            preferences.edit().putInt(UtilStrings.TOTAL_PASSENGERS, total_passenger).apply();
             PassengerCountList passengerCountList = new PassengerCountList();
-            passengerCountList.passenger_station_position=orderPos;
+            passengerCountList.passenger_station_position=routeStationLists.get(position).station_order;
             passengerCountList.passenger_direction=String.valueOf(forward);
             databaseHelper.insertPassengerCountList(passengerCountList);
 
@@ -952,8 +947,11 @@ public class PriceAdapterPrices extends RecyclerView.Adapter<PriceAdapterPrices.
                 intent.putExtra(UtilStrings.TICKET_TYPE, ticketType);
                 intent.putExtra(UtilStrings.DISCOUNT_TYPE, discountType);
             }
+
+            total_passenger=total_passenger+1;
+            preferences.edit().putInt(UtilStrings.TOTAL_PASSENGERS, total_passenger).apply();
             PassengerCountList passengerCountList = new PassengerCountList();
-            passengerCountList.passenger_station_position=orderPos;
+            passengerCountList.passenger_station_position=routeStationLists.get(position).station_order;
             passengerCountList.passenger_direction=String.valueOf(forward);
             databaseHelper.insertPassengerCountList(passengerCountList);
 
@@ -973,27 +971,23 @@ public class PriceAdapterPrices extends RecyclerView.Adapter<PriceAdapterPrices.
     private void processingPayment(RouteStationList routeStationModelList, String price, int position) {
 
         AlertDialog alertDialog = new AlertDialog.Builder(context).create();
-        alertDialog.setTitle("रु." + price + " " + nearestName + " - " + routeStationModelList.station_name);
+        alertDialog.setTitle("रु." + price + " " + nearestName +routeStationModelList.station_order+ " - " + routeStationModelList.station_name);
         alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "OK", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 helperId = preferencesHelper.getString(UtilStrings.ID_HELPER, "");
                 busName = preferences.getString(UtilStrings.DEVICE_NAME, "");
 
-                Log.i("TAG", "processingPayment: "+orderPos+"::::"+forward);
-
 
                 total_passenger=total_passenger+1;
                 preferences.edit().putInt(UtilStrings.TOTAL_PASSENGERS, total_passenger).apply();
-
                 PassengerCountList passengerCountList = new PassengerCountList();
-                passengerCountList.passenger_station_position=orderPos;
+                passengerCountList.passenger_station_position=routeStationModelList.station_order;
                 passengerCountList.passenger_direction=String.valueOf(forward);
                 databaseHelper.insertPassengerCountList(passengerCountList);
 
 
                 Log.i("TAG", "onClick: "+ routeStationModelList.station_lat+"   "+routeStationModelList.station_lng);
-
 
                 Log.i("isdataSending", "" + preferences.getBoolean(UtilStrings.DATA_SENDING, false));
 

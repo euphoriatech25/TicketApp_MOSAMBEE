@@ -528,10 +528,7 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
 
         //        getBlockListHere
         BlockListCheck.getBlockList(this);
-        if (helperId.length() == 0) {
-            startActivity(new Intent(TicketAndTracking.this, HelperLogin.class));
-            finish();
-        }
+
 
 //        thread.start();
 
@@ -559,10 +556,12 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
                     nearest = distance;
                     orderPos = routeStationLists.get(i).station_order;
                     gridLayoutManager.scrollToPositionWithOffset(orderPos - 1, 10);
-//                    updateTotalPassengerCount(orderPos);
                 }
             }
+
         }
+        Log.i(TAG, "getNearestLocToTop: aamamsmsmss"+orderPos);
+        updateTotalPassengerCount(orderPos);
     }
 
     public String getNetworkInfo() {
@@ -1305,8 +1304,9 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
         //        totalCollectionTickets.setText("Total Tickets :" + String.valueOf(totalTickets) + "\n Total Colletions :" + String.valueOf(totalCollections));
         totalCollectionTickets.setText(getString(R.string.total_tickets) + GeneralUtils.getUnicodeNumber(String.valueOf(totalTickets)) + "\n" + getString(R.string.total_collections) + GeneralUtils.getUnicodeNumber(String.valueOf(totalCollections)));
 
+
         if (passengerCountLists != null) {
-            totalPassenger.setText(String.valueOf(preferences.getInt(UtilStrings.TOTAL_PASSENGERS, 0)));
+            totalPassenger.setText(String.valueOf(passengerCountLists.size()));
         }
 
     }
@@ -1518,16 +1518,24 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
     }
 
     private void updateTotalPassengerCount(int orderPos) {
+        passengerCountLists=databaseHelper.passengerCountLists();
         if(databaseHelper.passengerCountLists().size()>0){
 //            totalPassenger.setText(String.valueOf(passengerCountLists.size()));
             for (int i1 = 0; i1 < databaseHelper.passengerCountLists().size(); i1++) {
-                Log.i(TAG, "updateTotalPassengerCount: "+databaseHelper.passengerCountLists().get(i1).passenger_station_position+"  "+databaseHelper.passengerCountLists().get(i1).passenger_direction);
+                Log.i(TAG, "getNearestLocToTop: "+passengerCountLists.get(i1).toString());
+                Log.i(TAG, "getNearestLocToTop: "+i1+"  "+databaseHelper.passengerCountLists().get(i1).passenger_station_position+"  "+databaseHelper.passengerCountLists().get(i1).passenger_direction);
                 if(databaseHelper.passengerCountLists().get(i1).passenger_station_position<=orderPos){
-                    databaseHelper.updatePassengerCountForward(orderPos);
-                }else if(databaseHelper.passengerCountLists().get(i1).passenger_station_position>=orderPos){
-                    databaseHelper.updatePassengerCountBackward(orderPos);
+                    databaseHelper.updatePassengerCountForward(passengerCountLists.get(i1).id);
+                    Log.i(TAG, "getNearestLocToTop: "+passengerCountLists.size());
+
                 }
+//                else if(databaseHelper.passengerCountLists().get(i1).passenger_station_position>=orderPos){
+//                    databaseHelper.updatePassengerCountBackward(orderPos);
+//                }
             }
+        }
+        if (passengerCountLists != null) {
+            totalPassenger.setText(String.valueOf(passengerCountLists.size()));
         }
 
     }

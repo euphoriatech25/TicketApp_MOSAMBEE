@@ -54,7 +54,7 @@ public class PriceAdapterPlaces extends RecyclerView.Adapter<PriceAdapterPlaces.
     private SharedPreferences preferences, preferencesHelper;
     private int total_tickets;
     private int total_collections;
-    private int total_collections_cash;
+    private int total_collections_cash,total_passenger;
     private String deviceId;
     private String latitude;
     private String longitude;
@@ -118,6 +118,7 @@ public class PriceAdapterPlaces extends RecyclerView.Adapter<PriceAdapterPlaces.
                 databaseHelper = new DatabaseHelper(context);
                 routeStationLists = databaseHelper.routeStationLists();
                 route_type = preferences.getInt(UtilStrings.ROUTE_TYPE, UtilStrings.NON_RING_ROAD);
+                total_passenger=  preferences.getInt(UtilStrings.TOTAL_PASSENGERS, 0);
 
                 float distance = 0;
                 float nearest = 0;
@@ -437,8 +438,10 @@ public class PriceAdapterPlaces extends RecyclerView.Adapter<PriceAdapterPlaces.
                 intent.putExtra(UtilStrings.DISCOUNT_TYPE, discountType);
             }
 
+            total_passenger=total_passenger+1;
+            preferences.edit().putInt(UtilStrings.TOTAL_PASSENGERS, total_passenger).apply();
             PassengerCountList passengerCountList = new PassengerCountList();
-            passengerCountList.passenger_station_position=orderPos;
+            passengerCountList.passenger_station_position=routeStationLists.get(position).station_order;
             passengerCountList.passenger_direction=String.valueOf(forward);
             databaseHelper.insertPassengerCountList(passengerCountList);
 
@@ -474,8 +477,10 @@ public class PriceAdapterPlaces extends RecyclerView.Adapter<PriceAdapterPlaces.
                 intent.putExtra(UtilStrings.DISCOUNT_TYPE, discountType);
             }
 
+            total_passenger=total_passenger+1;
+            preferences.edit().putInt(UtilStrings.TOTAL_PASSENGERS, total_passenger).apply();
             PassengerCountList passengerCountList = new PassengerCountList();
-            passengerCountList.passenger_station_position=orderPos;
+            passengerCountList.passenger_station_position=routeStationLists.get(position).station_order;
             passengerCountList.passenger_direction=String.valueOf(forward);
             databaseHelper.insertPassengerCountList(passengerCountList);
 
@@ -582,10 +587,13 @@ public class PriceAdapterPlaces extends RecyclerView.Adapter<PriceAdapterPlaces.
 
             Log.i("TAG", "processingPayment: "+orderPos+"::::"+orderPos);
 
+            total_passenger=total_passenger+1;
+            preferences.edit().putInt(UtilStrings.TOTAL_PASSENGERS, total_passenger).apply();
             PassengerCountList passengerCountList = new PassengerCountList();
-            passengerCountList.passenger_station_position=orderPos;
+            passengerCountList.passenger_station_position=routeStationLists.get(position).station_order;
             passengerCountList.passenger_direction=String.valueOf(forward);
             databaseHelper.insertPassengerCountList(passengerCountList);
+
 
             try {
                 Printer.Print(context, printTransaction, handler);

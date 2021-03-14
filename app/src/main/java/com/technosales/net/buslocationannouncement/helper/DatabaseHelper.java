@@ -633,14 +633,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     public void updatePassengerCountForward(Integer position) {
-        String sql = "DELETE FROM " + PASSENGER_COUNT_TABLE  +  " WHERE " + PASSENGER_STATION_POSITION + ">=" +position;
+        String sql = "DELETE FROM " + PASSENGER_COUNT_TABLE  +  " WHERE " + "id" + "=" +position;
         getWritableDatabase().execSQL(sql);
     }
 
-    public void updatePassengerCountBackward(Integer position) {
-        String sql = "DELETE FROM " + PASSENGER_COUNT_TABLE  +  " WHERE " + PASSENGER_STATION_POSITION + "<=" +position;
-        getWritableDatabase().execSQL(sql);
-    }
+
 
     public void clearAllFromPassengerTime() {
         String sql = "DELETE FROM " + PASSENGER_COUNT_TABLE;
@@ -733,6 +730,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         Cursor c = getWritableDatabase().rawQuery(sql, null);
         while (c.moveToNext()) {
             PassengerCountList passengerCountList = new PassengerCountList();
+            passengerCountList.id = c.getInt(c.getColumnIndex("id"));
             passengerCountList.passenger_station_position = c.getInt(c.getColumnIndex(PASSENGER_STATION_POSITION));
             passengerCountList.passenger_direction = c.getString(c.getColumnIndex(PASSENGER_DIRECTION));
 

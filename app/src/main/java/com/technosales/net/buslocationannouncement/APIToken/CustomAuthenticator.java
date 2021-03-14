@@ -84,9 +84,13 @@ public class CustomAuthenticator implements Authenticator {
                     SharedPreferences.Editor editor = preferences.edit();
                     editor.clear();
                     editor.apply();
-
-                    }else {
-                    return null;
+                    TicketBusApp.getContext().startActivity(new Intent(TicketBusApp.getContext(),HelperLogin.class));
+                    }else  if(res.code() == 401){
+                    SharedPreferences preferences = TicketBusApp.getContext().getSharedPreferences(SHARED_PREFERENCES_HELPER, Context.MODE_PRIVATE);
+                    SharedPreferences.Editor editor = preferences.edit();
+                    editor.clear();
+                    editor.apply();
+                    TicketBusApp.getContext().startActivity(new Intent(TicketBusApp.getContext(),HelperLogin.class));
                 }
             }
             return  null;
