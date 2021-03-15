@@ -1113,7 +1113,7 @@ public class PayByCardActivity extends BaseActivity {
                 } catch (RemoteException e) {
                     e.printStackTrace();
                 }
-
+               dialog.dismiss();
 
 //                startActivity(new Intent(PayByCardActivity.this, TicketAndTracking.class));
                 finish();
@@ -1209,6 +1209,7 @@ public class PayByCardActivity extends BaseActivity {
                 } catch (RemoteException e) {
                     e.printStackTrace();
                 }
+                dialog.dismiss();
 
 
 //                startActivity(new Intent(PayByCardActivity.this, TicketAndTracking.class));

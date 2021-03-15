@@ -156,7 +156,7 @@ public class UtilStrings {
 
     public static final int SECTOR_TRAILER_CUSTOMER_DETAILS =15;
     public static final int SECTOR_TRAILER_CUSTOMER_FIRST_TRANSACTION =27;
-    public static final int SECTOR_TRANSACTION_NO = 31;
+    public static final int SECTOR_TRAILER_TRANSACTION_NO = 31;
     public static final int SECTOR_TRAILER_CUSTOMER_SECOND_TRANSACTION =21;
 
 

@@ -151,6 +151,7 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
     private Drawer mainDrawer;
     private Toolbar mainToolBar;
     private int totalTickets;
+    private int totalPassengerCal;
     private int totalCollections;
     private boolean reset = true;
     private int mode;
@@ -160,35 +161,7 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
     private SharedPreferences preferences, preferencesHelper;
     private List<PassengerCountList> passengerCountLists;
 
-    //    Thread thread = new Thread(new Runnable() {
-//        @Override
-//        public void run() {
-//            while (!Thread.interrupted())
-//                try {
-//                    Thread.sleep(10000);
-//                    runOnUiThread(new Runnable() // start actions in UI thread
-//                    {
-//                        @Override
-//                        public void run() {
-//                            boolean changed;
-//                            changed = preferences.getBoolean(UtilStrings.LOCATION_CHANGE, false);
-//                            Log.i(TAG, "onCreate: " + changed);
-//                            if (changed) {
-//                                finish();
-//                                overridePendingTransition(0, 0);
-//                                startActivity(getIntent());
-//                                overridePendingTransition(0, 0);
-//                                Toast.makeText(TicketAndTracking.this, "changed", Toast.LENGTH_SHORT).show();
-//                                getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.LOCATION_CHANGE, false).apply();
-//
-//                            }
-//                        }
-//                    });
-//                } catch (InterruptedException e) {
-//                }
-//
-//        }
-//    });
+
     private boolean isFirstRun, onLocationChanged;
     private String isOnlineCheck;
     private boolean isDownloadStarted = false;
@@ -208,6 +181,7 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
             }
         }
     };
+
     private TrackingController trackingController;
     private int spanCount = 4;
 
@@ -274,10 +248,13 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
         trackCarPrefs.edit().putString(KEY_INTERVAL, "0").apply();
         trackCarPrefs.edit().putString(KEY_DISTANCE, "0").apply();
         /*trackCarPrefs.edit().putString(KEY_DEVICE, "12345678").apply();*/
+
         databaseHelper = new DatabaseHelper(this);
         trackingController = new TrackingController(this);
         trackingController.setListener(this);
-//        trackingController.startHandler();
+
+        trackingController.startHandler();
+
         startTrackingService(true, false);
 
         /**/
@@ -1301,11 +1278,11 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
         totalTickets = preferences.getInt(UtilStrings.TOTAL_TICKETS, 0);
         totalCollections = preferences.getInt(UtilStrings.TOTAL_COLLECTIONS, 0);
         //        totalCollectionTickets.setText("Total Tickets :" + String.valueOf(totalTickets) + "\n Total Colletions :" + String.valueOf(totalCollections));
+
         totalCollectionTickets.setText(getString(R.string.total_tickets) + GeneralUtils.getUnicodeNumber(String.valueOf(totalTickets)) + "\n" + getString(R.string.total_collections) + GeneralUtils.getUnicodeNumber(String.valueOf(totalCollections)));
-
-
+        totalPassengerCal= preferences.getInt(UtilStrings.TOTAL_PASSENGERS, 0);
         if (passengerCountLists != null) {
-            totalPassenger.setText(String.valueOf(passengerCountLists.size()));
+            totalPassenger.setText(String.valueOf(totalPassengerCal));
         }
 
     }
@@ -1526,9 +1503,6 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
                     Log.i(TAG, "getNearestLocToTop: "+passengerCountLists.size());
 
                 }
-//                else if(databaseHelper.passengerCountLists().get(i1).passenger_station_position>=orderPos){
-//                    databaseHelper.updatePassengerCountBackward(orderPos);
-//                }
             }
         }
         if (passengerCountLists != null) {
