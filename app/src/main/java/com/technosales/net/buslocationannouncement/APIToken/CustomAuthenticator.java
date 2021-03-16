@@ -1,10 +1,13 @@
 package com.technosales.net.buslocationannouncement.APIToken;
 
 
+import android.accounts.AccountAuthenticatorResponse;
+import android.accounts.NetworkErrorException;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -18,6 +21,8 @@ import com.technosales.net.buslocationannouncement.pojo.HelperModel;
 import com.technosales.net.buslocationannouncement.serverconn.RetrofitInterface;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.Authenticator;
@@ -35,14 +40,15 @@ import static com.technosales.net.buslocationannouncement.utils.UtilStrings.TICK
 
 
 public class CustomAuthenticator implements Authenticator {
+    int a;
       private TokenManager tokenManager;
-        private static com.technosales.net.buslocationannouncement.APIToken.CustomAuthenticator INSTANCE;
+        private static CustomAuthenticator INSTANCE;
         private CustomAuthenticator(TokenManager tokenManager){
             this.tokenManager = tokenManager;
         }
-        public static synchronized com.technosales.net.buslocationannouncement.APIToken.CustomAuthenticator getInstance(TokenManager tokenManager){
+        public static synchronized CustomAuthenticator getInstance(TokenManager tokenManager){
             if(INSTANCE == null){
-                INSTANCE = new com.technosales.net.buslocationannouncement.APIToken.CustomAuthenticator(tokenManager);
+                INSTANCE = new CustomAuthenticator(tokenManager);
             }
 
             return INSTANCE;
@@ -52,6 +58,8 @@ public class CustomAuthenticator implements Authenticator {
         @Override
         public Request authenticate(Route route, Response response) throws IOException {
            HelperModel.Token token = tokenManager.getToken();
+           a++;
+            Log.i("TAG", "authenticate: "+route.toString());
             if (response.code() == 401) {
                 HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
                 interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
@@ -75,7 +83,6 @@ public class CustomAuthenticator implements Authenticator {
                     if (res.isSuccessful()) {
                         HelperModel.Token newToken = res.body();
                         tokenManager.saveToken(newToken);
-                        Log.i("TAG", "authenticate: " + res.body().getAccessToken());
                         Log.i("TAG", "authenticate: " + res.body().getRefreshToken());
                         return response.request().newBuilder().header("Authorization", "Bearer " + res.body().getAccessToken()).build();
                     }

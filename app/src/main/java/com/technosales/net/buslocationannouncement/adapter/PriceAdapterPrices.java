@@ -33,6 +33,7 @@ import com.technosales.net.buslocationannouncement.additionalfeatures.PayByCardA
 import com.technosales.net.buslocationannouncement.R;
 import com.technosales.net.buslocationannouncement.activity.TicketAndTracking;
 import com.technosales.net.buslocationannouncement.helper.DatabaseHelper;
+import com.technosales.net.buslocationannouncement.mosambeesupport.BeepLEDTest;
 import com.technosales.net.buslocationannouncement.mosambeesupport.M1CardHandlerMosambee;
 import com.technosales.net.buslocationannouncement.mosambeesupport.Printer;
 import com.technosales.net.buslocationannouncement.pojo.PassengerCountList;
@@ -103,7 +104,7 @@ public class PriceAdapterPrices extends RecyclerView.Adapter<PriceAdapterPrices.
         preferencesHelper = context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES_HELPER, 0);
         routeType = preferences.getInt(UtilStrings.ROUTE_TYPE, UtilStrings.NON_RING_ROAD);
         routeStationListSize = preferences.getInt(UtilStrings.ROUTE_LIST_SIZE, 0);
-       total_passenger=  preferences.getInt(UtilStrings.TOTAL_PASSENGERS, 0);
+        total_passenger=  preferences.getInt(UtilStrings.TOTAL_PASSENGERS, 0);
 
         if (((TicketAndTracking) context).normalDiscountToggle.isOn()) {
             holder.routeStationItem.setTextColor(context.getResources().getColorStateList(R.color.discount_txt_color));
@@ -902,16 +903,19 @@ public class PriceAdapterPrices extends RecyclerView.Adapter<PriceAdapterPrices.
 
             intent.putExtra(UtilStrings.POSITION, position);
 
+            intent.putExtra(UtilStrings.STATION_POS_PASSENGERS, routeStationLists.get(position).station_order);
+
             if (ticketType != null && discountType != null) {
                 intent.putExtra(UtilStrings.TICKET_TYPE, ticketType);
                 intent.putExtra(UtilStrings.DISCOUNT_TYPE, discountType);
             }
-            total_passenger=total_passenger+1;
-            preferences.edit().putInt(UtilStrings.TOTAL_PASSENGERS, total_passenger).apply();
-            PassengerCountList passengerCountList = new PassengerCountList();
-            passengerCountList.passenger_station_position=routeStationLists.get(position).station_order;
-            passengerCountList.passenger_direction=String.valueOf(forward);
-            databaseHelper.insertPassengerCountList(passengerCountList);
+
+//            total_passenger=total_passenger+1;
+//            preferences.edit().putInt(UtilStrings.TOTAL_PASSENGERS, total_passenger).apply();
+//            PassengerCountList passengerCountList = new PassengerCountList();
+//            passengerCountList.passenger_station_position=routeStationLists.get(position).station_order;
+//            passengerCountList.passenger_direction=String.valueOf(forward);
+//            databaseHelper.insertPassengerCountList(passengerCountList);
 
 //            ((TicketAndTracking) context).finish();
             context.startActivity(intent);
@@ -942,20 +946,13 @@ public class PriceAdapterPrices extends RecyclerView.Adapter<PriceAdapterPrices.
             intent.putExtra(UtilStrings.POSITION, position);
             intent.putExtra(UtilStrings.TOTAL_DISTANCE, totalDistance);
             intent.putExtra(UtilStrings.SOURCE, UtilStrings.PRICE);
+            intent.putExtra(UtilStrings.STATION_POS_PASSENGERS, routeStationLists.get(position).station_order);
 
             if (ticketType != null && discountType != null) {
                 intent.putExtra(UtilStrings.TICKET_TYPE, ticketType);
                 intent.putExtra(UtilStrings.DISCOUNT_TYPE, discountType);
             }
 
-            total_passenger=total_passenger+1;
-            preferences.edit().putInt(UtilStrings.TOTAL_PASSENGERS, total_passenger).apply();
-            PassengerCountList passengerCountList = new PassengerCountList();
-            passengerCountList.passenger_station_position=routeStationLists.get(position).station_order;
-            passengerCountList.passenger_direction=String.valueOf(forward);
-            databaseHelper.insertPassengerCountList(passengerCountList);
-
-//            ((TicketAndTracking) context).finish();
             context.startActivity(intent);
         } else {
             Toast.makeText(context, "सहायक छान्नुहोस् ।", Toast.LENGTH_SHORT).show();
@@ -978,13 +975,6 @@ public class PriceAdapterPrices extends RecyclerView.Adapter<PriceAdapterPrices.
                 helperId = preferencesHelper.getString(UtilStrings.ID_HELPER, "");
                 busName = preferences.getString(UtilStrings.DEVICE_NAME, "");
 
-
-                total_passenger=total_passenger+1;
-                preferences.edit().putInt(UtilStrings.TOTAL_PASSENGERS, total_passenger).apply();
-                PassengerCountList passengerCountList = new PassengerCountList();
-                passengerCountList.passenger_station_position=routeStationModelList.station_order;
-                passengerCountList.passenger_direction=String.valueOf(forward);
-                databaseHelper.insertPassengerCountList(passengerCountList);
 
 
                 Log.i("TAG", "onClick: "+ routeStationModelList.station_lat+"   "+routeStationModelList.station_lng);
@@ -1090,6 +1080,18 @@ public class PriceAdapterPrices extends RecyclerView.Adapter<PriceAdapterPrices.
 
                     Toast.makeText(context, "टिकट सफलतापूर्वक काटियो।", Toast.LENGTH_SHORT).show();
 
+                    total_passenger=total_passenger+1;
+                    preferences.edit().putInt(UtilStrings.TOTAL_PASSENGERS, total_passenger).apply();
+                    PassengerCountList passengerCountList = new PassengerCountList();
+                    passengerCountList.passenger_station_position=routeStationModelList.station_order;
+                    passengerCountList.passenger_direction=String.valueOf(forward);
+                    databaseHelper.insertPassengerCountList(passengerCountList);
+
+                    try {
+                        BeepLEDTest.beepSuccess();
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
+                    }
                     try {
                         Printer.Print(context, printTransaction, handler);
                     } catch (RemoteException e) {

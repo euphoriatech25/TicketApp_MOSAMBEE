@@ -74,13 +74,6 @@ public class M1CardHandlerMosambee {
 
                             } else if (fromWhichActivity.equalsIgnoreCase("ReIssueCard") || fromWhichActivity.equalsIgnoreCase("IssueCardActivity")) {
 
-//                                int value1 = m1CardHandler.authority(M1KeyTypeConstrants.KEYTYPE_A, SECTOR_SECOND_TRANSATION,MifareClassic.KEY_DEFAULT, uid);
-//                                Log.i(TAG, "onSearchResult11: "+value1+SECTOR_SECOND_TRANSATION);
-//                                if (value1 == ServiceResult.Success) {
-//                                    int value = m1CardHandler.writeBlock( 47, KEY_DEFAULT);
-//                                    Log.i(TAG, "onSearchResultqqqqqqm: " + value);
-//                                }
-
                                 int value = m1CardHandler.authority(M1KeyTypeConstrants.KEYTYPE_A, SECTOR_FIRST_TRANSATION, KEY_A, uid);
                                 int value1 = m1CardHandler.authority(M1KeyTypeConstrants.KEYTYPE_A, SECTOR_SECOND_TRANSATION, KEY_A, uid);
 
@@ -92,6 +85,7 @@ public class M1CardHandlerMosambee {
                                     handler.sendMessage(messageCardId);
 
                                 } else if (value == ServiceResult.M1Card_Verify_Err || value1 == ServiceResult.M1Card_Verify_Err) {
+
                                     int value2 = m1CardHandler.authority(M1KeyTypeConstrants.KEYTYPE_A, SECTOR_FIRST_TRANSATION, MifareClassic.KEY_DEFAULT, uid);
                                     int value3 = m1CardHandler.authority(M1KeyTypeConstrants.KEYTYPE_A, SECTOR_SECOND_TRANSATION, MifareClassic.KEY_DEFAULT, uid);
                                     Log.i(TAG, "mmMM" + value2 + value3);

@@ -30,6 +30,7 @@ import com.technosales.net.buslocationannouncement.additionalfeatures.PayByCardA
 import com.technosales.net.buslocationannouncement.R;
 import com.technosales.net.buslocationannouncement.activity.TicketAndTracking;
 import com.technosales.net.buslocationannouncement.helper.DatabaseHelper;
+import com.technosales.net.buslocationannouncement.mosambeesupport.BeepLEDTest;
 import com.technosales.net.buslocationannouncement.mosambeesupport.Printer;
 import com.technosales.net.buslocationannouncement.pojo.PassengerCountList;
 import com.technosales.net.buslocationannouncement.pojo.PriceList;
@@ -437,15 +438,7 @@ public class PriceAdapterPlaces extends RecyclerView.Adapter<PriceAdapterPlaces.
                 intent.putExtra(UtilStrings.TICKET_TYPE, ticketType);
                 intent.putExtra(UtilStrings.DISCOUNT_TYPE, discountType);
             }
-
-            total_passenger=total_passenger+1;
-            preferences.edit().putInt(UtilStrings.TOTAL_PASSENGERS, total_passenger).apply();
-            PassengerCountList passengerCountList = new PassengerCountList();
-            passengerCountList.passenger_station_position=routeStationLists.get(position).station_order;
-            passengerCountList.passenger_direction=String.valueOf(forward);
-            databaseHelper.insertPassengerCountList(passengerCountList);
-
-//            ((TicketAndTracking) context).finish();
+            intent.putExtra(UtilStrings.STATION_POS_PASSENGERS, routeStationLists.get(position).station_order);
             context.startActivity(intent);
         } else {
             Toast.makeText(context, "सहायक छान्नुहोस् ।", Toast.LENGTH_SHORT).show();
@@ -476,16 +469,8 @@ public class PriceAdapterPlaces extends RecyclerView.Adapter<PriceAdapterPlaces.
                 intent.putExtra(UtilStrings.TICKET_TYPE, ticketType);
                 intent.putExtra(UtilStrings.DISCOUNT_TYPE, discountType);
             }
+            intent.putExtra(UtilStrings.STATION_POS_PASSENGERS, routeStationLists.get(position).station_order);
 
-            total_passenger=total_passenger+1;
-            preferences.edit().putInt(UtilStrings.TOTAL_PASSENGERS, total_passenger).apply();
-            PassengerCountList passengerCountList = new PassengerCountList();
-            passengerCountList.passenger_station_position=routeStationLists.get(position).station_order;
-            passengerCountList.passenger_direction=String.valueOf(forward);
-            databaseHelper.insertPassengerCountList(passengerCountList);
-
-
-//            ((TicketAndTracking) context).finish();
             context.startActivity(intent);
         } else {
             Toast.makeText(context, "सहायक छान्नुहोस् ।", Toast.LENGTH_SHORT).show();
@@ -583,17 +568,20 @@ public class PriceAdapterPlaces extends RecyclerView.Adapter<PriceAdapterPlaces.
 
 //            ((TicketAndTracking) context).recreate();
 
-            Toast.makeText(context, "टिकट सफलतापूर्वक काटियो।", Toast.LENGTH_SHORT).show();
 
             Log.i("TAG", "processingPayment: "+orderPos+"::::"+orderPos);
 
-            total_passenger=total_passenger+1;
+            total_passenger++;
             preferences.edit().putInt(UtilStrings.TOTAL_PASSENGERS, total_passenger).apply();
             PassengerCountList passengerCountList = new PassengerCountList();
             passengerCountList.passenger_station_position=routeStationLists.get(position).station_order;
             passengerCountList.passenger_direction=String.valueOf(forward);
             databaseHelper.insertPassengerCountList(passengerCountList);
-
+            try {
+                BeepLEDTest.beepSuccess();
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
 
             try {
                 Printer.Print(context, printTransaction, handler);

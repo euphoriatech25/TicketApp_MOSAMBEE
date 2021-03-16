@@ -34,6 +34,7 @@ import com.technosales.net.buslocationannouncement.mosambeesupport.BeepLEDTest;
 import com.technosales.net.buslocationannouncement.mosambeesupport.M1CardHandlerMosambee;
 import com.technosales.net.buslocationannouncement.mosambeesupport.Printer;
 import com.technosales.net.buslocationannouncement.pojo.BlockList;
+import com.technosales.net.buslocationannouncement.pojo.PassengerCountList;
 import com.technosales.net.buslocationannouncement.pojo.RouteStationList;
 import com.technosales.net.buslocationannouncement.pojo.TicketInfoList;
 import com.technosales.net.buslocationannouncement.serverconn.Encrypt;
@@ -115,6 +116,8 @@ public class PayByCardActivity extends BaseActivity {
     Dialog dialog;
     String newRefHash;
     String newBalance;
+    int orderPos,total_passenger;
+
     private Handler handlerTransaction = new Handler() {
         public void handleMessage(android.os.Message msg) {
             this.obtainMessage();
@@ -219,6 +222,14 @@ public class PayByCardActivity extends BaseActivity {
                             } catch (RemoteException e) {
                                 e.printStackTrace();
                             }
+
+
+                            total_passenger=total_passenger+1;
+                            preferences.edit().putInt(UtilStrings.TOTAL_PASSENGERS, total_passenger).apply();
+                            PassengerCountList passengerCountList = new PassengerCountList();
+                            passengerCountList.passenger_station_position=orderPos;
+                            passengerCountList.passenger_direction=String.valueOf(preferences.getBoolean(UtilStrings.FORWARD, true));
+                            databaseHelper.insertPassengerCountList(passengerCountList);
 
                             if (source != null && source.equalsIgnoreCase(UtilStrings.PLACE)) {
                                 price(ticketId, tranCurrentHash);
@@ -325,7 +336,7 @@ public class PayByCardActivity extends BaseActivity {
         source = getIntent().getStringExtra(UtilStrings.SOURCE);
         dateTime = GeneralUtils.getTicketDate() + GeneralUtils.getTicketTime();
         totalDistance = getIntent().getFloatExtra(UtilStrings.TOTAL_DISTANCE, 0);
-
+        total_passenger= getIntent().getIntExtra(UtilStrings.STATION_POS_PASSENGERS, 0);
 
 //       transafering code from below
         total_tickets = preferences.getInt(UtilStrings.TOTAL_TICKETS, 0);

@@ -639,10 +639,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
 
 
-    public void clearAllFromPassengerTime() {
-        String sql = "DELETE FROM " + PASSENGER_COUNT_TABLE;
-        getWritableDatabase().execSQL(sql);
-    }
+
     public List<PriceList> priceLists(boolean normalDiscount) {
         List<PriceList> priceLists = new ArrayList<>();
 
@@ -922,6 +919,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     public void clearTxtTable() {
         String sql = "DELETE FROM " + TICKET_TABLE_TXT;
+        getWritableDatabase().execSQL(sql);
+    }
+
+    public void clearPassengerTable() {
+        String sql = "DELETE FROM " + PASSENGER_COUNT_TABLE;
         getWritableDatabase().execSQL(sql);
     }
 

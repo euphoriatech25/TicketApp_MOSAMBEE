@@ -1,5 +1,6 @@
 package com.technosales.net.buslocationannouncement.APIToken;
 import android.content.SharedPreferences;
+import android.util.Log;
 
 import com.technosales.net.buslocationannouncement.pojo.HelperModel;
 
@@ -23,6 +24,7 @@ public class TokenManager {
     }
 
     public void saveToken( HelperModel.Token token){
+        Log.i("TAG", "sdfvgzsdgvxdfgnsejtkfgnkjdfdhnutkn: "+token);
         editor.putString("ACCESS_TOKEN", token.getAccessToken()).commit();
         editor.putString("REFRESH_TOKEN", token.getRefreshToken()).commit();
     }

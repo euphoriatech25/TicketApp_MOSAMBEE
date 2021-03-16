@@ -24,6 +24,7 @@ import com.technosales.net.buslocationannouncement.base.BaseActivity;
 import com.technosales.net.buslocationannouncement.helper.DatabaseHelper;
 import com.technosales.net.buslocationannouncement.mosambeesupport.Printer;
 import com.technosales.net.buslocationannouncement.mosambeesupport.ScannerApi;
+import com.technosales.net.buslocationannouncement.pojo.PassengerCountList;
 import com.technosales.net.buslocationannouncement.pojo.RouteStationList;
 import com.technosales.net.buslocationannouncement.pojo.TicketInfoList;
 import com.technosales.net.buslocationannouncement.utils.GeneralUtils;
@@ -465,13 +466,14 @@ public class QrCodeScanner extends BaseActivity implements View.OnClickListener 
             } catch (RemoteException e) {
                 e.printStackTrace();
             }
-//            String status = PrinterTester.getInstance().getStatus();
+//            total_passenger=total_passenger+1;
+//            preferences.edit().putInt(UtilStrings.TOTAL_PASSENGERS, total_passenger).apply();
+//            PassengerCountList passengerCountList = new PassengerCountList();
+//            passengerCountList.passenger_station_position=orderPos;
+//            passengerCountList.passenger_direction=String.valueOf(preferences.getBoolean(UtilStrings.FORWARD, true));
+//            databaseHelper.insertPassengerCountList(passengerCountList);
 
-//            if(status.equalsIgnoreCase("Out of paper ")){
-//                Toast.makeText(QrCodeScanner.this, "मुद्रण कागज समाप्त भयो।", Toast.LENGTH_SHORT).show();
-//            }else {
-//                paraPrint(printTransaction);
-//            }
+
             startActivity(new Intent(this, TicketAndTracking.class));
             finish();
         } else {
