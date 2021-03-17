@@ -71,7 +71,7 @@ public class ServerConfigNew {
                         return chain.proceed(request);
                     }
                 }).authenticator(CustomAuthenticator.getInstance(tokenManager)).build();
-        Retrofit.Builder builder = new Retrofit.Builder()
+                Retrofit.Builder builder = new Retrofit.Builder()
                 .client(client)
                 .baseUrl(TICKET_URL_NEW)
                 .addConverterFactory(GsonConverterFactory.create());

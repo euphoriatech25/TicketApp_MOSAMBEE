@@ -206,8 +206,11 @@ import java.util.Random;
 
                                         }
                                     }
-
                                 }
+                                Intent intent=new Intent(context,TicketAndTracking.class);
+                                intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+                                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+
 
                                 if (mListener!=null){
                                     mListener.onLocationUpdated();
@@ -269,6 +272,9 @@ import java.util.Random;
                                         }
                                     }
                                 }
+                                Intent intent=new Intent(context,TicketAndTracking.class);
+                                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+
                                 preOrder = currentOrder;
                                 preOrderId = currentOrderId;
                                 if (mListener!=null){

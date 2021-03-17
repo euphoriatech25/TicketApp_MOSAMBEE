@@ -430,8 +430,6 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
             @Override
             public void onClick(View v) {
 
-
-
          /* AlertDialog alertDialog = new AlertDialog.Builder(TicketAndTracking.this).create();
                 alertDialog.setTitle("Clear Data");
                 alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
@@ -460,7 +458,7 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
                 alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
-                                trackingController.start();
+
 //                                dialog.dismiss();
 //                                preferences.edit().remove(UtilStrings.TOTAL_PASSENGERS).apply();
                             }
@@ -502,11 +500,6 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
 //        });
 
 
-        //        getBlockListHere
-        BlockListCheck.getBlockList(this);
-
-
-//        thread.start();
 
     }
 
@@ -1425,9 +1418,16 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
                             PassengerCountUpdate.pushPassengerCount(TicketAndTracking.this, String.valueOf(preferences.getInt(UtilStrings.TOTAL_PASSENGERS, 0)));
                         }
                     }
-                }, 15000);
+                },  40000);
 
-
+                rHandler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (databaseHelper.passengerCountLists().size() > 0) {
+                            BlockListCheck.getBlockList(TicketAndTracking.this);
+                        }
+                    }
+                },   1200000);
                 totalRemainingTickets.setText(GeneralUtils.getUnicodeNumber(String.valueOf(databaseHelper.listTickets().size())) + "\n" + GeneralUtils.getUnicodeNumber(String.valueOf(databaseHelper.remainingAmount())));
                 rHandler.postAtTime(rTicker, next);
             }

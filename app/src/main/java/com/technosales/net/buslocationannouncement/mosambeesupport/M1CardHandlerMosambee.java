@@ -24,6 +24,8 @@ import com.technosales.net.buslocationannouncement.utils.UtilStrings;
 
 import java.io.UnsupportedEncodingException;
 
+import okio.ByteString;
+
 import static com.technosales.net.buslocationannouncement.utils.UtilStrings.KEY_A;
 import static com.technosales.net.buslocationannouncement.utils.UtilStrings.KEY_B;
 import static com.technosales.net.buslocationannouncement.utils.UtilStrings.KEY_DEFAULT;
@@ -74,32 +76,24 @@ public class M1CardHandlerMosambee {
 
                             } else if (fromWhichActivity.equalsIgnoreCase("ReIssueCard") || fromWhichActivity.equalsIgnoreCase("IssueCardActivity")) {
 
-                                int value = m1CardHandler.authority(M1KeyTypeConstrants.KEYTYPE_A, SECTOR_FIRST_TRANSATION, KEY_A, uid);
-                                int value1 = m1CardHandler.authority(M1KeyTypeConstrants.KEYTYPE_A, SECTOR_SECOND_TRANSATION, KEY_A, uid);
+                                int value = m1CardHandler.authority(M1KeyTypeConstrants.KEYTYPE_A, SECTOR_FIRST_TRANSATION, MifareClassic.KEY_DEFAULT, uid);
+                                int value1 = m1CardHandler.authority(M1KeyTypeConstrants.KEYTYPE_A, SECTOR_SECOND_TRANSATION, MifareClassic.KEY_DEFAULT, uid);
 
-                                Log.i(TAG, "onSearchResult: " + value + value1);
+
                                 if (value == ServiceResult.Success && value1 == ServiceResult.Success) {
                                     Message messageCardId = new Message();
                                     messageCardId.what = 100;
                                     messageCardId.obj = GeneralUtils.ByteArrayToHexString(uid);
                                     handler.sendMessage(messageCardId);
+                                    authorizingBlock(m1CardHandler);
+                                    Log.i(TAG, "onSearchResult:  not authorized"+value+value1);
 
                                 } else if (value == ServiceResult.M1Card_Verify_Err || value1 == ServiceResult.M1Card_Verify_Err) {
-
-                                    int value2 = m1CardHandler.authority(M1KeyTypeConstrants.KEYTYPE_A, SECTOR_FIRST_TRANSATION, MifareClassic.KEY_DEFAULT, uid);
-                                    int value3 = m1CardHandler.authority(M1KeyTypeConstrants.KEYTYPE_A, SECTOR_SECOND_TRANSATION, MifareClassic.KEY_DEFAULT, uid);
-                                    Log.i(TAG, "mmMM" + value2 + value3);
-                                    if (value2 == ServiceResult.Success && value3 == ServiceResult.Success) {
-                                        int valueAuth = m1CardHandler.writeBlock(SECTOR_TRAILER_CUSTOMER_FIRST_TRANSACTION, KEY_DEFAULT);
-                                        int valueAuth1 = m1CardHandler.writeBlock(SECTOR_TRAILER_CUSTOMER_SECOND_TRANSACTION, KEY_DEFAULT);
-                                        if (valueAuth == ServiceResult.Success && valueAuth1 == ServiceResult.Success) {
-                                            Message messageCardId = new Message();
-                                            messageCardId.what = 100;
-                                            messageCardId.obj = GeneralUtils.ByteArrayToHexString(uid);
-                                            handler.sendMessage(messageCardId);
-
-                                        }
-                                    }
+                                    Message messageCardId = new Message();
+                                    messageCardId.what = 100;
+                                    messageCardId.obj = GeneralUtils.ByteArrayToHexString(uid);
+                                    handler.sendMessage(messageCardId);
+                                    Log.i(TAG, "onSearchResult: authorized"+value+value1);
                                 }
 
                             } else if (fromWhichActivity.equalsIgnoreCase("PayByCardActivity")) {
@@ -179,6 +173,16 @@ public class M1CardHandlerMosambee {
         });
     }
 
+    private static void authorizingBlock(M1CardHandler m1CardHandler) {
+        try {
+            int ret1 = m1CardHandler.writeBlock((byte) SECTOR_TRAILER_CUSTOMER_FIRST_TRANSACTION, KEY_DEFAULT);
+            int ret2 = m1CardHandler.writeBlock((byte) SECTOR_TRAILER_CUSTOMER_SECOND_TRANSACTION, KEY_DEFAULT);
+            Log.i(TAG, "authorizingBlockZZ: "+ret1+ret2);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+    }
+
     public static void write_miCard(Handler handler, String[] customerUpdatedValue, int[] customerDetailsBlock, String fromWhichActivity) {
         DeviceServiceEngine mSDKManager;
         mSDKManager = SDKManager.getInstance().getDeviceServiceEngine();
@@ -223,7 +227,7 @@ public class M1CardHandlerMosambee {
                                 int value = m1CardHandler.authority(M1KeyTypeConstrants.KEYTYPE_B, SECTOR_CUSTOMER, KEY_B, uid);
 
                                 Log.i(TAG, "onSearchResultWrite: " + value);
-                                 if (value == ServiceResult.Success) {
+                                if (value == ServiceResult.Success) {
                                     Log.i(TAG, "testing testing:11111 " + value);
                                     writeCustomerReIssue(handler, m1CardHandler, customerUpdatedValue, customerDetailsBlock, uid, true);
 
@@ -648,7 +652,6 @@ public class M1CardHandlerMosambee {
                     handlerTransaction.sendMessage(messageCustomerTranNo);
                 }
             }
-
         } catch (RemoteException e) {
             e.printStackTrace();
         }
