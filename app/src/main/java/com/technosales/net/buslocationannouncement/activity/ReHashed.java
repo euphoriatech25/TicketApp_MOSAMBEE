@@ -15,19 +15,17 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 
 import com.technosales.net.buslocationannouncement.APIToken.TokenManager;
 import com.technosales.net.buslocationannouncement.R;
+import com.technosales.net.buslocationannouncement.base.BaseActivity;
+import com.technosales.net.buslocationannouncement.helper.DatabaseHelper;
 import com.technosales.net.buslocationannouncement.mosambeesupport.BeepLEDTest;
 import com.technosales.net.buslocationannouncement.mosambeesupport.M1CardHandlerMosambee;
 import com.technosales.net.buslocationannouncement.mosambeesupport.Printer;
+import com.technosales.net.buslocationannouncement.pojo.ReIssueCardResponse;
 import com.technosales.net.buslocationannouncement.serverconn.RetrofitInterface;
 import com.technosales.net.buslocationannouncement.serverconn.ServerConfigNew;
-import com.technosales.net.buslocationannouncement.base.BaseActivity;
-import com.technosales.net.buslocationannouncement.helper.DatabaseHelper;
-import com.technosales.net.buslocationannouncement.pojo.ReIssueCardResponse;
-import com.technosales.net.buslocationannouncement.userregistration.IssueCardActivity;
 import com.technosales.net.buslocationannouncement.utils.GeneralUtils;
 import com.technosales.net.buslocationannouncement.utils.UtilStrings;
 
@@ -40,9 +38,8 @@ import static com.technosales.net.buslocationannouncement.utils.UtilStrings.CUST
 import static com.technosales.net.buslocationannouncement.utils.UtilStrings.CUSTOMER_AMT;
 import static com.technosales.net.buslocationannouncement.utils.UtilStrings.CUSTOMER_HASH;
 import static com.technosales.net.buslocationannouncement.utils.UtilStrings.CUSTOMER_TRANSACTION_NO;
-import static com.technosales.net.buslocationannouncement.utils.UtilStrings.SHARED_PREFERENCES;
 
-public class ReIssueCard extends BaseActivity implements View.OnClickListener {
+public class ReHashed  extends BaseActivity implements View.OnClickListener {
     int successStatus = 0;
     SweetAlertDialog sweetAlertDialog;
     private String customer_card_no;
@@ -66,17 +63,17 @@ public class ReIssueCard extends BaseActivity implements View.OnClickListener {
                     if (msg.obj.toString().equalsIgnoreCase("Success")) {
                         try {
                             sweetAlertDialog.dismissWithAnimation();
-                            Printer.Print(ReIssueCard.this, printData,handler);
+                            Printer.Print(ReHashed.this, printData,handler);
                         } catch (RemoteException e) {
                             e.printStackTrace();
                         }
-                        Toast.makeText(ReIssueCard.this, "ग्राहक सफलतापूर्वक दर्ता गरियो।", Toast.LENGTH_SHORT).show();
-                        startActivity(new Intent(ReIssueCard.this, TicketAndTracking.class));
+                        Toast.makeText(ReHashed.this, "ग्राहक सफलतापूर्वक दर्ता गरियो।", Toast.LENGTH_SHORT).show();
+                        startActivity(new Intent(ReHashed.this, TicketAndTracking.class));
                         finish();
                     }
                     break;
-                    case 505:
-                        Toast.makeText(ReIssueCard.this, msg.obj.toString(), Toast.LENGTH_SHORT).show();
+                case 505:
+                    Toast.makeText(ReHashed.this, msg.obj.toString(), Toast.LENGTH_SHORT).show();
                     break;
                 default:
                     break;
@@ -101,7 +98,7 @@ public class ReIssueCard extends BaseActivity implements View.OnClickListener {
         tokenManager = TokenManager.getInstance(getSharedPreferences("prefs", MODE_PRIVATE));
         stopThread = false;
         int[] value = {};
-        M1CardHandlerMosambee.read_miCard(handler, value, "ReIssueCard");
+        M1CardHandlerMosambee.read_miCard(handler, value, "ReHashed");
 
         btn_submit.setOnClickListener(this);
         btn_cancel.setOnClickListener(this);
@@ -111,8 +108,8 @@ public class ReIssueCard extends BaseActivity implements View.OnClickListener {
         if (databaseHelper.listBlockList().size() > 0) {
             for (int i = 0; i < databaseHelper.listBlockList().size(); i++) {
                 if (databaseHelper.listBlockList().get(i).identificationId.equalsIgnoreCase(toString)) {
-                    Toast.makeText(ReIssueCard.this, "यो कार्ड ब्लक गरिएको छ।", Toast.LENGTH_SHORT).show();
-                    startActivity(new Intent(ReIssueCard.this,TicketAndTracking.class));
+                    Toast.makeText(ReHashed.this, "यो कार्ड ब्लक गरिएको छ।", Toast.LENGTH_SHORT).show();
+                    startActivity(new Intent(ReHashed.this,TicketAndTracking.class));
                     finish();
                 } else {
                     try {
@@ -178,9 +175,9 @@ public class ReIssueCard extends BaseActivity implements View.OnClickListener {
                     showCardReadLayout(id, amount, referenceHash);
                 } else if (response.code() == 404) {
                     progressBar.setVisibility(View.GONE);
-                    Toast.makeText(ReIssueCard.this, "Mobile number Not Found ", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ReHashed.this, "Mobile number Not Found ", Toast.LENGTH_SHORT).show();
                 } else if (response.code() == 401) {
-                    startActivity(new Intent(ReIssueCard.this, HelperLogin.class));
+                    startActivity(new Intent(ReHashed.this, HelperLogin.class));
                     finish();
                 }
             }
@@ -188,14 +185,14 @@ public class ReIssueCard extends BaseActivity implements View.OnClickListener {
             @Override
             public void onFailure(Call<ReIssueCardResponse> call, Throwable t) {
                 if (t.getMessage() != null) {
-                    Toast.makeText(ReIssueCard.this, t.getMessage(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ReHashed.this, t.getMessage(), Toast.LENGTH_SHORT).show();
                 }
             }
         });
     }
 
     private void showCardReadLayout(String id, String amount, String referenceHash) {
-        sweetAlertDialog = new SweetAlertDialog(ReIssueCard.this, SweetAlertDialog.SUCCESS_TYPE);
+        sweetAlertDialog = new SweetAlertDialog(ReHashed.this, SweetAlertDialog.SUCCESS_TYPE);
         sweetAlertDialog.setTitleText("Card ReIssued Successfully !!!")
                 .setContentText("तपाईको कार्ड प्रमाणित गर्नुहोस् ।")
                 .setConfirmText("CONFIRM")
@@ -211,7 +208,7 @@ public class ReIssueCard extends BaseActivity implements View.OnClickListener {
 
                 String[] customerDetails = {customerId, customerAmt, customerHash, customerTranNo};
                 int[] customerDetailsBlock = {CUSTOMERID, CUSTOMER_AMT, CUSTOMER_HASH, CUSTOMER_TRANSACTION_NO};
-                M1CardHandlerMosambee.write_miCard(handler, customerDetails, customerDetailsBlock, "ReIssueCard-UpdateCard");
+                M1CardHandlerMosambee.write_miCard(handler, customerDetails, customerDetailsBlock, "ReHashed-UpdateCard");
             }
         }).show();
     }
@@ -235,10 +232,11 @@ public class ReIssueCard extends BaseActivity implements View.OnClickListener {
                 break;
 
             case R.id.btn_cancel:
-                startActivity(new Intent(ReIssueCard.this, TicketAndTracking.class));
+                startActivity(new Intent(ReHashed.this, TicketAndTracking.class));
                 break;
         }
     }
 
 
 }
+

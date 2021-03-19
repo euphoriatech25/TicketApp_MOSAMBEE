@@ -74,6 +74,12 @@
             android:theme="@style/Theme.AppCompat.Light.NoActionBar"
             android:windowSoftInputMode="stateHidden" />
 
+
+         <activity
+            android:name=".activity.ReHashed"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar"
+            android:windowSoftInputMode="stateHidden" />
+
         <activity
             android:name=".activity.CheckBalanceActivity"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
@@ -94,14 +100,7 @@
             </intent-filter>
         </receiver>
 
-        <receiver
-            android:name=".callcontrol.IncomingCallReceiver"
-            android:enabled="true"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.PHONE_STATE" />
-            </intent-filter>
-        </receiver>
+
 
         <service android:name=".trackcar.TrackingService$HideNotificationService" />
 

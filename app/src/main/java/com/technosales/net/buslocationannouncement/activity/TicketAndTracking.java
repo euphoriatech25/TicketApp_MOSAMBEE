@@ -252,7 +252,7 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
         databaseHelper = new DatabaseHelper(this);
         trackingController = new TrackingController(this);
         trackingController.setListener(this);
-
+//        trackingController.startCheck();
 
         startTrackingService(true, false);
 
@@ -499,7 +499,10 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
 //            }
 //        });
 
+        for (int p = 0; p < passengerCountLists.size(); p++) {
+            Log.i(TAG, "testingggggggggggggggggggggggg: "+passengerCountLists.get(p).toString());
 
+        }
 
     }
 
@@ -543,23 +546,44 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
     }
 
     private void initializeDrawer() {
-        final PrimaryDrawerItem FareItem = new PrimaryDrawerItem().withIdentifier(1).withName("Fare Type").withTag("FareItem").withBadge("▼");
+        final PrimaryDrawerItem FareItem = new PrimaryDrawerItem().withIdentifier(1).withName("भाडाको प्रकार").withTag("FareItem").withBadge("▼");
 
-        final SecondaryDrawerItem Normal = new SecondaryDrawerItem().withIdentifier(2).withName("Normal");
-        final SecondaryDrawerItem Places = new SecondaryDrawerItem().withIdentifier(3).withName("Places");
-        final SecondaryDrawerItem Price = new SecondaryDrawerItem().withIdentifier(4).withName("Price");
+        final SecondaryDrawerItem Normal = new SecondaryDrawerItem().withIdentifier(2).withName("सामान्य");
+        final SecondaryDrawerItem Places = new SecondaryDrawerItem().withIdentifier(3).withName("ठाउँको आधारमा");
+        final SecondaryDrawerItem Price = new SecondaryDrawerItem().withIdentifier(4).withName("मूल्यको आधारमा");
 
-        final PrimaryDrawerItem UpdatePrice = new PrimaryDrawerItem().withName("Update Price").withBadge("$");
+        final PrimaryDrawerItem UpdatePrice = new PrimaryDrawerItem().withName("मूल्य अपडेट").withBadge("$");
 
 
-        final PrimaryDrawerItem CardOption = new PrimaryDrawerItem().withIdentifier(5).withName("Card Option").withTag("CardOption").withBadge("▼");
-        final SecondaryDrawerItem IssueCard = new SecondaryDrawerItem().withIdentifier(6).withName("Issue Card");
-        final SecondaryDrawerItem CardBlock = new SecondaryDrawerItem().withIdentifier(7).withName("Card Block");
-        final SecondaryDrawerItem CardReissue = new SecondaryDrawerItem().withIdentifier(8).withName("Card Reissue");
+        final PrimaryDrawerItem CardOption = new PrimaryDrawerItem().withIdentifier(5).withName("कार्ड विकल्प").withTag("CardOption").withBadge("▼");
+        final SecondaryDrawerItem IssueCard = new SecondaryDrawerItem().withIdentifier(6).withName("कार्ड जारी");
+        final SecondaryDrawerItem CardBlock = new SecondaryDrawerItem().withIdentifier(7).withName("कार्ड ब्लक");
+        final SecondaryDrawerItem CardReissue = new SecondaryDrawerItem().withIdentifier(8).withName("कार्ड पुनःजारी");
 
-        final PrimaryDrawerItem checkBalance = new PrimaryDrawerItem().withName("Check Balance");
+        final PrimaryDrawerItem checkBalance = new PrimaryDrawerItem().withName("ब्यालेन्स जाँच");
+        final SecondaryDrawerItem CardRehash = new SecondaryDrawerItem().withName("कार्ड रिहास");
 
-        final PrimaryDrawerItem updateApp = new PrimaryDrawerItem().withName("Update App");
+        final PrimaryDrawerItem updateApp = new PrimaryDrawerItem().withName("अपडेट");
+
+
+//        final PrimaryDrawerItem FareItem = new PrimaryDrawerItem().withIdentifier(1).withName("Fare Type").withTag("FareItem").withBadge("▼");
+//
+//        final SecondaryDrawerItem Normal = new SecondaryDrawerItem().withIdentifier(2).withName("Normal");
+//        final SecondaryDrawerItem Places = new SecondaryDrawerItem().withIdentifier(3).withName("Places");
+//        final SecondaryDrawerItem Price = new SecondaryDrawerItem().withIdentifier(4).withName("Price");
+//
+//        final PrimaryDrawerItem UpdatePrice = new PrimaryDrawerItem().withName("Update Price").withBadge("$");
+//
+//
+//        final PrimaryDrawerItem CardOption = new PrimaryDrawerItem().withIdentifier(5).withName("Card Option").withTag("CardOption").withBadge("▼");
+//        final SecondaryDrawerItem IssueCard = new SecondaryDrawerItem().withIdentifier(6).withName("Issue Card");
+//        final SecondaryDrawerItem CardBlock = new SecondaryDrawerItem().withIdentifier(7).withName("Card Block");
+//        final SecondaryDrawerItem CardReissue = new SecondaryDrawerItem().withIdentifier(8).withName("Card Reissue");
+//
+//        final PrimaryDrawerItem checkBalance = new PrimaryDrawerItem().withName("Check Balance");
+//        final PrimaryDrawerItem CardRehash = new PrimaryDrawerItem().withName("Card Rehash");
+//
+//        final PrimaryDrawerItem updateApp = new PrimaryDrawerItem().withName("Update App");
 
         Toolbar toolbar = new Toolbar(this);
         mainDrawer = new DrawerBuilder()
@@ -573,7 +597,7 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
                         new DividerDrawerItem(),
                         UpdatePrice,
                         new DividerDrawerItem(),
-                        CardOption.withSubItems(IssueCard, CardBlock, CardReissue),
+                        CardOption.withSubItems(IssueCard, CardBlock, CardReissue,CardRehash),
                         new DividerDrawerItem(),
                         checkBalance,
                         new DividerDrawerItem(),
@@ -636,6 +660,10 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
                             }
                         } else if (drawerItem.equals(CardReissue)) {
                             Intent intent = new Intent(TicketAndTracking.this, ReIssueCard.class);
+                            startActivity(intent);
+                            mainDrawer.closeDrawer();
+                        } else if (drawerItem.equals(CardRehash)) {
+                            Intent intent = new Intent(TicketAndTracking.this, ReHashed.class);
                             startActivity(intent);
                             mainDrawer.closeDrawer();
                         } else if (drawerItem.equals(updateApp)) {
@@ -1493,8 +1521,10 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
         if(databaseHelper.passengerCountLists().size()>0){
             for (int i1 = 0; i1 < databaseHelper.passengerCountLists().size(); i1++) {
                 Log.i(TAG, "getNearestLocToTop: "+passengerCountLists.get(i1).toString());
-                 if(databaseHelper.passengerCountLists().get(i1).passenger_station_position==orderPos){
-                    databaseHelper.updatePassengerCountForward(passengerCountLists.get(i1).id);
+                 if(passengerCountLists.get(i1).passenger_station_position==orderPos){
+                     Log.i(TAG, "cccccccccccccccccccccccccccccccccccc: "+passengerCountLists.get(i1).passenger_station_position+""+orderPos);
+
+                     databaseHelper.updatePassengerCountForward(passengerCountLists.get(i1).id);
                      totalPassengerCal= preferences.getInt(UtilStrings.TOTAL_PASSENGERS, 0);
                      totalPassengerCal = totalPassengerCal-1;
                      preferences.edit().putInt(UtilStrings.TOTAL_PASSENGERS, totalPassengerCal).apply();

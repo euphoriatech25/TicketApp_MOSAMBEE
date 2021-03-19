@@ -71,7 +71,7 @@ public class PriceAdapterPlaces extends RecyclerView.Adapter<PriceAdapterPlaces.
     private boolean forward;
     private int orderPos = 0;
     private String toGetOff = "";
-    private int route_type;
+    private int route_type,test;
     double endLat;
     double endLng;
     public PriceAdapterPlaces(List<PriceList> priceLists, Context context, Handler printHandler) {
@@ -144,11 +144,11 @@ public class PriceAdapterPlaces extends RecyclerView.Adapter<PriceAdapterPlaces.
                             }
                             orderPos = routeStationLists.get(i).station_order;
 
-                        }
 
+                        }
                     }
                 }
-
+                Log.i("TAG", "sssssssssssssssssssssssssssssssss: "+orderPos);
                 nearest_name = routeStationLists.get(positionNew).station_name;
                 if (route_type == UtilStrings.NON_RING_ROAD) {
                     nearestDistance = routeStationLists.get(positionNew).station_distance;
@@ -158,6 +158,7 @@ public class PriceAdapterPlaces extends RecyclerView.Adapter<PriceAdapterPlaces.
                 forward = preferences.getBoolean(UtilStrings.FORWARD, true);
 //                forward = true; //static
                 final ArrayList<String> stationsGetoff = new ArrayList<>();
+                final ArrayList<Integer> orderPosPassenger = new ArrayList<>();
 
 
                 if (route_type == UtilStrings.RING_ROAD) {
@@ -169,6 +170,7 @@ public class PriceAdapterPlaces extends RecyclerView.Adapter<PriceAdapterPlaces.
                                     if (nearestDistance > priceList.price_min_distance && nearestDistance < priceList.price_distance) {
 
                                         stationsGetoff.add(routeStationLists.get(i).station_name);
+                                        orderPosPassenger.add(routeStationLists.get(i).station_order);
 
                                     }
                                     if (i == routeStationLists.size() - 1) {
@@ -176,6 +178,8 @@ public class PriceAdapterPlaces extends RecyclerView.Adapter<PriceAdapterPlaces.
                                             nearestDistance = (nearestDistance + routeStationLists.get(j).station_distance);
                                             if (nearestDistance > priceList.price_min_distance && nearestDistance < priceList.price_distance)
                                                 stationsGetoff.add(routeStationLists.get(j).station_name);
+                                               orderPosPassenger.add(routeStationLists.get(j).station_order);
+
                                         }
                                     }
                                 }
@@ -188,6 +192,8 @@ public class PriceAdapterPlaces extends RecyclerView.Adapter<PriceAdapterPlaces.
                                     nearestDistance = (nearestDistance + routeStationLists.get(i).station_distance);
                                     if (nearestDistance > priceList.price_min_distance && nearestDistance < priceList.price_distance) {
                                         stationsGetoff.add(routeStationLists.get(i).station_name);
+                                        orderPosPassenger.add(routeStationLists.get(i).station_order);
+
                                     }
                                     for (int j = routeStationLists.size() - 1; j > -1; j--) {
                                         if (j == routeStationLists.size() - 1) {
@@ -198,6 +204,8 @@ public class PriceAdapterPlaces extends RecyclerView.Adapter<PriceAdapterPlaces.
                                         /*nearestDistance = (nearestDistance + routeStationLists.get(j).station_distance / 1000);*/
                                         if (nearestDistance > priceList.price_min_distance && nearestDistance < priceList.price_distance)
                                             stationsGetoff.add(routeStationLists.get(j).station_name);
+                                        orderPosPassenger.add(routeStationLists.get(j).station_order);
+
                                     }
 
                                 }
@@ -214,14 +222,16 @@ public class PriceAdapterPlaces extends RecyclerView.Adapter<PriceAdapterPlaces.
 
                             if (i >= orderPos) {
                                 if (priceList.price_distance >= Math.abs(nearestDistance - routeStationLists.get(i).station_distance) && priceList.price_min_distance <= Math.abs(nearestDistance - routeStationLists.get(i).station_distance)) {
-                                    stationsGetoff.add(routeStationLists.get(i).station_name);
+                                    stationsGetoff.add(routeStationLists.get(i).station_name);    orderPosPassenger.add(routeStationLists.get(i).station_order);
+
                                     /*calcDistance = calcDistance+  routeStationLists.get(i).station_distance;*/
                                 }
                             }
                         } else {
                             if (i <= orderPos) {
                                 if (priceList.price_distance >= Math.abs(nearestDistance - routeStationLists.get(i).station_distance) && priceList.price_min_distance <= Math.abs(nearestDistance - routeStationLists.get(i).station_distance)) {
-                                    stationsGetoff.add(routeStationLists.get(i).station_name);
+                                    stationsGetoff.add(routeStationLists.get(i).station_name);    orderPosPassenger.add(routeStationLists.get(i).station_order);
+
                                     /*calcDistance = calcDistance+  routeStationLists.get(i).station_distance;*/
                                 }
                             }
@@ -239,11 +249,9 @@ public class PriceAdapterPlaces extends RecyclerView.Adapter<PriceAdapterPlaces.
                 dialog.setContentView(R.layout.dialog_layout);
 
                 final ListView suggestionList = dialog.findViewById(R.id.suggestionList);
-                final TextView completeInfo = dialog.findViewById(R.id.completeInfo);
-
-//                final Button btn_ok = dialog.findViewById(R.id.btn_ok);
-//                Button btn_cancel = dialog.findViewById(R.id.btn_cancel);
-//                btn_ok.setEnabled(false);
+                for (int i = 0; i < orderPosPassenger.size(); i++) {
+                    Log.i("TAG", "onClnnnnnnnk: "+orderPosPassenger.get(i));
+                }
 
                 final ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(context, android.R.layout.simple_list_item_1, stationsGetoff);
                 suggestionList.setAdapter(arrayAdapter);
@@ -270,23 +278,34 @@ public class PriceAdapterPlaces extends RecyclerView.Adapter<PriceAdapterPlaces.
                                         payByCard(priceList, toGetOff, nearest_name, position);
                                         dialog1.dismiss();
                                         dialog.dismiss();
+                                        orderPosPassenger.clear();
 
                                         break;
                                     case 1: //cash
                                         payByCash(priceList, position);
                                         dialog1.dismiss();
                                         dialog.dismiss();
+                                        orderPosPassenger.clear();
                                         break;
                                     case 2: //QR Code
                                         payByQR(priceList, toGetOff, nearest_name, position);
                                         dialog1.dismiss();
                                         dialog.dismiss();
+                                        orderPosPassenger.clear();
                                         break;
                                 }
                             }
                         }).show();
 
                         toGetOff = arrayAdapter.getItem(position);
+                        if(test==0){
+                            test=orderPosPassenger.get(position);
+                            orderPosPassenger.clear();
+                        }else {
+                            test=0;
+                        }
+
+
 
 //                        btn_ok.setEnabled(true);
 //                        dialog.setTitle("रु. " + priceList.price_value + " " + nearest_name + " - " + toGetOff);
@@ -438,7 +457,7 @@ public class PriceAdapterPlaces extends RecyclerView.Adapter<PriceAdapterPlaces.
                 intent.putExtra(UtilStrings.TICKET_TYPE, ticketType);
                 intent.putExtra(UtilStrings.DISCOUNT_TYPE, discountType);
             }
-            intent.putExtra(UtilStrings.STATION_POS_PASSENGERS, routeStationLists.get(position).station_order);
+            intent.putExtra(UtilStrings.STATION_POS_PASSENGERS, test);
             context.startActivity(intent);
         } else {
             Toast.makeText(context, "सहायक छान्नुहोस् ।", Toast.LENGTH_SHORT).show();
@@ -469,7 +488,7 @@ public class PriceAdapterPlaces extends RecyclerView.Adapter<PriceAdapterPlaces.
                 intent.putExtra(UtilStrings.TICKET_TYPE, ticketType);
                 intent.putExtra(UtilStrings.DISCOUNT_TYPE, discountType);
             }
-            intent.putExtra(UtilStrings.STATION_POS_PASSENGERS, routeStationLists.get(position).station_order);
+            intent.putExtra(UtilStrings.STATION_POS_PASSENGERS,test);
 
             context.startActivity(intent);
         } else {
@@ -569,14 +588,17 @@ public class PriceAdapterPlaces extends RecyclerView.Adapter<PriceAdapterPlaces.
 //            ((TicketAndTracking) context).recreate();
 
 
-            Log.i("TAG", "processingPayment: "+orderPos+"::::"+orderPos);
+            Log.i("TAG", "processingPayment: "+orderPos+"::::"+test);
 
             total_passenger++;
             preferences.edit().putInt(UtilStrings.TOTAL_PASSENGERS, total_passenger).apply();
             PassengerCountList passengerCountList = new PassengerCountList();
-            passengerCountList.passenger_station_position=routeStationLists.get(position).station_order;
+            passengerCountList.passenger_station_position=test;
             passengerCountList.passenger_direction=String.valueOf(forward);
             databaseHelper.insertPassengerCountList(passengerCountList);
+            test=0;
+
+
             try {
                 BeepLEDTest.beepSuccess();
             } catch (RemoteException e) {

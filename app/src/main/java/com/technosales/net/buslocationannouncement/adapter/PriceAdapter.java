@@ -345,8 +345,6 @@ public class PriceAdapter extends RecyclerView.Adapter<PriceAdapter.MyViewHolder
                 intent.putExtra(UtilStrings.POSITION, position);
                 intent.putExtra(UtilStrings.DISCOUNT_TYPE, discountType);
             }
-
-
             intent.putExtra(UtilStrings.STATION_POS_PASSENGERS, possiblePosition);
 
             context.startActivity(intent);

@@ -15,8 +15,6 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.technosales.net.buslocationannouncement.activity.ReIssueCard;
-import com.technosales.net.buslocationannouncement.callcontrol.IncomingCallReceiver;
 import com.technosales.net.buslocationannouncement.R;
 import com.technosales.net.buslocationannouncement.activity.TicketAndTracking;
 import com.technosales.net.buslocationannouncement.base.BaseActivity;
@@ -125,8 +123,7 @@ public class IssueCardActivity extends BaseActivity implements ICreateAccount.Vi
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_issue_card);
-        intent=new Intent(this, IncomingCallReceiver.class);
-        startService(intent);
+
         setUpToolbar("ग्राहक कार्ड दर्ता", true);
         customer_number = getIntent().getStringExtra(USER_NUMBER);
         progressDialog = new ProgressDialog(IssueCardActivity.this);

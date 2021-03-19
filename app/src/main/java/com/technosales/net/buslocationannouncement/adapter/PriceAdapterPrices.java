@@ -1,5 +1,6 @@
 package com.technosales.net.buslocationannouncement.adapter;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -105,7 +106,7 @@ public class PriceAdapterPrices extends RecyclerView.Adapter<PriceAdapterPrices.
         routeType = preferences.getInt(UtilStrings.ROUTE_TYPE, UtilStrings.NON_RING_ROAD);
         routeStationListSize = preferences.getInt(UtilStrings.ROUTE_LIST_SIZE, 0);
         total_passenger=  preferences.getInt(UtilStrings.TOTAL_PASSENGERS, 0);
-
+        Log.i("TAG", "onBindViewHolder: "+total_passenger);
         if (((TicketAndTracking) context).normalDiscountToggle.isOn()) {
             holder.routeStationItem.setTextColor(context.getResources().getColorStateList(R.color.discount_txt_color));
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
@@ -910,14 +911,6 @@ public class PriceAdapterPrices extends RecyclerView.Adapter<PriceAdapterPrices.
                 intent.putExtra(UtilStrings.DISCOUNT_TYPE, discountType);
             }
 
-//            total_passenger=total_passenger+1;
-//            preferences.edit().putInt(UtilStrings.TOTAL_PASSENGERS, total_passenger).apply();
-//            PassengerCountList passengerCountList = new PassengerCountList();
-//            passengerCountList.passenger_station_position=routeStationLists.get(position).station_order;
-//            passengerCountList.passenger_direction=String.valueOf(forward);
-//            databaseHelper.insertPassengerCountList(passengerCountList);
-
-//            ((TicketAndTracking) context).finish();
             context.startActivity(intent);
         } else {
             Toast.makeText(context, "सहायक छान्नुहोस् ।", Toast.LENGTH_SHORT).show();
@@ -954,6 +947,7 @@ public class PriceAdapterPrices extends RecyclerView.Adapter<PriceAdapterPrices.
             }
 
             context.startActivity(intent);
+            ((Activity)context).finish();
         } else {
             Toast.makeText(context, "सहायक छान्नुहोस् ।", Toast.LENGTH_SHORT).show();
             ((TicketAndTracking) context).helperName.setText("सहायक छान्नुहोस् ।");
@@ -1070,7 +1064,7 @@ public class PriceAdapterPrices extends RecyclerView.Adapter<PriceAdapterPrices.
                         strTotal = strTotal.substring(0, 4);
                     }
 
-                    String printTransaction ="बस नम्बर :- "+busName + " (कार्ड)" + "\n" +
+                    String printTransaction ="बस नम्बर :- "+busName + "(नगद)" + "\n" +
                             "टिकट नम्बर :-"+ GeneralUtils.getUnicodeNumber(ticketInfoList.ticket_id) + "\n" +
                             GeneralUtils.getUnicodeNumber(strTotal) + "कि.मी \n रकम :- रु." + GeneralUtils.getUnicodeNumber(ticketInfoList.transactionAmount) + discountType + "\n" +
                             "दूरी :-"+nearestName + "-" + routeStationModelList.station_name + "\n" +
@@ -1080,7 +1074,7 @@ public class PriceAdapterPrices extends RecyclerView.Adapter<PriceAdapterPrices.
 
                     Toast.makeText(context, "टिकट सफलतापूर्वक काटियो।", Toast.LENGTH_SHORT).show();
 
-                    total_passenger=total_passenger+1;
+                    total_passenger++;
                     preferences.edit().putInt(UtilStrings.TOTAL_PASSENGERS, total_passenger).apply();
                     PassengerCountList passengerCountList = new PassengerCountList();
                     passengerCountList.passenger_station_position=routeStationModelList.station_order;

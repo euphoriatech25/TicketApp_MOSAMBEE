@@ -290,5 +290,7 @@ public class HelperLogin extends AppCompatActivity {
     public void onBackPressed() {
         stopThread = true;
         super.onBackPressed();
+        startActivity(new Intent(this,TicketAndTracking.class));
+        finish();
     }
 }

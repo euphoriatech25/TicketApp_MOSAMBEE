@@ -215,7 +215,6 @@ public class PayByCardActivity extends BaseActivity {
                     Toast.makeText(PayByCardActivity.this, msg.obj.toString(), Toast.LENGTH_SHORT).show();
                     break;
                 case 200:
-                    Log.i(TAG, "handleMessage: hhhhhhhhh");
                         if (!ticketId.equalsIgnoreCase("") && !tranCurrentHash.equalsIgnoreCase("")) {
                             try {
                                 BeepLEDTest.beepSuccess();
@@ -336,7 +335,8 @@ public class PayByCardActivity extends BaseActivity {
         source = getIntent().getStringExtra(UtilStrings.SOURCE);
         dateTime = GeneralUtils.getTicketDate() + GeneralUtils.getTicketTime();
         totalDistance = getIntent().getFloatExtra(UtilStrings.TOTAL_DISTANCE, 0);
-        total_passenger= getIntent().getIntExtra(UtilStrings.STATION_POS_PASSENGERS, 0);
+        orderPos= getIntent().getIntExtra(UtilStrings.STATION_POS_PASSENGERS, 0);
+        total_passenger=  preferences.getInt(UtilStrings.TOTAL_PASSENGERS, 0);
 
 //       transafering code from below
         total_tickets = preferences.getInt(UtilStrings.TOTAL_TICKETS, 0);
@@ -1039,6 +1039,8 @@ public class PayByCardActivity extends BaseActivity {
                 } catch (RemoteException e) {
                     e.printStackTrace();
                 }
+                Intent intent=new Intent(this,TicketAndTracking.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
 
 
 //                startActivity(new Intent(PayByCardActivity.this, TicketAndTracking.class));
@@ -1125,6 +1127,8 @@ public class PayByCardActivity extends BaseActivity {
                     e.printStackTrace();
                 }
                dialog.dismiss();
+                Intent intent=new Intent(this,TicketAndTracking.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
 
 //                startActivity(new Intent(PayByCardActivity.this, TicketAndTracking.class));
                 finish();
@@ -1222,9 +1226,21 @@ public class PayByCardActivity extends BaseActivity {
                 }
                 dialog.dismiss();
 
+                Intent intent = new Intent(PayByCardActivity.this, TicketAndTracking.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
 
+                startActivity(intent);
+                overridePendingTransition(0, 0);
+
+                PayByCardActivity.this.finish();
+
+
+//                Intent intent=new Intent(this,TicketAndTracking.class);
+//                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
 //                startActivity(new Intent(PayByCardActivity.this, TicketAndTracking.class));
-                finish();
+//                finish();
+
+
             } else {
                 Log.i("TAG", "onActivate: " + "rrrr");
             }
