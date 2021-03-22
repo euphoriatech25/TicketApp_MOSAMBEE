@@ -18,7 +18,7 @@
     <LinearLayout
         android:id="@+id/linearLayout2"
         android:layout_width="match_parent"
-        android:layout_height="300dp"
+        android:layout_height="wrap_content"
         android:layout_margin="5dp"
         android:orientation="vertical"
         android:padding="5dp"
@@ -105,10 +105,10 @@
                     android:textColor="@color/main_blue_color"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="जम्मा तिर्ने रकम"/>
+                    android:text="कुल यात्रा दूरी"/>
 
             <TextView
-                android:id="@+id/amount"
+                android:id="@+id/distance"
                 android:layout_width="fill_parent"
                 android:layout_height="match_parent"
                 android:gravity="left"
@@ -170,6 +170,37 @@
             android:layout_marginTop="10dp"
             android:layout_margin="5dp"
             android:background="@color/md_black_1000"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:orientation="vertical"
+            android:layout_height="wrap_content">
+            <TextView
+                android:gravity="left"
+                android:layout_margin="5dp"
+                android:textColor="@color/main_blue_color"
+                android:layout_width="wrap_content"
+                android:text="जम्मा तिर्ने रकम"
+                android:textSize="20sp"
+                android:layout_height="wrap_content"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:gravity="center"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:text="रू"
+                    android:textSize="25sp"
+                    android:layout_marginTop="25dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:id="@+id/amount"
+                android:textColor="@color/main_green_color"
+                android:textSize="100sp"
+                android:layout_height="wrap_content"/>
+            </LinearLayout>
+        </LinearLayout>
     </LinearLayout>
 
 

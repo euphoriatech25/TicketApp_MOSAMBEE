@@ -74,12 +74,6 @@
             android:theme="@style/Theme.AppCompat.Light.NoActionBar"
             android:windowSoftInputMode="stateHidden" />
 
-
-         <activity
-            android:name=".activity.ReHashed"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar"
-            android:windowSoftInputMode="stateHidden" />
-
         <activity
             android:name=".activity.CheckBalanceActivity"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />

@@ -75,8 +75,10 @@ public class ReIssueCard extends BaseActivity implements View.OnClickListener {
                         finish();
                     }
                     break;
-                    case 505:
-                        Toast.makeText(ReIssueCard.this, msg.obj.toString(), Toast.LENGTH_SHORT).show();
+                case 505:
+
+                    Toast.makeText(ReIssueCard.this, msg.obj.toString(), Toast.LENGTH_SHORT).show();
+                 finish();
                     break;
                 default:
                     break;
@@ -198,8 +200,9 @@ public class ReIssueCard extends BaseActivity implements View.OnClickListener {
         sweetAlertDialog = new SweetAlertDialog(ReIssueCard.this, SweetAlertDialog.SUCCESS_TYPE);
         sweetAlertDialog.setTitleText("Card ReIssued Successfully !!!")
                 .setContentText("तपाईको कार्ड प्रमाणित गर्नुहोस् ।")
-                .setConfirmText("CONFIRM")
+                .setConfirmText("कन्फर्म")
                 .setCancelable(false);
+
         sweetAlertDialog.setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
             @Override
             public void onClick(SweetAlertDialog sDialog) {

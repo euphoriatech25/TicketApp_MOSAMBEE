@@ -231,7 +231,12 @@ public class CheckBalanceActivity extends BaseActivity {
                     Log.i("TAG", "rechargeProcess: " + passenserId + " " + transactionHash);
                     if (GeneralUtils.isNetworkAvailable(this)) {
                         String ticketId = deviceID.substring(deviceID.length() - 2) + dateTime + "" + valueOfTickets;
-                        String referenceHash = BCrypt.withDefaults().hashToString(10, (transactionHash + ticketId + passenserId + amount).toCharArray());
+                        String referenceHash = null;
+                        try {
+                            referenceHash = Encrypt.encrypt(value1,transactionHash + ticketId + passenserId + amount);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
                         newHash = referenceHash.substring(referenceHash.length() - 9);
                         Map<String, Object> params = new HashMap<>();
                         params.put("helper_id", helperString);

@@ -1,6 +1,7 @@
 package com.technosales.net.buslocationannouncement.adapter;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
@@ -459,6 +460,7 @@ public class PriceAdapterPlaces extends RecyclerView.Adapter<PriceAdapterPlaces.
             }
             intent.putExtra(UtilStrings.STATION_POS_PASSENGERS, test);
             context.startActivity(intent);
+            ((Activity)context).finish();
         } else {
             Toast.makeText(context, "सहायक छान्नुहोस् ।", Toast.LENGTH_SHORT).show();
             ((TicketAndTracking) context).helperName.setText("सहायक छान्नुहोस् ।");
@@ -489,8 +491,8 @@ public class PriceAdapterPlaces extends RecyclerView.Adapter<PriceAdapterPlaces.
                 intent.putExtra(UtilStrings.DISCOUNT_TYPE, discountType);
             }
             intent.putExtra(UtilStrings.STATION_POS_PASSENGERS,test);
-
             context.startActivity(intent);
+            ((Activity)context).finish();
         } else {
             Toast.makeText(context, "सहायक छान्नुहोस् ।", Toast.LENGTH_SHORT).show();
             ((TicketAndTracking) context).helperName.setText("सहायक छान्नुहोस् ।");

@@ -320,7 +320,7 @@ public class PriceAdapter extends RecyclerView.Adapter<PriceAdapter.MyViewHolder
             intent.putExtra(UtilStrings.STATION_POS_PASSENGERS, possiblePosition);
 
             context.startActivity(intent);
-//            ((TicketAndTracking) context).finish();
+            ((TicketAndTracking) context).finish();
         }else {
             Toast.makeText(context, "सहायक छान्नुहोस् ।", Toast.LENGTH_SHORT).show();
             ((TicketAndTracking) context).helperName.setText("सहायक छान्नुहोस् ।");
@@ -348,7 +348,7 @@ public class PriceAdapter extends RecyclerView.Adapter<PriceAdapter.MyViewHolder
             intent.putExtra(UtilStrings.STATION_POS_PASSENGERS, possiblePosition);
 
             context.startActivity(intent);
-//            ((TicketAndTracking) context).finish();
+            ((TicketAndTracking) context).finish();
         }else {
             Toast.makeText(context, "सहायक छान्नुहोस् ।", Toast.LENGTH_SHORT).show();
             ((TicketAndTracking) context).helperName.setText("सहायक छान्नुहोस् ।");

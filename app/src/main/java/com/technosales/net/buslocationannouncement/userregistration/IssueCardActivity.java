@@ -100,7 +100,9 @@ public class IssueCardActivity extends BaseActivity implements ICreateAccount.Vi
                     stopThread=true;
                     break;
                 case 505:
+
                     Toast.makeText(IssueCardActivity.this, msg.obj.toString(), Toast.LENGTH_SHORT).show();
+                    finish();
                     break;
                 case 200:
                         try {

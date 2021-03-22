@@ -75,40 +75,21 @@ public class M1CardHandlerMosambee {
 
 
                             } else if (fromWhichActivity.equalsIgnoreCase("ReIssueCard") || fromWhichActivity.equalsIgnoreCase("IssueCardActivity")) {
+                                int value = m1CardHandler.authority(M1KeyTypeConstrants.KEYTYPE_A, SECTOR_CUSTOMER,KEY_A, uid);
 
-                                int value = m1CardHandler.authority(M1KeyTypeConstrants.KEYTYPE_B, SECTOR_FIRST_TRANSATION, MifareClassic.KEY_DEFAULT, uid);
-                                int valueWrite = m1CardHandler.writeBlock(SECTOR_TRAILER_CUSTOMER_FIRST_TRANSACTION, KEY_DEFAULT);
-
-                                int value1 = m1CardHandler.authority(M1KeyTypeConstrants.KEYTYPE_B, SECTOR_SECOND_TRANSATION, MifareClassic.KEY_DEFAULT, uid);
-                                int valueWrite1 = m1CardHandler.writeBlock(SECTOR_TRAILER_CUSTOMER_SECOND_TRANSACTION, KEY_DEFAULT);
-                                Log.i(TAG, "onSearchResult:  not authorized" + value + value1 + valueWrite + valueWrite1);
-
-                                if (value == ServiceResult.Success || value1 == ServiceResult.Success) {
-                                    if (value == ServiceResult.Success) {
-                                        Message messageCardId = new Message();
-                                        messageCardId.what = 100;
-                                        messageCardId.obj = GeneralUtils.ByteArrayToHexString(uid);
-                                        handler.sendMessage(messageCardId);
-                                    }
-
-                                } else if (value == ServiceResult.M1Card_Verify_Err || value1 == ServiceResult.M1Card_Verify_Err) {
+                                if (value == ServiceResult.Success) {
                                     Message messageCardId = new Message();
                                     messageCardId.what = 100;
                                     messageCardId.obj = GeneralUtils.ByteArrayToHexString(uid);
                                     handler.sendMessage(messageCardId);
-                                    Log.i(TAG, "onSearchResult: authorized" + value1);
+
+                                } else if (value == ServiceResult.M1Card_Verify_Err) {
+                                    Message messageCardId1 = new Message();
+                                    messageCardId1.what = 505;
+                                    messageCardId1.obj = "यो एक अधिकृत कार्ड हैन।";
+                                    handler.sendMessage(messageCardId1);
                                 }
-                                m1CardHandler.authority(M1KeyTypeConstrants.KEYTYPE_B, SECTOR_FIRST_TRANSATION, MifareClassic.KEY_DEFAULT, uid);
-                                Message messageCardId = new Message();
-                                messageCardId.what = 100;
-                                messageCardId.obj = GeneralUtils.ByteArrayToHexString(uid);
-                                handler.sendMessage(messageCardId);
-                            }else if (fromWhichActivity.equalsIgnoreCase("ReHashed")) {
-                                m1CardHandler.authority(M1KeyTypeConstrants.KEYTYPE_B, SECTOR_FIRST_TRANSATION, MifareClassic.KEY_DEFAULT, uid);
-                                Message messageCardId = new Message();
-                                messageCardId.what = 100;
-                                messageCardId.obj = GeneralUtils.ByteArrayToHexString(uid);
-                                handler.sendMessage(messageCardId);
+
                             }else if (fromWhichActivity.equalsIgnoreCase("PayByCardActivity")) {
                                 int ret = m1CardHandler.authority(M1KeyTypeConstrants.KEYTYPE_A, SECTOR_CUSTOMER, KEY_A, uid);
                                 Log.i(TAG, "onSearchResult: " + ret);
@@ -229,12 +210,15 @@ public class M1CardHandlerMosambee {
                             } else if (fromWhichActivity.equalsIgnoreCase("ReIssueCard-UpdateCard") || fromWhichActivity.equalsIgnoreCase("IssueCardActivity-CreateCard")) {
 
                                 int value = m1CardHandler.authority(M1KeyTypeConstrants.KEYTYPE_B, SECTOR_CUSTOMER, KEY_B, uid);
-                                Log.i(TAG, "onSearchResult: " + value);
 
-                                if (value == ServiceResult.Success) {
-                                    writeCustomerReIssue(handler, m1CardHandler, customerUpdatedValue, customerDetailsBlock, uid, true);
+                                Log.i(TAG, "onSearchResult: "+value);
+                                if (value == ServiceResult.Success ) {
+                                    writeCustomerReIssue(handler, m1CardHandler, customerUpdatedValue, customerDetailsBlock, uid);
                                 } else if (value == ServiceResult.M1Card_Verify_Err) {
-                                    writeCustomerReIssue(handler, m1CardHandler, customerUpdatedValue, customerDetailsBlock, uid, false);
+                                    Message messageCardId1 = new Message();
+                                    messageCardId1.what = 505;
+                                    messageCardId1.obj = "यो कार्ड पहिले नै प्रयोग गरीएको छ। कृपया नयाँ कार्ड प्रयोग गर्नुहोस्।";
+                                    handler.sendMessage(messageCardId1);
                                 } else {
                                     Message messageCardId = new Message();
                                     messageCardId.what = 500;
@@ -242,21 +226,7 @@ public class M1CardHandlerMosambee {
                                     handler.sendMessage(messageCardId);
                                 }
 
-                            }else if (fromWhichActivity.equalsIgnoreCase("ReHashed-UpdateCard")){
-                                int value = m1CardHandler.authority(M1KeyTypeConstrants.KEYTYPE_B, SECTOR_CUSTOMER, KEY_B, uid);
-                                Log.i(TAG, "onSearchResult: " + value);
-
-                                if (value == ServiceResult.Success) {
-                                    writeCustomerReIssue(handler, m1CardHandler, customerUpdatedValue, customerDetailsBlock, uid, true);
-                                } else if (value == ServiceResult.M1Card_Verify_Err) {
-                                    writeCustomerReIssue(handler, m1CardHandler, customerUpdatedValue, customerDetailsBlock, uid, false);
-                                } else {
-                                    Message messageCardId = new Message();
-                                    messageCardId.what = 500;
-                                    messageCardId.obj = "Card invalid ...Please contract Admin";
-                                    handler.sendMessage(messageCardId);
-                                }
-                        } else if (fromWhichActivity.equalsIgnoreCase("FirstOfflineTransaction-Write")) {
+                            }  else if (fromWhichActivity.equalsIgnoreCase("FirstOfflineTransaction-Write")) {
                                 int ret = m1CardHandler.authority(M1KeyTypeConstrants.KEYTYPE_B, SECTOR_FIRST_TRANSATION, KEY_B, uid);
                                 Log.i(TAG, "onSearchResultWrite111: " + ret);
                                 if (ret == ServiceResult.Success) {
@@ -269,7 +239,9 @@ public class M1CardHandlerMosambee {
                                     writeOfflineTransaction(handler, m1CardHandler, customerUpdatedValue, customerDetailsBlock, uid);
                                 }
                             } else if (fromWhichActivity.equalsIgnoreCase("OfflineTransactionNoUpdate")) {
+
                                 int ret = m1CardHandler.authority(M1KeyTypeConstrants.KEYTYPE_B, SECTOR_TRANSATION, KEY_B, uid);
+                                Log.i(TAG, "onSearchResult: from sadi"+ret);
                                 if (ret == ServiceResult.Success) {
                                     writeTransationNo(handler, m1CardHandler, customerUpdatedValue, customerDetailsBlock);
                                 }
@@ -284,6 +256,40 @@ public class M1CardHandlerMosambee {
                 }
             }
         });
+    }
+
+    private static void writeCustomerDetailsWrite(Handler handler, M1CardHandler m1CardHandler, String[] customerUpdatedValue, int[] customerDetailsBlock, byte[] uid) {
+        try {
+              int ret = m1CardHandler.authority(M1KeyTypeConstrants.KEYTYPE_B, SECTOR_CUSTOMER, KEY_B, uid);
+            Log.i(TAG, "writeCustomerDetailsWrite: "+ret);
+            if (ret == ServiceResult.Success) {
+                int ret1 = m1CardHandler.writeBlock((byte) customerDetailsBlock[0], customerUpdatedValue[0].getBytes());
+                int ret2 = m1CardHandler.writeBlock((byte) customerDetailsBlock[1], customerUpdatedValue[1].getBytes());
+                int ret3 = m1CardHandler.writeBlock((byte) customerDetailsBlock[2], customerUpdatedValue[2].getBytes());
+
+
+                int ret4 = m1CardHandler.authority(M1KeyTypeConstrants.KEYTYPE_B, SECTOR_TRANSATION, KEY_B, uid);
+
+                Log.i(TAG, "writeCustomerReIssue: " + ret1 + ret2 + ret3 + ret4);
+                if (ret4 == ServiceResult.Success) {
+                    int ret5 = m1CardHandler.writeBlock((byte) customerDetailsBlock[3], customerUpdatedValue[3].getBytes());
+                    Log.i(TAG, "writeCustomerReIssue: " + ret1 + ret2 + ret3 + ret4 + ret5);
+                }
+                if (ret1 == ServiceResult.Success && ret2 == ServiceResult.Success && ret3 == ServiceResult.Success && ret4 == ServiceResult.Success) {
+                    Message messageSuccess = new Message();
+                    messageSuccess.what = 200;
+                    messageSuccess.obj = "Success";
+                    handler.sendMessage(messageSuccess);
+                } else if (ret1 == -10303 || ret2 == -10303 || ret3 == -10303 || ret4 == -10303) {
+                    Message messageSuccess = new Message();
+                    messageSuccess.what = 500;
+                    messageSuccess.obj = "Something went wrong..Please Wait....";
+                    handler.sendMessage(messageSuccess);
+                }
+            }
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
     }
 
     private static void readCustomerFirstOfflineTranDetails(Handler handler, M1CardHandler m1CardHandler, int[] customerDetailsBlock) {
@@ -489,7 +495,7 @@ public class M1CardHandlerMosambee {
 
     }
 
-    private static void writeCustomerReIssue(Handler handler, M1CardHandler m1CardHandler, String[] customerUpdatedValue, int[] customerDetailsBlock, byte[] uid, boolean authorized) {
+    private static void writeCustomerReIssue(Handler handler, M1CardHandler m1CardHandler, String[] customerUpdatedValue, int[] customerDetailsBlock, byte[] uid) {
 
         try {
             Log.i(TAG, "writeCustomerReIssue: " + customerDetailsBlock[0] + customerUpdatedValue[0]);
@@ -525,8 +531,6 @@ public class M1CardHandlerMosambee {
     private static void writeCustomerDetails(Handler handler, M1CardHandler m1CardHandler, String[] customerUpdatedValue, int[] customerDetailsBlock) {
         try {
             int ret1 = m1CardHandler.writeBlock((byte) customerDetailsBlock[0], customerUpdatedValue[0].getBytes());
-            Log.i(TAG, "writeOfflineTransaction111111111111111111: " + customerUpdatedValue[1]);
-
             int ret2 = m1CardHandler.writeBlock((byte) customerDetailsBlock[1], customerUpdatedValue[1].getBytes());
             Log.i(TAG, "writeCustomerDetails: " + ret1 + ret2);
             if (ret1 == ServiceResult.Success && ret2 == ServiceResult.Success) {

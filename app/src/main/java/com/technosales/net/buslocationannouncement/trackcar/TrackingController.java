@@ -17,6 +17,7 @@ package com.technosales.net.buslocationannouncement.trackcar;
 
 
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -80,10 +81,8 @@ import java.util.Random;
 //            public void run() {
 //                position++;
 //                test();
-//
 //                handlerloop.postDelayed(this, 10000);
 //            }
-//
 //        };
 
         private TrackingListener mListener;
@@ -156,6 +155,9 @@ import java.util.Random;
 
         @Override
         public void onPositionUpdate(Position position) {
+            Log.i(TAG, "test: called");
+            context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putString(UtilStrings.LATITUDE, String.valueOf(position.getLatitude())).apply();
+            context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putString(UtilStrings.LONGITUDE, String.valueOf(position.getLongitude())).apply();
 
             try {
                 StatusActivity.addMessage(context.getString(R.string.status_location_update));
@@ -207,20 +209,21 @@ import java.util.Random;
                                         }
                                     }
                                 }
-                                Intent intent=new Intent(context,TicketAndTracking.class);
-                                intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-                                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                Intent i1 = new Intent(context, TicketAndTracking.class);
+                                i1.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                context.startActivity(i1);
+                                ((Activity)context).finish();
+                                ((Activity)context).overridePendingTransition(0, 0);
 
 
-                                if (mListener!=null){
-                                    mListener.onLocationUpdated();
-                                }
+//                                if (mListener!=null){
+//                                    mListener.onLocationUpdated();
+//                                }
                                 preOrder = currentOrder;
                                 preOrderId = currentOrderId;
                             }
                             break;
                         }
-
                     }
 
                 }else {
@@ -272,14 +275,17 @@ import java.util.Random;
                                         }
                                     }
                                 }
-                                Intent intent=new Intent(context,TicketAndTracking.class);
-                                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                Intent i1 = new Intent(context, TicketAndTracking.class);
+                                i1.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                context.startActivity(i1);
+                                ((Activity)context).finish();
+                                ((Activity)context).overridePendingTransition(0, 0);
 
                                 preOrder = currentOrder;
                                 preOrderId = currentOrderId;
-                                if (mListener!=null){
-                                    mListener.onLocationUpdated();
-                                }
+//                                if (mListener!=null){
+//                                    mListener.onLocationUpdated();
+//                                }
 
                             }
                             break;
@@ -290,6 +296,7 @@ import java.util.Random;
                 e.printStackTrace();
             }
         }
+
 
 
 //        private void test() {
@@ -340,9 +347,15 @@ import java.util.Random;
 //                            }
 //
 //                        }
+//                        Intent i1 = new Intent(context, TicketAndTracking.class);
+//                        i1.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//                        context.startActivity(i1);
+//                        ((Activity)context).finish();
+//                        ((Activity)context).overridePendingTransition(0, 0);
+//
 //                        preOrder = currentOrder;
 //                        preOrderId = currentOrderId;
-//                        Log.i(TAG, "test: qqqqqqqqqqqqwwwwwwwwwwweeeeeeeeeerrrrrrrrrrrrrrr      "+position);
+//                        Log.i(TAG, "test:"+position);
 //
 //                    }
 //                    break;

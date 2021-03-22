@@ -227,4 +227,16 @@
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
     <string name="downloading">Downloading</string>
+
+
+
+    <string name="faretype"><font size="25"><bold>भाडाको प्रकार</bold></font></string>
+
+    <string name="Normal"><font size="25">सामान्य</font></string>
+    <string name="Places"><font size="25">ठाउँको आधारमा</font></string>
+    <string name="Price"><font size="25">मूल्यको आधारमा</font></string>
+
+
+    <string name="Update_Price"><font size="25">मूल्य अपडेट</font></string>
+    <string name="Card_Option"><font size="25">कार्ड विकल्प</font></string>
 </resources>
