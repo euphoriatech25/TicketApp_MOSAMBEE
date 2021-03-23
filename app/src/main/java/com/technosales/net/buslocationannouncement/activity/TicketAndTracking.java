@@ -69,6 +69,7 @@ import com.technosales.net.buslocationannouncement.APIToken.TokenManager;
 import com.technosales.net.buslocationannouncement.BuildConfig;
 import com.technosales.net.buslocationannouncement.R;
 import com.technosales.net.buslocationannouncement.mosambeesupport.M1CardHandlerMosambee;
+import com.technosales.net.buslocationannouncement.mosambeesupport.TestActivity;
 import com.technosales.net.buslocationannouncement.network.PassengerCountUpdate;
 import com.technosales.net.buslocationannouncement.pojo.ApiError;
 import com.technosales.net.buslocationannouncement.pojo.CallResponse;
@@ -115,7 +116,7 @@ import static com.technosales.net.buslocationannouncement.trackcar.MainFragment.
 import static com.technosales.net.buslocationannouncement.trackcar.MainFragment.KEY_URL;
 import static com.technosales.net.buslocationannouncement.utils.UtilStrings.USER_NUMBER;
 
-public class TicketAndTracking extends AppCompatActivity implements GetPricesFares.OnPriceUpdate, TrackingController.TrackingListener {
+public class TicketAndTracking extends AppCompatActivity implements GetPricesFares.OnPriceUpdate{
     private static final int PERMISSION_REQUEST_READ_PHONE_STATE = 1;
     private static final int PERMISSIONS_REQUEST_LOCATION = 2;
     private static final int ALARM_MANAGER_INTERVAL = 15000;
@@ -229,11 +230,7 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_ticket_and_tracking);
-//        deviceIDHelper = getIntent().getStringExtra(UtilStrings.DEVICE_ID);
-//        helperNameString = getIntent().getStringExtra(UtilStrings.NAME_HELPER);
-//        setHelper(deviceIDHelper,helperNameString);
 
-        /**/
 
         preferencesHelper = getSharedPreferences(UtilStrings.SHARED_PREFERENCES_HELPER, 0);
         preferences = getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0);
@@ -252,7 +249,7 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
 
         databaseHelper = new DatabaseHelper(this);
         trackingController = new TrackingController(this);
-        trackingController.setListener(this);
+
 //        trackingController.startCheck();
 
 
@@ -476,12 +473,9 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
         try {
             rHandler.removeCallbacks(rTicker);
         } catch (Exception ex) {
-
         }
 
-
         interValDataPush();
-        onLocationUpdated();
 
 //TODO
 //       priceListView.addOnScrollListener(new RecyclerView.OnScrollListener() {
@@ -519,14 +513,11 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
         List<RouteStationList> routeStationLists = new ArrayList<>();
         routeStationLists = databaseHelper.routeStationLists();
         int routeStationListSize = preferences.getInt(UtilStrings.ROUTE_LIST_SIZE, 0);
-
-
         for (int i = 0; i < routeStationListSize; i++) {
             double startLat = Double.parseDouble(preferences.getString(UtilStrings.LATITUDE, "0.0"));
             double startLng = Double.parseDouble(preferences.getString(UtilStrings.LONGITUDE, "0.0"));
             double endLat = Double.parseDouble(routeStationLists.get(i).station_lat);
             double endLng = Double.parseDouble(routeStationLists.get(i).station_lng);
-
             distance = GeneralUtils.calculateDistance(startLat, startLng, endLat, endLng);
             if (i == 0) {
                 nearest = distance;
@@ -534,12 +525,11 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
                 if (distance < nearest) {
                     nearest = distance;
                     orderPos = routeStationLists.get(i).station_order;
-                    gridLayoutManager.scrollToPositionWithOffset(orderPos - 1, 10);
+                    gridLayoutManager.scrollToPositionWithOffset(orderPos-1, 10);
+
                 }
             }
-
         }
-//        Log.i(TAG, "getNearestLocToTop: aamamsmsmss"+orderPos);
         updateTotalPassengerCount(orderPos);
     }
 
@@ -672,8 +662,9 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
                             startActivity(intent);
                             mainDrawer.closeDrawer();
                         } else if (drawerItem.equals(updateApp)) {
-                            UpdateLatestApp(link);
-
+//                            UpdateLatestApp(link);
+                            Intent intent = new Intent(TicketAndTracking.this, TestActivity.class);
+                            startActivity(intent);
                             mainDrawer.closeDrawer();
 
                         }
@@ -1514,13 +1505,13 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
         finish();
     }
 
-    @Override
-    public void onLocationUpdated() {
-        priceAdapterPrices = new PriceAdapterPrices(routeStationListsForInfinite, this, databaseHelper, printHandler);
-        gridLayoutManager = new GridLayoutManager(this, spanCount);
-        priceListView.setLayoutManager(gridLayoutManager);
-        getNearestLocToTop();
-    }
+//    @Override
+//    public void onLocationUpdated() {
+//        priceAdapterPrices = new PriceAdapterPrices(routeStationListsForInfinite, this, databaseHelper, printHandler);
+//        gridLayoutManager = new GridLayoutManager(this, spanCount);
+//        priceListView.setLayoutManager(gridLayoutManager);
+//        getNearestLocToTop();
+//    }
 
     private void updateTotalPassengerCount(int orderPos) {
 

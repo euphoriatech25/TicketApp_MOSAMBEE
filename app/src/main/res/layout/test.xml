@@ -3,17 +3,16 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:gravity="center">
-    <TextView
-        android:id="@+id/showLocation"
+    <Button
+        android:id="@+id/validate"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:hint="Location"
-        android:textSize="24sp" />
-    <Button
-        android:id="@+id/btnGetLocation"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Get Location" />
+        android:text="Validate CARD"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 </LinearLayout>

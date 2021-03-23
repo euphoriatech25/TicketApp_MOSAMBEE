@@ -961,11 +961,11 @@ public class PriceAdapterPrices extends RecyclerView.Adapter<PriceAdapterPrices.
 
     private void processingPayment(RouteStationList routeStationModelList, String price, int position) {
 
-        AlertDialog alertDialog = new AlertDialog.Builder(context).create();
-        alertDialog.setTitle("रु." + price + " " + nearestName + " - " + routeStationModelList.station_name);
-        alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "OK", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
+//        AlertDialog alertDialog = new AlertDialog.Builder(context).create();
+//        alertDialog.setTitle("रु." + price + " " + nearestName + " - " + routeStationModelList.station_name);
+//        alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "OK", new DialogInterface.OnClickListener() {
+//            @Override
+//            public void onClick(DialogInterface dialog, int which) {
                 helperId = preferencesHelper.getString(UtilStrings.ID_HELPER, "");
                 busName = preferences.getString(UtilStrings.DEVICE_NAME, "");
 
@@ -977,7 +977,7 @@ public class PriceAdapterPrices extends RecyclerView.Adapter<PriceAdapterPrices.
 
                 if (helperId.length() > 0) {
 
-                    dialog.dismiss();
+//                    dialog.dismiss();
                     total_tickets = preferences.getInt(UtilStrings.TOTAL_TICKETS, 0);
                     total_collections = preferences.getInt(UtilStrings.TOTAL_COLLECTIONS, 0);
                     total_collections_cash = preferences.getInt(UtilStrings.TOTAL_COLLECTIONS_BY_CASH, 0);
@@ -1096,15 +1096,15 @@ public class PriceAdapterPrices extends RecyclerView.Adapter<PriceAdapterPrices.
                     ((TicketAndTracking) context).helperName.setText("सहायक छान्नुहोस् ।");
                 }
 
-            }
-        });
-        alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "CANCEL", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-
-            }
-        });
-        alertDialog.show();
+//            }
+//        });
+//        alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "CANCEL", new DialogInterface.OnClickListener() {
+//            @Override
+//            public void onClick(DialogInterface dialog, int which) {
+//
+//            }
+//        });
+//        alertDialog.show();
     }
 
     @Override

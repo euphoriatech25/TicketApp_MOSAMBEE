@@ -7,6 +7,8 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.nfc.tech.MifareClassic;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -14,16 +16,27 @@ import android.os.RemoteException;
 import android.util.Base64;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.core.content.ContextCompat;
+
 import com.hornet.dateconverter.DateConverter;
 import com.hornet.dateconverter.Model;
+import com.morefun.yapi.ServiceResult;
+import com.morefun.yapi.card.mifare.M1CardHandler;
+import com.morefun.yapi.card.mifare.M1KeyTypeConstrants;
+import com.morefun.yapi.device.reader.icc.ICCSearchResult;
+import com.morefun.yapi.device.reader.icc.IccCardType;
+import com.morefun.yapi.device.reader.icc.IccReaderSlot;
+import com.morefun.yapi.engine.DeviceServiceEngine;
 import com.technosales.net.buslocationannouncement.APIToken.TokenManager;
 import com.technosales.net.buslocationannouncement.R;
+import com.technosales.net.buslocationannouncement.SDKManager;
 import com.technosales.net.buslocationannouncement.activity.CheckBalanceActivity;
 import com.technosales.net.buslocationannouncement.activity.HelperLogin;
 import com.technosales.net.buslocationannouncement.activity.ReIssueCard;
@@ -33,6 +46,7 @@ import com.technosales.net.buslocationannouncement.helper.DatabaseHelper;
 import com.technosales.net.buslocationannouncement.mosambeesupport.BeepLEDTest;
 import com.technosales.net.buslocationannouncement.mosambeesupport.M1CardHandlerMosambee;
 import com.technosales.net.buslocationannouncement.mosambeesupport.Printer;
+import com.technosales.net.buslocationannouncement.mosambeesupport.SearchCardOrCardReaderTest;
 import com.technosales.net.buslocationannouncement.pojo.BlockList;
 import com.technosales.net.buslocationannouncement.pojo.PassengerCountList;
 import com.technosales.net.buslocationannouncement.pojo.RouteStationList;
@@ -62,11 +76,15 @@ import static com.technosales.net.buslocationannouncement.utils.UtilStrings.CUST
 import static com.technosales.net.buslocationannouncement.utils.UtilStrings.FIRST_TRANSACTION_AMT;
 import static com.technosales.net.buslocationannouncement.utils.UtilStrings.FIRST_TRANSACTION_HASH;
 import static com.technosales.net.buslocationannouncement.utils.UtilStrings.FIRST_TRANSACTION_ID;
+import static com.technosales.net.buslocationannouncement.utils.UtilStrings.KEY_A;
+import static com.technosales.net.buslocationannouncement.utils.UtilStrings.KEY_B;
 import static com.technosales.net.buslocationannouncement.utils.UtilStrings.PAYMENT_CARD;
 import static com.technosales.net.buslocationannouncement.utils.UtilStrings.SECOND_TRANSACTION_AMT;
 import static com.technosales.net.buslocationannouncement.utils.UtilStrings.SECOND_TRANSACTION_HASH;
 import static com.technosales.net.buslocationannouncement.utils.UtilStrings.SECOND_TRANSACTION_ID;
 import static com.technosales.net.buslocationannouncement.utils.UtilStrings.SECRET_KEY;
+import static com.technosales.net.buslocationannouncement.utils.UtilStrings.SECTOR_CUSTOMER;
+import static com.technosales.net.buslocationannouncement.utils.UtilStrings.SECTOR_TRANSATION;
 import static com.technosales.net.buslocationannouncement.utils.UtilStrings.STATUS;
 import static com.technosales.net.buslocationannouncement.utils.UtilStrings.TOGETOFF;
 import static com.technosales.net.buslocationannouncement.utils.UtilStrings.TRANSACTION_TYPE_PAYMENT;
@@ -191,9 +209,9 @@ public class PayByCardActivity extends BaseActivity {
                     break;
 
                 case 404:
-                    Toast.makeText(PayByCardActivity.this, "Card is not authorized", Toast.LENGTH_SHORT).show();
-                    startActivity(new Intent(PayByCardActivity.this, TicketAndTracking.class));
-                    finish();
+//                    Toast.makeText(PayByCardActivity.this, "Card is not authorized", Toast.LENGTH_SHORT).show();
+//                    startActivity(new Intent(PayByCardActivity.this, TicketAndTracking.class));
+//                    finish();
                     break;
 
                 case 405:
@@ -289,6 +307,10 @@ public class PayByCardActivity extends BaseActivity {
                         @Override
                         public void run() {
                             currentAmount.setText(GeneralUtils.getUnicodeNumber(passengerAmt));
+                            currentAmount.setTextColor(ContextCompat.getColor(PayByCardActivity.this,R.color.greenbb));
+                            tv_cardNum.setTextColor(ContextCompat.getColor(PayByCardActivity.this,R.color.greenbb));
+                            tv_amount.setTextColor(ContextCompat.getColor(PayByCardActivity.this,R.color.greenbb));
+                            distance.setTextColor(ContextCompat.getColor(PayByCardActivity.this,R.color.greenbb));
                         }
                     });
                     getCustomerDetails();
@@ -347,13 +369,13 @@ public class PayByCardActivity extends BaseActivity {
         total_tickets = total_tickets + 1;
         total_collections = total_collections + Integer.parseInt(amount);
         total_collections_card = total_collections_card + Integer.parseInt(amount);
-
+        Log.i(TAG, "onCreate: "+toGetOff+nearest_name+station_name);
 
         station_name = getIntent().getStringExtra(UtilStrings.STATION_NAME);
         tokenManager = TokenManager.getInstance(getSharedPreferences("prefs", MODE_PRIVATE));
 
         if (amount != null) {
-            tv_amount.setText(amount);
+            tv_amount.setText(amount+"/-");
         }
 
         stopThread1 = false;
@@ -371,6 +393,8 @@ public class PayByCardActivity extends BaseActivity {
             isOnlineCheck = "false";
         }
 
+
+
         dialog = new Dialog(this);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
@@ -378,19 +402,19 @@ public class PayByCardActivity extends BaseActivity {
         dialog.setContentView(R.layout.customer_dialog);
 
         if (source != null && source.equalsIgnoreCase(UtilStrings.PLACE)) {
-            if(station_name==null){
-                   distance.setText( nearest_name);
-            }else {
-                distance.setText( nearest_name + "-" + station_name );
-            }
-
-        } else if (source != null && source.equalsIgnoreCase(UtilStrings.PRICE)) {
-
             if(toGetOff==null){
                 distance.setText( nearest_name);
             }else {
                 distance.setText( nearest_name + "-" + toGetOff );
             }
+
+        } else if (source != null && source.equalsIgnoreCase(UtilStrings.PRICE)) {
+            if(station_name==null){
+                distance.setText( nearest_name);
+            }else {
+                distance.setText( nearest_name + "-" + station_name );
+            }
+
         } else {
             distance.setText("सामान्य भुक्तानी प्रकार");
         }
@@ -541,16 +565,16 @@ public class PayByCardActivity extends BaseActivity {
                             String newTranNo = Base64.encodeToString("0".getBytes(), Base64.DEFAULT);
                             String[] newTranNoList = {newTranNo};
                             int[] newTranNoListBlock = {CUSTOMER_TRANSACTION_NO};
-//                            M1CardHandlerMosambee.write_miCard(handlerTransaction, newTranNoList, newTranNoListBlock, "OfflineTransactionNoUpdate");
-//                            startTransactionProcess(transactionHash);
-                            final Handler handler = new Handler();
-                            handler.postDelayed(new Runnable() {
-                                @Override
-                                public void run() {
-                                    M1CardHandlerMosambee.write_miCard(handlerTransaction, newTranNoList, newTranNoListBlock, "OfflineTransactionNoUpdate");
-                                    startTransactionProcess(latestTransHash);
-                                }
-                            }, 2000);
+                            M1CardHandlerMosambee.write_miCard(handlerTransaction, newTranNoList, newTranNoListBlock, "OfflineTransactionNoUpdate");
+                            startTransactionProcess(transactionHash);
+//                            final Handler handler = new Handler();
+//                            handler.postDelayed(new Runnable() {
+//                                @Override
+//                                public void run() {
+//                                    M1CardHandlerMosambee.write_miCard(handlerTransaction, newTranNoList, newTranNoListBlock, "OfflineTransactionNoUpdate");
+//                                    startTransactionProcess(latestTransHash);
+//                                }
+//                            }, 3000);
                         }
                     } else if (response.code() == 404) {
                         firstTransactionStatus = 404;
@@ -1069,6 +1093,7 @@ public class PayByCardActivity extends BaseActivity {
 
     private void price(String ticketId, String tranCurrentHash) {
         ///startProcess
+        Log.i(TAG, "onCreate: "+toGetOff+nearest_name+station_name);
 
 //        Log.i("TAG", "place: " + ticketId + " " + tranCurrentHash);
         if (helperId.length() != 0) {
@@ -1156,6 +1181,7 @@ public class PayByCardActivity extends BaseActivity {
     }
 
     private void place(String ticketId, String tranCurrentHash) {
+        Log.i(TAG, "onCreate: "+toGetOff+nearest_name+station_name);
 
 //        Log.i("TAG", "place: " + ticketId + " " + tranCurrentHash);
         ///startProcess

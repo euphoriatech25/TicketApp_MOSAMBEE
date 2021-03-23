@@ -168,6 +168,7 @@ public class M1CardHandlerMosambee {
     }
 
 
+
     public static void write_miCard(Handler handler, String[] customerUpdatedValue, int[] customerDetailsBlock, String fromWhichActivity) {
         DeviceServiceEngine mSDKManager;
         mSDKManager = SDKManager.getInstance().getDeviceServiceEngine();

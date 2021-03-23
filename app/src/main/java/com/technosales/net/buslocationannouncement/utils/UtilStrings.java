@@ -189,4 +189,6 @@ public class UtilStrings {
 
     public static final String TOTAL_PASSENGERS = "total_passengers";
     public static final String STATION_POS_PASSENGERS = "station_pos_passengers";
+    public static final String STATION_TO = "station_to";
+
 }

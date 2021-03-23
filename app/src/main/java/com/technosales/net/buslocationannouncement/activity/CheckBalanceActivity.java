@@ -137,6 +137,7 @@ public class CheckBalanceActivity extends BaseActivity {
                     break;
                     case 404:
                         Toast.makeText(CheckBalanceActivity.this, "Card is not authorized", Toast.LENGTH_SHORT).show();
+                        startActivity(new Intent(CheckBalanceActivity.this, TicketAndTracking.class));
                         finish();
                     break;
                 default:
@@ -598,5 +599,7 @@ public class CheckBalanceActivity extends BaseActivity {
     public void onBackPressed() {
         stopThread = true;
         super.onBackPressed();
+        startActivity(new Intent(CheckBalanceActivity.this, TicketAndTracking.class));
+        finish();
     }
 }
