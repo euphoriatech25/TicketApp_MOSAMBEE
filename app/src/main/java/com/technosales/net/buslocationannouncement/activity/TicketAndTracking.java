@@ -476,7 +476,23 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
         }
 
         interValDataPush();
+        rHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (databaseHelper.passengerCountLists().size() > 0) {
+                    PassengerCountUpdate.pushPassengerCount(TicketAndTracking.this, String.valueOf(preferences.getInt(UtilStrings.TOTAL_PASSENGERS, 0)));
+                }
+            }
+        },  20000);
 
+        rHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (databaseHelper.passengerCountLists().size() > 0) {
+                    BlockListCheck.getBlockList(TicketAndTracking.this);
+                }
+            }
+        },   80000);
 //TODO
 //       priceListView.addOnScrollListener(new RecyclerView.OnScrollListener() {
 //            @Override
@@ -637,12 +653,10 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
                             mainDrawer.closeDrawer();
 
                         } else if (drawerItem.equals(IssueCard)) {
-//                            if(acceptCallPermission()) {
                             boolean result = IssueProcess();
                             if (result) {
                             } else {
                             }
-                            mainDrawer.closeDrawer();
 
                         } else if (drawerItem.equals(checkBalance)) {
                             Intent intent = new Intent(TicketAndTracking.this, CheckBalanceActivity.class);
@@ -662,10 +676,10 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
                             startActivity(intent);
                             mainDrawer.closeDrawer();
                         } else if (drawerItem.equals(updateApp)) {
-//                            UpdateLatestApp(link);
-                            Intent intent = new Intent(TicketAndTracking.this, TestActivity.class);
-                            startActivity(intent);
-                            mainDrawer.closeDrawer();
+                            UpdateLatestApp(link);
+//                            Intent intent = new Intent(TicketAndTracking.this, TestActivity.class);
+//                            startActivity(intent);
+//                            mainDrawer.closeDrawer();
 
                         }
                         return true;
@@ -1437,23 +1451,7 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
                     databaseHelper.ticketInfoLists();
                 }
 
-                rHandler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (databaseHelper.passengerCountLists().size() > 0) {
-                            PassengerCountUpdate.pushPassengerCount(TicketAndTracking.this, String.valueOf(preferences.getInt(UtilStrings.TOTAL_PASSENGERS, 0)));
-                        }
-                    }
-                },  40000);
 
-                rHandler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (databaseHelper.passengerCountLists().size() > 0) {
-                            BlockListCheck.getBlockList(TicketAndTracking.this);
-                        }
-                    }
-                },   80000);
                 totalRemainingTickets.setText(GeneralUtils.getUnicodeNumber(String.valueOf(databaseHelper.listTickets().size())) + "\n" + GeneralUtils.getUnicodeNumber(String.valueOf(databaseHelper.remainingAmount())));
                 rHandler.postAtTime(rTicker, next);
             }

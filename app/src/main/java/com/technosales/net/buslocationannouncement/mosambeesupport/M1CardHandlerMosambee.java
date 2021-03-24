@@ -168,7 +168,50 @@ public class M1CardHandlerMosambee {
     }
 
 
+    public static void write_miCard() {
+        final DeviceServiceEngine mSDKManager;
+        mSDKManager = SDKManager.getInstance().getDeviceServiceEngine();
+        if (mSDKManager == null) {
+            Log.e("TAG", "ServiceEngine is Null");
+            return;
+        }
+        new SearchCardOrCardReaderTest(mSDKManager).searchRFCard(new String[]{IccCardType.M1CARD}, new  PayByCardActivity.OnSearchListener(){
+            @Override
+            public void onSearchResult(int retCode, Bundle bundle) {
+                if (ServiceResult.Success == retCode) {
+                    String cardType = bundle.getString(ICCSearchResult.CARDTYPE);
+                    if (IccCardType.M1CARD.equals(cardType)) {
+                        try {
+                            M1CardHandler m1CardHandler = mSDKManager.getM1CardHandler(mSDKManager.getIccCardReader(IccReaderSlot.RFSlOT));
+                            if (m1CardHandler == null) {
+                                return;
+                            }
+                            byte[] uid = new byte[4];
+                            int value = m1CardHandler.authority(M1KeyTypeConstrants.KEYTYPE_B, SECTOR_CUSTOMER, MifareClassic.KEY_DEFAULT, uid);
+                            int valueWrite1 = m1CardHandler.writeBlock(SECTOR_TRAILER_CUSTOMER_DETAILS, KEY_DEFAULT);
 
+                            int value1 = m1CardHandler.authority(M1KeyTypeConstrants.KEYTYPE_B, SECTOR_TRANSATION, MifareClassic.KEY_DEFAULT, uid);
+                            int valueWrite2 = m1CardHandler.writeBlock(SECTOR_TRAILER_TRANSACTION_NO, KEY_DEFAULT);
+
+                            int value2 = m1CardHandler.authority(M1KeyTypeConstrants.KEYTYPE_B, SECTOR_FIRST_TRANSATION, MifareClassic.KEY_DEFAULT, uid);
+                            int valueWrite3 = m1CardHandler.writeBlock(SECTOR_TRAILER_CUSTOMER_FIRST_TRANSACTION, KEY_DEFAULT);
+
+                            int value3 = m1CardHandler.authority(M1KeyTypeConstrants.KEYTYPE_B, SECTOR_SECOND_TRANSATION, MifareClassic.KEY_DEFAULT, uid);
+                            int valueWrite4 = m1CardHandler.writeBlock(SECTOR_TRAILER_CUSTOMER_SECOND_TRANSACTION, KEY_DEFAULT);
+
+                            Log.i(TAG, "onSearchResult: "+value+value1+value2+value3+"    "+"444");
+                              Log.i(TAG, "onSearchResult: "+valueWrite1+valueWrite4+valueWrite2+valueWrite3);
+
+
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                } else {
+                }
+            }
+        });
+    }
     public static void write_miCard(Handler handler, String[] customerUpdatedValue, int[] customerDetailsBlock, String fromWhichActivity) {
         DeviceServiceEngine mSDKManager;
         mSDKManager = SDKManager.getInstance().getDeviceServiceEngine();

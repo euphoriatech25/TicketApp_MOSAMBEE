@@ -234,11 +234,13 @@ public class CheckBalanceActivity extends BaseActivity {
                         String ticketId = deviceID.substring(deviceID.length() - 2) + dateTime + "" + valueOfTickets;
                         String referenceHash = null;
                         try {
+                            transactionHash = transactionHash.replace("\n", "");
                             referenceHash = Encrypt.encrypt(value1,transactionHash + ticketId + passenserId + amount);
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
-                        newHash = referenceHash.substring(referenceHash.length() - 9);
+                        newHash = referenceHash.substring(referenceHash.length() - 10);
+                        Log.i("TAG", "rechargeProcesswwwwwwwwwwwwww: "+newHash);
                         Map<String, Object> params = new HashMap<>();
                         params.put("helper_id", helperString);
                         params.put("ticket_id", ticketId);

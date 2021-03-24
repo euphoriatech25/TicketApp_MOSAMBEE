@@ -719,6 +719,29 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return routeStationLists;
     }
 
+
+    public List<RouteStationList> routeStationListsReverse() {
+        List<RouteStationList> routeStationLists = new ArrayList<>();
+        String sql ="SELECT * FROM " + ROUTE_STATION_TABLE+  " ORDER BY id DESC ";
+
+        Cursor c = getWritableDatabase().rawQuery(sql, null);
+        while (c.moveToNext()) {
+            RouteStationList routeStationList = new RouteStationList();
+            routeStationList.station_id = c.getString(c.getColumnIndex(STATION_ID));
+            routeStationList.station_order = c.getInt(c.getColumnIndex(STATION_ORDER));
+            routeStationList.station_name = c.getString(c.getColumnIndex(STATION_NAME));
+            routeStationList.station_name_eng = c.getString(c.getColumnIndex(STATION_NAME_ENG));
+            routeStationList.station_lat = c.getString(c.getColumnIndex(STATION_LAT));
+            routeStationList.station_lng = c.getString(c.getColumnIndex(STATION_LNG));
+            routeStationList.station_distance = c.getFloat(c.getColumnIndex(STATION_DISTANCE));
+
+            routeStationLists.add(routeStationList);
+//            Log.i("routeStation", routeStationList.station_name + "::" + routeStationList.station_id);
+        }
+        c.close();
+        return routeStationLists;
+    }
+
     public List<PassengerCountList> passengerCountLists() {
         List<PassengerCountList> passengerCountLists = new ArrayList<>();
 

@@ -38,7 +38,7 @@ public class TestActivity extends AppCompatActivity {
         validate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//           M1CardHandlerMosambee.write_miCard();
+           M1CardHandlerMosambee.write_miCard();
             }
         });
 

@@ -209,9 +209,9 @@ public class PayByCardActivity extends BaseActivity {
                     break;
 
                 case 404:
-//                    Toast.makeText(PayByCardActivity.this, "Card is not authorized", Toast.LENGTH_SHORT).show();
-//                    startActivity(new Intent(PayByCardActivity.this, TicketAndTracking.class));
-//                    finish();
+                    Toast.makeText(PayByCardActivity.this, "Card is not authorized", Toast.LENGTH_SHORT).show();
+                    startActivity(new Intent(PayByCardActivity.this, TicketAndTracking.class));
+                    finish();
                     break;
 
                 case 405:
@@ -314,8 +314,6 @@ public class PayByCardActivity extends BaseActivity {
                         }
                     });
                     getCustomerDetails();
-
-
                 } else {
                 }
             }
@@ -506,6 +504,7 @@ public class PayByCardActivity extends BaseActivity {
         String amt = null;  String hash = null;
         try {
             amt = Encrypt.encrypt(value1, finalCusFirstTransAmt);
+            finalCusFirstTransHash = finalCusFirstTransHash.replace("\n", "");
             hash=Encrypt.encrypt(value1,finalCusFirstTransHash + finalCusFirstTransId + passengerId + finalCusFirstTransAmt);
 
         } catch (Exception e) {
@@ -637,6 +636,7 @@ public class PayByCardActivity extends BaseActivity {
         String amt = null;
         try {
             amt = Encrypt.encrypt(value1, ticketSecondAmount);
+            transactionHash = transactionHash.replace("\n", "");
             newHash =  Encrypt.encrypt(value1,transactionHash + ticketSecondId + passengerId + ticketSecondAmount);
         } catch (Exception e) {
             e.printStackTrace();
@@ -730,13 +730,14 @@ public class PayByCardActivity extends BaseActivity {
 //                tranCurrentHash = BCrypt.withDefaults().hashToString(10, (transactionHashLatest + ticketId + passengerId + GeneralUtils.getUnicodeReverse(amount)).toCharArray());
 
             try {
-                Log.i(TAG, "startTransactionProcess:1111111111111111111111 "+transactionHashLatest + ticketId + passengerId + GeneralUtils.getUnicodeReverse(amount));
+                transactionHashLatest = transactionHashLatest.replace("\n", "");
                 tranCurrentHash = Encrypt.encrypt(value1,transactionHashLatest + ticketId + passengerId + GeneralUtils.getUnicodeReverse(amount));
             } catch (Exception e) {
                 e.printStackTrace();
             }
 
-            String newWritableHash = tranCurrentHash.substring(tranCurrentHash.length() - 9);
+            String newWritableHash = tranCurrentHash.substring(tranCurrentHash.length() - 10);
+            Log.i(TAG, "startTransactionProcess: "+newWritableHash);
                 reducedValue = Integer.valueOf(passengerAmt)-(Integer.valueOf(GeneralUtils.getUnicodeReverse(amount)));
 
 //            writing details to blocks
@@ -844,7 +845,7 @@ public class PayByCardActivity extends BaseActivity {
                         public void onClick(SweetAlertDialog sDialog) {
                             sDialog.dismiss();
                             sDialog.dismissWithAnimation();
-//                            startActivity(new Intent(PayByCardActivity.this, TicketAndTracking.class));
+                            startActivity(new Intent(PayByCardActivity.this, TicketAndTracking.class));
                             finish();
                         }
                     })
