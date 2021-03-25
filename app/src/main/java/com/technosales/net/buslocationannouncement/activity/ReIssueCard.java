@@ -65,7 +65,7 @@ public class ReIssueCard extends BaseActivity implements View.OnClickListener {
                 case 200:
                     if (msg.obj.toString().equalsIgnoreCase("Success")) {
                         try {
-                            sweetAlertDialog.dismissWithAnimation();
+                            sweetAlertDialog.dismiss();
                             Printer.Print(ReIssueCard.this, printData,handler);
                         } catch (RemoteException e) {
                             e.printStackTrace();

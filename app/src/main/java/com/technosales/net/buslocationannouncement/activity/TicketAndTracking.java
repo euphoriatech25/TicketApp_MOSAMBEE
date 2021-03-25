@@ -182,7 +182,7 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
             }
         }
     };
-
+   private boolean forward=true;
     private TrackingController trackingController;
     private int spanCount = 4;
     boolean changed=false;
@@ -303,12 +303,12 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
         }
         routeStationListsForInfinite = databaseHelper.routeStationLists();
 
+
         priceAdapterPrices = new PriceAdapterPrices(routeStationListsForInfinite, this, databaseHelper, printHandler);
         gridLayoutManager = new GridLayoutManager(this, spanCount);
         priceListView.setLayoutManager(gridLayoutManager);
         priceListView.setHasFixedSize(true);
 
-        getNearestLocToTop();
 
 
         priceLists = databaseHelper.priceLists(normalDiscountToggle.isOn());
@@ -514,13 +514,52 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
 //            }
 //        });
 
-//        for (int p = 0; p < passengerCountLists.size(); p++) {
-//            Log.i(TAG, "testingggggggggggggggggggggggg: "+passengerCountLists.get(p).toString());
-//
-//        }
+
+        forward = preferences.getBoolean(UtilStrings.FORWARD, true);
+
+        if(forward){
+            getNearestLocToTop();
+
+        }else {
+            Collections.reverse(routeStationListsForInfinite);
+            priceAdapterPrices = new PriceAdapterPrices(routeStationListsForInfinite, this, databaseHelper, printHandler);
+            gridLayoutManager = new GridLayoutManager(this, spanCount);
+            priceListView.setLayoutManager(gridLayoutManager);
+            priceListView.setHasFixedSize(true);
+            getNearestLocToButton();
+        }
+
+
+    }
+
+
+    private void getNearestLocToButton() {
+        float distance, nearest = 0;
+        int orderPos = 0;
+        List<RouteStationList> routeStationLists = new ArrayList<>();
+        routeStationLists = databaseHelper.routeStationLists();
+        int routeStationListSize = preferences.getInt(UtilStrings.ROUTE_LIST_SIZE, 0);
+        for (int i = 0; i < routeStationListSize; i++) {
+            double startLat = Double.parseDouble(preferences.getString(UtilStrings.LATITUDE, "0.0"));
+            double startLng = Double.parseDouble(preferences.getString(UtilStrings.LONGITUDE, "0.0"));
+            double endLat = Double.parseDouble(routeStationLists.get(i).station_lat);
+            double endLng = Double.parseDouble(routeStationLists.get(i).station_lng);
+            distance = GeneralUtils.calculateDistance(startLat, startLng, endLat, endLng);
+            if (i == 0) {
+                nearest = distance;
+            } else {
+                if (distance < nearest) {
+                    nearest = distance;
+                    orderPos = routeStationLists.get(i).station_order;
+                    Log.i(TAG, "getNearestLocToButton1111: "+ routeStationLists.get(i).station_name+"     "+orderPos +i);
 
 
 
+                }
+            }
+        }
+        gridLayoutManager.scrollToPositionWithOffset(routeStationListSize-orderPos, 10);
+        updateTotalPassengerCount(orderPos);
     }
 
     private void getNearestLocToTop() {
@@ -541,6 +580,7 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
                 if (distance < nearest) {
                     nearest = distance;
                     orderPos = routeStationLists.get(i).station_order;
+                    Log.i(TAG, "getNearestLocToButton1111: "+orderPos);
                     gridLayoutManager.scrollToPositionWithOffset(orderPos-1, 10);
 
                 }

@@ -149,7 +149,7 @@ public class PriceAdapterPlaces extends RecyclerView.Adapter<PriceAdapterPlaces.
                         }
                     }
                 }
-                Log.i("TAG", "sssssssssssssssssssssssssssssssss: "+orderPos);
+
                 nearest_name = routeStationLists.get(positionNew).station_name;
                 if (route_type == UtilStrings.NON_RING_ROAD) {
                     nearestDistance = routeStationLists.get(positionNew).station_distance;

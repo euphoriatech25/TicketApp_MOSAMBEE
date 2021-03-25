@@ -191,4 +191,7 @@ public class UtilStrings {
     public static final String STATION_POS_PASSENGERS = "station_pos_passengers";
     public static final String STATION_TO = "station_to";
 
+//    public static final double latTest=27.6579493;
+//    public static final double lngTest=85.3225493;
+
 }

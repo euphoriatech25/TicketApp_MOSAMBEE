@@ -106,7 +106,7 @@ public class PriceAdapterPrices extends RecyclerView.Adapter<PriceAdapterPrices.
         routeType = preferences.getInt(UtilStrings.ROUTE_TYPE, UtilStrings.NON_RING_ROAD);
         routeStationListSize = preferences.getInt(UtilStrings.ROUTE_LIST_SIZE, 0);
         total_passenger=  preferences.getInt(UtilStrings.TOTAL_PASSENGERS, 0);
-        Log.i("TAG", "onBindViewHolder: "+total_passenger);
+
         if (((TicketAndTracking) context).normalDiscountToggle.isOn()) {
             holder.routeStationItem.setTextColor(context.getResources().getColorStateList(R.color.discount_txt_color));
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
@@ -123,6 +123,7 @@ public class PriceAdapterPrices extends RecyclerView.Adapter<PriceAdapterPrices.
         for (int i = 0; i < routeStationListSize; i++) {
             double startLat = Double.parseDouble(preferences.getString(UtilStrings.LATITUDE, "0.0"));
             double startLng = Double.parseDouble(preferences.getString(UtilStrings.LONGITUDE, "0.0"));
+
             double endLat = Double.parseDouble(routeStationLists.get(i).station_lat);
             double endLng = Double.parseDouble(routeStationLists.get(i).station_lng);
             destination_latitude=endLat;
@@ -149,7 +150,8 @@ public class PriceAdapterPrices extends RecyclerView.Adapter<PriceAdapterPrices.
 //        Log.i("TAG", "onBindViewHolder: " + orderPos);
 
 
-        forward = true;
+        forward = preferences.getBoolean(UtilStrings.FORWARD, true);
+
         if (forward) {
             if (routeStationModelList.station_order <= orderPos) {
                 if (position == orderPos - 1) {
@@ -161,16 +163,67 @@ public class PriceAdapterPrices extends RecyclerView.Adapter<PriceAdapterPrices.
                 } else {
                     holder.routeStationItem.setTextColor(Color.parseColor("#ababab"));
                     holder.routeStationItem.setText(routeStationModelList.station_name);
+                    onHolderClick(holder, routeStationModelList,position);
+                }
+            }else {
+                if ((position == orderPos)) {
+                    holder.routeStationItem.setTextColor(Color.parseColor("#FFFFFF"));
+                    holder.routeStationItem.setBackgroundColor(Color.parseColor("#5393C0"));
+
+                    Bitmap icon = BitmapFactory.decodeResource(context.getResources(), R.drawable.bus);
+                    Bitmap smallIcon = GeneralUtils.getResizedBitmap(icon, 60);
+                    Drawable d = new BitmapDrawable(context.getResources(), smallIcon);
+
+                    holder.routeStationItem.setCompoundDrawablesWithIntrinsicBounds(null, null, d, null);
+                    holder.routeStationItem.setGravity(Gravity.CENTER);
+                    holder.routeStationItem.setText(routeStationModelList.station_name);
+                    onHolderClick(holder, routeStationModelList,position);
+                }else {
+                    holder.routeStationItem.setText(routeStationModelList.station_name);
+                    onHolderClick(holder, routeStationModelList,position);
                 }
             }
         } else {
+            if (routeStationModelList.station_order >= orderPos) {
+                if (routeStationModelList.station_order == orderPos) {
+                    Log.i("TAG", "onBindViewHolder: "+routeStationModelList.station_name);
+                    holder.routeStationItem.setTextColor(Color.parseColor("#c72893"));
+                    holder.routeStationItem.setBackgroundColor(Color.parseColor("#D0E9FA"));
+                    holder.routeStationItem.setPaintFlags(Paint.STRIKE_THRU_TEXT_FLAG | Paint.ANTI_ALIAS_FLAG);
+                    holder.routeStationItem.setText(routeStationModelList.station_name);
+                    holder.rl_route_station.setClickable(false);
+                } else {
+                    holder.routeStationItem.setTextColor(Color.parseColor("#ababab"));
+                    holder.routeStationItem.setText(routeStationModelList.station_name);
+                    onHolderClick(holder, routeStationModelList,position);
+                }
+            }else  if(routeStationModelList.station_order == orderPos-1){
+                holder.routeStationItem.setTextColor(Color.parseColor("#FFFFFF"));
+                holder.routeStationItem.setBackgroundColor(Color.parseColor("#5393C0"));
 
+                Bitmap icon = BitmapFactory.decodeResource(context.getResources(), R.drawable.bus);
+                Bitmap smallIcon = GeneralUtils.getResizedBitmap(icon, 60);
+                Drawable d = new BitmapDrawable(context.getResources(), smallIcon);
 
+                holder.routeStationItem.setCompoundDrawablesWithIntrinsicBounds(null, null, d, null);
+                holder.routeStationItem.setGravity(Gravity.CENTER);
+                holder.routeStationItem.setText(routeStationModelList.station_name);
+                onHolderClick(holder, routeStationModelList,position);
+            }else {
+                    holder.routeStationItem.setText(routeStationModelList.station_name);
+                     onHolderClick(holder, routeStationModelList,position);
+            }
         }
 
 
 
 
+
+
+
+        holder.setIsRecyclable(false);
+    }
+   public void onHolderClick(MyViewHolder holder, RouteStationList routeStationModelList,int position){
         holder.routeStationItem.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -186,7 +239,6 @@ public class PriceAdapterPrices extends RecyclerView.Adapter<PriceAdapterPrices.
                 float distance, nearest = 0;
                 totalDistance = 0;
 
-//                forward = false;
                 for (int i = 0; i < routeStationListSize; i++) {
                     double startLat = Double.parseDouble(preferences.getString(UtilStrings.LATITUDE, "0.0"));
                     double startLng = Double.parseDouble(preferences.getString(UtilStrings.LONGITUDE, "0.0"));
@@ -304,9 +356,6 @@ public class PriceAdapterPrices extends RecyclerView.Adapter<PriceAdapterPrices.
                 }).show();
             }
         });
-
-
-        holder.setIsRecyclable(false);
     }
 
     private void payByQR(RouteStationList routeStationModelList, String price, int position) {

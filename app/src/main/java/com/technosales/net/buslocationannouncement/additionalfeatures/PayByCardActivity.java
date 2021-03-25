@@ -450,6 +450,7 @@ public class PayByCardActivity extends BaseActivity {
                         public void run() {
                             if (!isFinishing()) {
                                 currentAmount.setText(GeneralUtils.getUnicodeNumber(String.valueOf(passengerAmt)));
+                                currentAmount.setTextColor(ContextCompat.getColor(PayByCardActivity.this,R.color.colorAccent));
                                 showRechargeError("तपाईंसँग पर्याप्त ब्यालेन्स छैन। कृपया रिचार्ज गर्नुहोस्।");
                             }
                         }
@@ -817,7 +818,7 @@ public class PayByCardActivity extends BaseActivity {
                         public void onClick(SweetAlertDialog sweetAlertDialog) {
                             sweetAlertDialog.dismiss();
                             sweetAlertDialog.dismissWithAnimation();
-//                            startActivity(new Intent(PayByCardActivity.this, TicketAndTracking.class));
+                            startActivity(new Intent(PayByCardActivity.this, TicketAndTracking.class));
                             finish();
                         }
                     })

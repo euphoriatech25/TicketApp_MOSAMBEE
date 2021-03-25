@@ -277,7 +277,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         contentValues.put(STATION_LNG, routeStationList.station_lng);
         contentValues.put(STATION_DISTANCE, routeStationList.station_distance);
         sqLiteDatabase.insert(ROUTE_STATION_TABLE, null, contentValues);
-        Log.i("routeStation", "" + routeStationList.station_name + ":" + routeStationList.station_distance);
+        Log.i("routeStation", "" + routeStationList.station_name + ":" + routeStationList.station_distance+"     "+routeStationList.station_lat+routeStationList.station_lng);
     }
 
     public void insertHelpers(ContentValues contentValues) {
