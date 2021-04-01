@@ -239,7 +239,7 @@ public class CheckBalanceActivity extends BaseActivity {
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
-                        newHash = referenceHash.substring(referenceHash.length() - 10);
+                        newHash = referenceHash.substring(referenceHash.length() - 9);
                         Log.i("TAG", "rechargeProcesswwwwwwwwwwwwww: "+newHash);
                         Map<String, Object> params = new HashMap<>();
                         params.put("helper_id", helperString);

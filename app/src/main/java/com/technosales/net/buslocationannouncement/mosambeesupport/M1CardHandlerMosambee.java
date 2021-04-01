@@ -660,6 +660,7 @@ public class M1CardHandlerMosambee {
             }
 
             int ret111 = m1CardHandler.authority(M1KeyTypeConstrants.KEYTYPE_A, SECTOR_TRANSATION, KEY_A, uid);
+
             if (ret111 == ServiceResult.Success) {
                 ret3 = m1CardHandler.readBlock((byte) blockList[3], customerTranNo);
                 if (customerTranNo != null) {

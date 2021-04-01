@@ -25,6 +25,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -323,37 +324,73 @@ public class PriceAdapterPrices extends RecyclerView.Adapter<PriceAdapterPrices.
                 }
 
 
-                String[] modes = {"Card", "Cash", "QR Code"};
-                // 0 card 1 cash 2 QR Code
-
+//                String[] modes = {"Card", "Cash", "QR Code"};
+//                // 0 card 1 cash 2 QR Code
+//                AlertDialog.Builder builder = new AlertDialog.Builder(context);
+//                builder.setTitle("Select a payment mode:");
+//                builder.setItems(modes, new DialogInterface.OnClickListener() {
+//
+//                    @Override
+//                    public void onClick(DialogInterface dialog, int item) {
+//                        dialog.dismiss();
+//
+//                        switch (item) {
+//
+//                            case 0: //card
+//                                payByCard(routeStationModelList, price, position);
+//                                dialog.dismiss();
+//
+//                                break;
+//                            case 1: //cash
+//                                payByCash(routeStationModelList, price, position);
+//                                dialog.dismiss();
+//
+//                                break;
+//                            case 2: //QR Code
+//                                payByQR(routeStationModelList, price, position);
+//                                dialog.dismiss();
+//
+//                                break;
+//                        }
+//                    }
+//                }).show();
                 AlertDialog.Builder builder = new AlertDialog.Builder(context);
-                builder.setTitle("Select a payment mode:");
-                builder.setItems(modes, new DialogInterface.OnClickListener() {
+                CardView payment_by_card, payment_by_cash, payment_by_qr;
+                final View customLayout
+                        = ((TicketAndTracking) context).getLayoutInflater()
+                        .inflate(
+                                R.layout.payment_option,
+                                null);
+                builder.setView(customLayout);
+                AlertDialog dialogAlert
+                        = builder.create();
 
+                payment_by_card = customLayout.findViewById(R.id.payment_by_card);
+                payment_by_cash = customLayout.findViewById(R.id.payment_by_cash);
+                payment_by_qr = customLayout.findViewById(R.id.payment_by_qr);
+
+                payment_by_card.setOnClickListener(new View.OnClickListener() {
                     @Override
-                    public void onClick(DialogInterface dialog, int item) {
-                        dialog.dismiss();
-
-                        switch (item) {
-
-                            case 0: //card
-                                payByCard(routeStationModelList, price, position);
-                                dialog.dismiss();
-
-                                break;
-                            case 1: //cash
-                                payByCash(routeStationModelList, price, position);
-                                dialog.dismiss();
-
-                                break;
-                            case 2: //QR Code
-                                payByQR(routeStationModelList, price, position);
-                                dialog.dismiss();
-
-                                break;
-                        }
+                    public void onClick(View v) {
+                        payByCard(routeStationModelList, price, position);
+                        dialogAlert.dismiss();
                     }
-                }).show();
+                });
+                payment_by_cash.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        payByCash(routeStationModelList, price, position);
+                        dialogAlert.dismiss();
+                    }
+                });
+                payment_by_qr.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        payByQR(routeStationModelList, price, position);
+                        dialogAlert.dismiss();
+                    }
+                });
+                dialogAlert.show();
             }
         });
     }

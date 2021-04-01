@@ -110,30 +110,69 @@ public class PriceAdapter extends RecyclerView.Adapter<PriceAdapter.MyViewHolder
     }
 
     private void showPaymentSelection(final Context context, final PriceList priceList, int position) {
-
-        String[] modes = {"Card", "Cash", "QR Code"};
-        // 0 card 1 cash 2 QR Code
-
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setTitle("Select a payment mode:");
-        builder.setItems(modes, new DialogInterface.OnClickListener() {
+//        builder.setTitle("Select a payment mode:");
+        CardView payment_by_card,payment_by_cash,payment_by_qr;
 
+        final View customLayout
+                = ((TicketAndTracking)context).getLayoutInflater()
+                .inflate(
+                        R.layout.payment_option,
+                        null);
+        builder.setView(customLayout);
+        AlertDialog dialog
+                = builder.create();
+        payment_by_card=customLayout.findViewById(R.id.payment_by_card);
+        payment_by_cash=customLayout.findViewById(R.id.payment_by_cash);
+        payment_by_qr=customLayout.findViewById(R.id.payment_by_qr);
+
+        payment_by_card.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(DialogInterface dialog, int item) {
+            public void onClick(View v) {
                 dialog.dismiss();
-                switch (item) {
-                    case 0: //card
-                        payByCard(priceList, position);
-                        break;
-                    case 1: //cash
-                        payByCash(priceList, position);
-                        break;
-                    case 2: //QR Code
-                        payByQR(priceList, position);
-                        break;
-                }
+                payByCard(priceList, position);
+
             }
-        }).show();
+        });
+        payment_by_cash.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+                payByCash(priceList, position);
+            }
+        });
+        payment_by_qr.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+                payByQR(priceList, position);
+            }
+        });
+        dialog.show();
+
+//        String[] modes = {"Card", "Cash", "QR Code"};
+//        // 0 card 1 cash 2 QR Code
+//
+//        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+//        builder.setTitle("Select a payment mode:");
+//        builder.setItems(modes, new DialogInterface.OnClickListener() {
+//
+//            @Override
+//            public void onClick(DialogInterface dialog, int item) {
+//                dialog.dismiss();
+//                switch (item) {
+//                    case 0: //card
+//                        payByCard(priceList, position);
+//                        break;
+//                    case 1: //cash
+//                        payByCash(priceList, position);
+//                        break;
+//                    case 2: //QR Code
+//                        payByQR(priceList, position);
+//                        break;
+//                }
+//            }
+//        }).show();
     }
 
     public void payByCash(final PriceList priceList, int position) {

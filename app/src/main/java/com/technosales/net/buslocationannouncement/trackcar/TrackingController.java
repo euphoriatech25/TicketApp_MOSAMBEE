@@ -140,6 +140,7 @@ public class TrackingController implements PositionProvider.PositionListener, Ne
     @Override
     public void onPositionUpdate(Position position) {
 
+        Log.i(TAG, "onPositionUpdate: ");
         try {
             StatusActivity.addMessage(context.getString(R.string.status_location_update));
             if (position != null) {
@@ -193,6 +194,8 @@ public class TrackingController implements PositionProvider.PositionListener, Ne
                             }
                             preOrder = currentOrder;
                             preOrderId = currentOrderId;
+
+                            Log.i(TAG, "onPositionUpdate: " + routeStationList.station_name);
 
                             Intent i1 = new Intent(context, TicketAndTracking.class);
                             i1.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

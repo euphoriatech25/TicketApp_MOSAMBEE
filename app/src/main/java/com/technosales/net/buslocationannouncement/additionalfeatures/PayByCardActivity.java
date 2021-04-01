@@ -231,6 +231,7 @@ public class PayByCardActivity extends BaseActivity {
                     overridePendingTransition(0, 0);
                     break;
                 case 505:
+                    recreate();
                     Toast.makeText(PayByCardActivity.this, msg.obj.toString(), Toast.LENGTH_SHORT).show();
                     break;
                 case 200:
@@ -737,7 +738,7 @@ public class PayByCardActivity extends BaseActivity {
                 e.printStackTrace();
             }
 
-            String newWritableHash = tranCurrentHash.substring(tranCurrentHash.length() - 10);
+            String newWritableHash = tranCurrentHash.substring(tranCurrentHash.length() - 9);
             Log.i(TAG, "startTransactionProcess: "+newWritableHash);
                 reducedValue = Integer.valueOf(passengerAmt)-(Integer.valueOf(GeneralUtils.getUnicodeReverse(amount)));
 

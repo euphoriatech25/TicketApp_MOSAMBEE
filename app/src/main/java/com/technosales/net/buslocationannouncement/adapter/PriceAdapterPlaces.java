@@ -261,42 +261,88 @@ public class PriceAdapterPlaces extends RecyclerView.Adapter<PriceAdapterPlaces.
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
 
-                        String[] modes = {"Card", "Cash", "QR Code"};
-                        // 0 card 1 cash 2 QR Code
-
+//                        String[] modes = {"Card", "Cash", "QR Code"};
+//                        // 0 card 1 cash 2 QR Code
+//
+//                        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+//                        builder.setTitle("Select a payment mode:");
+//                        builder.setItems(modes, new DialogInterface.OnClickListener() {
+//
+//                            @Override
+//                            public void onClick(DialogInterface dialog1, int item) {
+//
+//                                dialog1.dismiss();
+//
+//                                switch (item) {
+//
+//                                    case 0: //card
+//                                        payByCard(priceList, toGetOff, nearest_name, position);
+//                                        dialog1.dismiss();
+//                                        dialog.dismiss();
+//                                        orderPosPassenger.clear();
+//
+//                                        break;
+//                                    case 1: //cash
+//                                        payByCash(priceList, position);
+//                                        dialog1.dismiss();
+//                                        dialog.dismiss();
+//                                        orderPosPassenger.clear();
+//                                        break;
+//                                    case 2: //QR Code
+//                                        payByQR(priceList, toGetOff, nearest_name, position);
+//                                        dialog1.dismiss();
+//                                        dialog.dismiss();
+//                                        orderPosPassenger.clear();
+//                                        break;
+//                                }
+//                            }
+//                        }).show();
                         AlertDialog.Builder builder = new AlertDialog.Builder(context);
-                        builder.setTitle("Select a payment mode:");
-                        builder.setItems(modes, new DialogInterface.OnClickListener() {
+//                      builder.setTitle("Select a payment mode:");
+                        CardView payment_by_card, payment_by_cash, payment_by_qr;
+                        final View customLayout
+                                = ((TicketAndTracking) context).getLayoutInflater()
+                                .inflate(
+                                        R.layout.payment_option,
+                                        null);
+                        builder.setView(customLayout);
+                        AlertDialog dialogAlert
+                                = builder.create();
 
+                        payment_by_card = customLayout.findViewById(R.id.payment_by_card);
+                        payment_by_cash = customLayout.findViewById(R.id.payment_by_cash);
+                        payment_by_qr = customLayout.findViewById(R.id.payment_by_qr);
+
+                        payment_by_card.setOnClickListener(new View.OnClickListener() {
                             @Override
-                            public void onClick(DialogInterface dialog1, int item) {
+                            public void onClick(View v) {
+                                payByCard(priceList, toGetOff, nearest_name, position);
+                                dialog.dismiss();
+                                dialogAlert.dismiss();
+                                orderPosPassenger.clear();
 
-                                dialog1.dismiss();
-
-                                switch (item) {
-
-                                    case 0: //card
-                                        payByCard(priceList, toGetOff, nearest_name, position);
-                                        dialog1.dismiss();
-                                        dialog.dismiss();
-                                        orderPosPassenger.clear();
-
-                                        break;
-                                    case 1: //cash
-                                        payByCash(priceList, position);
-                                        dialog1.dismiss();
-                                        dialog.dismiss();
-                                        orderPosPassenger.clear();
-                                        break;
-                                    case 2: //QR Code
-                                        payByQR(priceList, toGetOff, nearest_name, position);
-                                        dialog1.dismiss();
-                                        dialog.dismiss();
-                                        orderPosPassenger.clear();
-                                        break;
-                                }
                             }
-                        }).show();
+                        });
+                        payment_by_cash.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                payByCash(priceList, position);
+                                dialog.dismiss();
+                                dialogAlert.dismiss();
+                                orderPosPassenger.clear();
+
+                            }
+                        });
+                        payment_by_qr.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                payByQR(priceList, toGetOff, nearest_name, position);
+                                dialog.dismiss();
+                                dialogAlert.dismiss();
+                                orderPosPassenger.clear();
+                            }
+                        });
+                        dialogAlert.show();
 
                         toGetOff = arrayAdapter.getItem(position);
                         if(test==0){
