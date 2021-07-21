@@ -5,7 +5,6 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
@@ -30,6 +29,7 @@ import com.hornet.dateconverter.Model;
 import com.technosales.net.buslocationannouncement.additionalfeatures.PayByCardActivity;
 import com.technosales.net.buslocationannouncement.R;
 import com.technosales.net.buslocationannouncement.activity.TicketAndTracking;
+import com.technosales.net.buslocationannouncement.additionalfeatures.QRScanner;
 import com.technosales.net.buslocationannouncement.helper.DatabaseHelper;
 import com.technosales.net.buslocationannouncement.mosambeesupport.BeepLEDTest;
 import com.technosales.net.buslocationannouncement.mosambeesupport.Printer;
@@ -38,7 +38,6 @@ import com.technosales.net.buslocationannouncement.pojo.PriceList;
 import com.technosales.net.buslocationannouncement.pojo.RouteStationList;
 import com.technosales.net.buslocationannouncement.pojo.TicketInfoList;
 import com.technosales.net.buslocationannouncement.utils.GeneralUtils;
-import com.technosales.net.buslocationannouncement.additionalfeatures.QrCodeScanner;
 import com.technosales.net.buslocationannouncement.utils.UtilStrings;
 
 import java.util.ArrayList;
@@ -526,7 +525,7 @@ public class PriceAdapterPlaces extends RecyclerView.Adapter<PriceAdapterPlaces.
                 ticketType = "full";
                 discountType = "(साधारण)";
             }
-            Intent intent = new Intent(context, QrCodeScanner.class);
+            Intent intent = new Intent(context, QRScanner.class);
             intent.putExtra(UtilStrings.PRICE_VALUE, priceList.price_value);
             intent.putExtra(UtilStrings.TOGETOFF, toGetOff);
             intent.putExtra(UtilStrings.NEAREST_PLACE, nearest_name);

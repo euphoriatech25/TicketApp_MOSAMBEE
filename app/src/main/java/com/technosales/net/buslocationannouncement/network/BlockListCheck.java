@@ -1,18 +1,15 @@
 package com.technosales.net.buslocationannouncement.network;
 
 import android.content.Context;
-import android.content.Intent;
 import android.widget.Toast;
 
 import com.technosales.net.buslocationannouncement.APIToken.TokenManager;
-import com.technosales.net.buslocationannouncement.R;
-import com.technosales.net.buslocationannouncement.activity.HelperLogin;
+import com.technosales.net.buslocationannouncement.helper.DatabaseHelper;
 import com.technosales.net.buslocationannouncement.pojo.ApiError;
+import com.technosales.net.buslocationannouncement.pojo.BlockList;
+import com.technosales.net.buslocationannouncement.pojo.BlockListModel;
 import com.technosales.net.buslocationannouncement.serverconn.RetrofitInterface;
 import com.technosales.net.buslocationannouncement.serverconn.ServerConfigNew;
-import com.technosales.net.buslocationannouncement.helper.DatabaseHelper;
-import com.technosales.net.buslocationannouncement.pojo.BlockListModel;
-import com.technosales.net.buslocationannouncement.pojo.BlockList;
 import com.technosales.net.buslocationannouncement.utils.GeneralUtils;
 
 import java.util.List;

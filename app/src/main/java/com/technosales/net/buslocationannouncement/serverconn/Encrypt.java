@@ -2,30 +2,15 @@ package com.technosales.net.buslocationannouncement.serverconn;
 
 import android.util.Base64;
 
-import org.apache.commons.codec.binary.Hex;
-
-import java.security.Key;
-import java.security.MessageDigest;
-import java.security.spec.AlgorithmParameterSpec;
-import java.util.Arrays;
-
-import javax.crypto.Cipher;
-import javax.crypto.Mac;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
-
-import android.util.Base64;
-import android.util.Log;
 import com.google.gson.Gson;
+
 import org.apache.commons.codec.binary.Hex;
-import java.io.UnsupportedEncodingException;
-import java.security.GeneralSecurityException;
+
 import java.security.Key;
 import java.util.Arrays;
+
 import javax.crypto.Cipher;
 import javax.crypto.Mac;
-import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 

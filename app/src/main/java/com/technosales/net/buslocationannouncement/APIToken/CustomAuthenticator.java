@@ -1,28 +1,19 @@
 package com.technosales.net.buslocationannouncement.APIToken;
 
 
-import android.accounts.AccountAuthenticatorResponse;
-import android.accounts.NetworkErrorException;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.Bundle;
 import android.util.Log;
-import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 
 import com.technosales.net.buslocationannouncement.TicketBusApp;
 import com.technosales.net.buslocationannouncement.activity.HelperLogin;
-import com.technosales.net.buslocationannouncement.activity.TicketAndTracking;
-import com.technosales.net.buslocationannouncement.additionalfeatures.PayByCardActivity;
 import com.technosales.net.buslocationannouncement.pojo.HelperModel;
 import com.technosales.net.buslocationannouncement.serverconn.RetrofitInterface;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.Authenticator;
@@ -35,8 +26,8 @@ import retrofit2.Call;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
+import static com.technosales.net.buslocationannouncement.utils.UtilStrings.BASE_URL;
 import static com.technosales.net.buslocationannouncement.utils.UtilStrings.SHARED_PREFERENCES_HELPER;
-import static com.technosales.net.buslocationannouncement.utils.UtilStrings.TICKET_URL_NEW;
 
 
 public class CustomAuthenticator implements Authenticator {
@@ -72,7 +63,7 @@ public class CustomAuthenticator implements Authenticator {
                             .build();
                     Retrofit.Builder builder = new Retrofit.Builder()
                             .client(client)
-                            .baseUrl(TICKET_URL_NEW)
+                            .baseUrl(BASE_URL)
                             .addConverterFactory(GsonConverterFactory.create());
 
                     Log.i("TAG", "authenticate: " + token.getRefreshToken());

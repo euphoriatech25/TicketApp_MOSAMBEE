@@ -1,7 +1,9 @@
 package com.technosales.net.buslocationannouncement.activity;
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.AlarmManager;
+import android.app.Dialog;
 import android.app.DownloadManager;
 import android.app.PendingIntent;
 import android.app.ProgressDialog;
@@ -18,15 +20,17 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
-import android.os.Looper;
+import android.os.PowerManager;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
+import android.speech.tts.TextToSpeech;
 import android.text.InputFilter;
 import android.text.InputType;
 import android.util.Log;
@@ -36,6 +40,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -48,7 +53,6 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -57,6 +61,7 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearSnapHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.github.angads25.toggle.BuildConfig;
 import com.github.angads25.toggle.LabeledSwitch;
 import com.github.angads25.toggle.interfaces.OnToggledListener;
 import com.mikepenz.materialdrawer.Drawer;
@@ -66,17 +71,24 @@ import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
 import com.mikepenz.materialdrawer.model.SecondaryDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 import com.technosales.net.buslocationannouncement.APIToken.TokenManager;
-import com.technosales.net.buslocationannouncement.BuildConfig;
 import com.technosales.net.buslocationannouncement.R;
-import com.technosales.net.buslocationannouncement.mosambeesupport.M1CardHandlerMosambee;
-import com.technosales.net.buslocationannouncement.mosambeesupport.TestActivity;
+import com.technosales.net.buslocationannouncement.base.BaseActivity;
 import com.technosales.net.buslocationannouncement.network.PassengerCountUpdate;
+import com.technosales.net.buslocationannouncement.pojo.AdvertiseList;
 import com.technosales.net.buslocationannouncement.pojo.ApiError;
 import com.technosales.net.buslocationannouncement.pojo.CallResponse;
 import com.technosales.net.buslocationannouncement.pojo.PassengerCountList;
 import com.technosales.net.buslocationannouncement.serverconn.RetrofitInterface;
 import com.technosales.net.buslocationannouncement.serverconn.ServerConfigNew;
 import com.technosales.net.buslocationannouncement.serverconn.ServiceConfig;
+import com.technosales.net.buslocationannouncement.trackcar.MainFragment;
+import com.technosales.net.buslocationannouncement.trackcar.NetworkManager;
+import com.technosales.net.buslocationannouncement.trackcar.Position;
+import com.technosales.net.buslocationannouncement.trackcar.PositionProvider;
+import com.technosales.net.buslocationannouncement.trackcar.ProtocolFormatter;
+import com.technosales.net.buslocationannouncement.trackcar.RequestManager;
+import com.technosales.net.buslocationannouncement.trackcar.StatusActivity;
+import com.technosales.net.buslocationannouncement.trackcar.TrackingController;
 import com.technosales.net.buslocationannouncement.userregistration.IssueCardActivity;
 import com.technosales.net.buslocationannouncement.adapter.PriceAdapter;
 import com.technosales.net.buslocationannouncement.adapter.PriceAdapterPlaces;
@@ -85,11 +97,9 @@ import com.technosales.net.buslocationannouncement.helper.DatabaseHelper;
 import com.technosales.net.buslocationannouncement.network.BlockListCheck;
 import com.technosales.net.buslocationannouncement.network.GetAdvertisements;
 import com.technosales.net.buslocationannouncement.network.GetPricesFares;
-import com.technosales.net.buslocationannouncement.network.TicketInfoDataPush;
 import com.technosales.net.buslocationannouncement.pojo.PriceList;
 import com.technosales.net.buslocationannouncement.pojo.RouteStationList;
 import com.technosales.net.buslocationannouncement.trackcar.AutostartReceiver;
-import com.technosales.net.buslocationannouncement.trackcar.TrackingController;
 import com.technosales.net.buslocationannouncement.trackcar.TrackingService;
 import com.technosales.net.buslocationannouncement.utils.GeneralUtils;
 import com.technosales.net.buslocationannouncement.utils.UtilStrings;
@@ -98,11 +108,12 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.NetworkInterface;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Random;
 
 import okhttp3.ResponseBody;
 import retrofit2.Call;
@@ -114,9 +125,10 @@ import static com.technosales.net.buslocationannouncement.trackcar.MainFragment.
 import static com.technosales.net.buslocationannouncement.trackcar.MainFragment.KEY_DISTANCE;
 import static com.technosales.net.buslocationannouncement.trackcar.MainFragment.KEY_INTERVAL;
 import static com.technosales.net.buslocationannouncement.trackcar.MainFragment.KEY_URL;
+import static com.technosales.net.buslocationannouncement.utils.UtilStrings.BROADCAST_ACTION;
 import static com.technosales.net.buslocationannouncement.utils.UtilStrings.USER_NUMBER;
 
-public class TicketAndTracking extends AppCompatActivity implements GetPricesFares.OnPriceUpdate {
+public class TicketAndTracking extends BaseActivity implements GetPricesFares.OnPriceUpdate {
     private static final int PERMISSION_REQUEST_READ_PHONE_STATE = 1;
     private static final int PERMISSIONS_REQUEST_LOCATION = 2;
     private static final int ALARM_MANAGER_INTERVAL = 15000;
@@ -170,7 +182,35 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
     private long downloadId;
     private boolean finishDownload = false;
     private AlertDialog progressDownloadDialog;
+
     private TextView percentageProgress;
+
+
+    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if(intent.getAction().equalsIgnoreCase(BROADCAST_ACTION)){
+//                update when location is changed
+                forward = preferences.getBoolean(UtilStrings.FORWARD, true);
+                if (forward) {
+                    getNearestLocToTop();
+
+                } else {
+                    Collections.reverse(routeStationListsForInfinite);
+                    priceAdapterPrices = new PriceAdapterPrices(routeStationListsForInfinite, TicketAndTracking.this, databaseHelper, printHandler);
+                    gridLayoutManager = new GridLayoutManager(TicketAndTracking.this, spanCount);
+                    priceListView.setLayoutManager(gridLayoutManager);
+                    priceListView.setHasFixedSize(true);
+                    getNearestLocToButton();
+                }
+
+                Toast.makeText(context, "I have reached a new location2", Toast.LENGTH_SHORT).show();
+            }
+        }
+    };
+
+
+
     private Handler printHandler = new Handler() {
         public void handleMessage(android.os.Message msg) {
             switch (msg.what) {
@@ -197,32 +237,7 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
         return returnedBitmap;
     }
 
-    public static String getMacAddr() {
-        try {
-            List<NetworkInterface> all = Collections.list(NetworkInterface.getNetworkInterfaces());
-            for (NetworkInterface nif : all) {
-                if (!nif.getName().equalsIgnoreCase("wlan0")) continue;
 
-                byte[] macBytes = nif.getHardwareAddress();
-                if (macBytes == null) {
-                    return "";
-                }
-
-                StringBuilder res1 = new StringBuilder();
-                for (byte b : macBytes) {
-                    res1.append(Integer.toHexString(b & 0xFF) + ":");
-                }
-
-                if (res1.length() > 0) {
-                    res1.deleteCharAt(res1.length() - 1);
-                }
-                return res1.toString();
-            }
-        } catch (Exception ex) {
-            //handle exception
-        }
-        return "";
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -480,14 +495,12 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
             }
         }, 20000);
 
-        rHandler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                if (databaseHelper.passengerCountLists().size() > 0) {
-                    BlockListCheck.getBlockList(TicketAndTracking.this);
-                }
-            }
-        }, 80000);
+        if(!helperId.equalsIgnoreCase("")){
+            BlockListCheck.getBlockList(TicketAndTracking.this);
+        }
+
+
+
 //TODO
 //       priceListView.addOnScrollListener(new RecyclerView.OnScrollListener() {
 //            @Override
@@ -510,21 +523,20 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
 //        });
 
 
-        forward = preferences.getBoolean(UtilStrings.FORWARD, true);
-
-        if (forward) {
-            getNearestLocToTop();
-
-        } else {
-            Collections.reverse(routeStationListsForInfinite);
-            priceAdapterPrices = new PriceAdapterPrices(routeStationListsForInfinite, this, databaseHelper, printHandler);
-            gridLayoutManager = new GridLayoutManager(this, spanCount);
-            priceListView.setLayoutManager(gridLayoutManager);
-            priceListView.setHasFixedSize(true);
-            getNearestLocToButton();
-        }
 
 
+        registerLocationChanged();
+
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(broadcastReceiver);
+    }
+
+    private void registerLocationChanged() {
+        registerReceiver(broadcastReceiver, new IntentFilter(BROADCAST_ACTION));
     }
 
 
@@ -574,7 +586,6 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
                 if (distance < nearest) {
                     nearest = distance;
                     orderPos = routeStationLists.get(i).station_order;
-                    Log.i(TAG, "getNearestLocToButton1111: " + orderPos);
                     gridLayoutManager.scrollToPositionWithOffset(orderPos - 1, 10);
 
                 }
@@ -628,8 +639,6 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
         final SecondaryDrawerItem CardReissue = new SecondaryDrawerItem().withIdentifier(8).withName("Card Reissue");
 
         final PrimaryDrawerItem checkBalance = new PrimaryDrawerItem().withName("Check Balance");
-        final PrimaryDrawerItem CardRehash = new PrimaryDrawerItem().withName("Card Rehash");
-
         final PrimaryDrawerItem updateApp = new PrimaryDrawerItem().withName("Update App");
 
         Toolbar toolbar = new Toolbar(this);
@@ -679,11 +688,25 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
                             recreate();
                             mainDrawer.closeDrawer();
 
-                        } else if (drawerItem.equals(UpdatePrice)) {
+                        }
+                        else if (drawerItem.equals(UpdatePrice)) {
+                            Dialog dialog;
+                            ImageButton cancel_dialog;
+                            dialog = new Dialog(TicketAndTracking.this);
+                            dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+                            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+                            dialog.setCancelable(false);
+                            dialog.setContentView(R.layout.customer_dialog);
+                            cancel_dialog = dialog.findViewById(R.id.cancel_dialog);
+                            cancel_dialog.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    dialog.dismiss();
+                                }
+                            });
+                            dialog.show();
                             new GetPricesFares(TicketAndTracking.this, TicketAndTracking.this)
-                                    .getFares(preferences.getString(UtilStrings.DEVICE_ID, ""), getMacAddr(),
-                                            true);
-
+                                    .getFares(preferences.getString(UtilStrings.ROUTE_ID, ""), TicketAndTracking.this, dialog, true);
                             mainDrawer.closeDrawer();
 
                         } else if (drawerItem.equals(IssueCard)) {
@@ -695,6 +718,7 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
                         } else if (drawerItem.equals(checkBalance)) {
                             Intent intent = new Intent(TicketAndTracking.this, CheckBalanceActivity.class);
                             startActivity(intent);
+                            finish();
                             mainDrawer.closeDrawer();
 
                         } else if (drawerItem.equals(CardBlock)) {
@@ -711,9 +735,8 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
                             mainDrawer.closeDrawer();
                         } else if (drawerItem.equals(updateApp)) {
                             UpdateLatestApp(link);
-//                            Intent intent = new Intent(TicketAndTracking.this, TestActivity.class);
-//                            startActivity(intent);
-//                            mainDrawer.closeDrawer();
+//                            RFCardReadWrite.write_miCard(handler,BaseActivity.getIrfreader());
+
 
                         }
                         return true;
@@ -764,6 +787,7 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
                 public void onClick(View v) {
                     Intent intent = new Intent(TicketAndTracking.this, HelperLogin.class);
                     startActivity(intent);
+                    finish();
                 }
             });
             helper_login.setVisibility(View.VISIBLE);
@@ -833,6 +857,7 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
             public void onClick(View v) {
                 Intent intent = new Intent(TicketAndTracking.this, HelperLogin.class);
                 startActivity(intent);
+                finish();
             }
         });
     }
@@ -1048,15 +1073,17 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 progressDialog.dismiss();
-                if (response.code() == 200) {
+                if (response.isSuccessful()) {
                     Toast.makeText(TicketAndTracking.this, "Successfully blocked", Toast.LENGTH_SHORT).show();
                     progressDialog.dismiss();
                 } else if (response.code() == 404) {
-                    Toast.makeText(TicketAndTracking.this, "Card Not Found", Toast.LENGTH_SHORT).show();
+                    GeneralUtils.handleErrors(response.errorBody(),TicketAndTracking.this);
                     progressDialog.dismiss();
                 } else if (response.code() == 401) {
                     startActivity(new Intent(TicketAndTracking.this, HelperLogin.class));
                     finish();
+                } else {
+                    Toast.makeText(TicketAndTracking.this, "something went wrong", Toast.LENGTH_SHORT).show();
                 }
 
             }
@@ -1109,32 +1136,43 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
                 okay.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
+                        if(!helperId.equalsIgnoreCase("")) {
+                            if (GeneralUtils.isNetworkAvailable(TicketAndTracking.this)) {
+                                if(numberInput.getText().toString().length()==10) {
+                                    RetrofitInterface post = ServiceConfig.createServiceWithAuth(RetrofitInterface.class);
+                                    Call<CallResponse.GetServerNumber> call = post.getServerNumber();
+                                    call.enqueue(new Callback<CallResponse.GetServerNumber>() {
+                                        @Override
+                                        public void onResponse(Call<CallResponse.GetServerNumber> call, Response<CallResponse.GetServerNumber> response) {
+                                            if (response.isSuccessful()) {
+                                                CallResponse.GetServerNumber callResponse = response.body();
+                                                if (callResponse != null) {
+                                                    SharedPreferences sharedPreferences = getSharedPreferences("User_NUM", MODE_PRIVATE);
+                                                    SharedPreferences.Editor myEdit = sharedPreferences.edit();
+                                                    myEdit.putString("userNum", numberInput.getText().toString());
+                                                    myEdit.apply();
+                                                    getCallDetails(numberInput.getText().toString(), callResponse.getData().getServerNumber(), mAlertDialog);
+                                                }
+                                            } else {
+                                                GeneralUtils.handleErrors(response.errorBody(), TicketAndTracking.this);
+                                            }
 
-                        if (GeneralUtils.isNetworkAvailable(TicketAndTracking.this)) {
-                            RetrofitInterface post = ServiceConfig.createServiceWithAuth(RetrofitInterface.class);
-                            Call<CallResponse.GetServerNumber> call = post.getServerNumber();
-                            call.enqueue(new Callback<CallResponse.GetServerNumber>() {
-                                @Override
-                                public void onResponse(Call<CallResponse.GetServerNumber> call, Response<CallResponse.GetServerNumber> response) {
-                                    CallResponse.GetServerNumber callResponse = response.body();
-                                    if (callResponse != null) {
-                                        SharedPreferences sharedPreferences = getSharedPreferences("User_NUM", MODE_PRIVATE);
-                                        SharedPreferences.Editor myEdit = sharedPreferences.edit();
-                                        myEdit.putString("userNum", numberInput.getText().toString());
-                                        myEdit.apply();
-                                        getCallDetails(numberInput.getText().toString(), callResponse.getData().getServerNumber(), mAlertDialog);
-                                    }
-                                }
+                                        }
 
-                                @Override
-                                public void onFailure(Call<CallResponse.GetServerNumber> call, Throwable t) {
-                                    Log.i("TAG", "onResponse: Failed" + t.getLocalizedMessage());
+                                        @Override
+                                        public void onFailure(Call<CallResponse.GetServerNumber> call, Throwable t) {
+                                            Log.i("TAG", "onResponse: Failed" + t.getLocalizedMessage());
+                                        }
+                                    });
+                                }else {
+                                    Toast.makeText(TicketAndTracking.this, getString(R.string.phone_digit_check), Toast.LENGTH_SHORT).show();
                                 }
-                            });
-                        } else {
-                            Toast.makeText(TicketAndTracking.this, "Check your network connection", Toast.LENGTH_SHORT).show();
+                            } else {
+                                Toast.makeText(TicketAndTracking.this, getString(R.string.check_your_internet), Toast.LENGTH_SHORT).show();
+                            }
+                        }else {
+                            Toast.makeText(TicketAndTracking.this, getString(R.string.helperLogin), Toast.LENGTH_SHORT).show();
                         }
-
                     }
                 });
             }
@@ -1170,7 +1208,7 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
             @Override
             public void onClick(View view) {
                 ProgressDialog pClick = new ProgressDialog(TicketAndTracking.this); //Your Activity.this
-                pClick.setMessage("कृपया पर्खनुहोस्...");
+                pClick.setMessage(getString(R.string.please_wait));
                 pClick.setCancelable(true);
                 pClick.show();
                 getNumberFromServer(userNum, serverNum, pClick, mAlertDialog1, mAlertDialog);
@@ -1207,12 +1245,12 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
                     pClick.dismiss();
                     alertDialog1.dismiss();
                     mAlertDialog1.dismiss();
-                    handleErrors(response.errorBody());
+                    GeneralUtils.handleErrors(response.errorBody(),TicketAndTracking.this);
                 } else if (response.code() == 403) {
                     pClick.dismiss();
                     alertDialog1.dismiss();
                     mAlertDialog1.dismiss();
-                    handleErrors(response.errorBody());
+                    GeneralUtils.handleErrors(response.errorBody(),TicketAndTracking.this);
                 } else {
                     alertDialog1.dismiss();
                     mAlertDialog1.dismiss();
@@ -1228,21 +1266,7 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
         });
     }
 
-    private void handleErrors(ResponseBody responseBody) {
-        ApiError apiErrors = GeneralUtils.convertErrors(responseBody);
 
-        if (responseBody != null) {
-            for (Map.Entry<String, List<String>> error : apiErrors.getErrors().entrySet()) {
-                if (error.getKey().equals("message")) {
-                    Toast.makeText(this, error.getValue().get(0), Toast.LENGTH_SHORT).show();
-                } else {
-                }
-            }
-        } else {
-            Toast.makeText(this, "something went wrong", Toast.LENGTH_SHORT).show();
-        }
-
-    }
 
     private void setMode(int modeType, int spanCount, String modeStr) {
         preferences.edit().putInt(UtilStrings.MODE, modeType).apply();
@@ -1479,11 +1503,10 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
 
                 totalTickets = preferences.getInt(UtilStrings.TOTAL_TICKETS, 0);
                 if (totalTickets != preferences.getInt(UtilStrings.SENT_TICKET, 0))
-                    TicketInfoDataPush.pushBusData(TicketAndTracking.this, totalTickets, totalCollections);
 
-                if (databaseHelper.listTickets().size() > 0) {
-                    databaseHelper.ticketInfoLists();
-                }
+                    if (databaseHelper.listTickets().size() > 0) {
+                        databaseHelper.ticketInfoLists();
+                    }
 
 
                 totalRemainingTickets.setText(GeneralUtils.getUnicodeNumber(String.valueOf(databaseHelper.listTickets().size())) + "\n" + GeneralUtils.getUnicodeNumber(String.valueOf(databaseHelper.remainingAmount())));
@@ -1533,17 +1556,20 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
 
     @Override
     public void onPriceUpdate() {
-        startActivity(new Intent(this, TicketAndTracking.class));
-        finish();
+        Activity activity=new TicketAndTracking();
+        if (Build.VERSION.SDK_INT >= 11) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    recreate();
+                }
+            });
+        } else {
+            activity.finish();
+            activity.startActivity(activity.getIntent());
+        }
     }
 
-//    @Override
-//    public void onLocationUpdated() {
-//        priceAdapterPrices = new PriceAdapterPrices(routeStationListsForInfinite, this, databaseHelper, printHandler);
-//        gridLayoutManager = new GridLayoutManager(this, spanCount);
-//        priceListView.setLayoutManager(gridLayoutManager);
-//        getNearestLocToTop();
-//    }
 
     private void updateTotalPassengerCount(int orderPos) {
 
@@ -1561,4 +1587,5 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
             }
         }
     }
+
 }

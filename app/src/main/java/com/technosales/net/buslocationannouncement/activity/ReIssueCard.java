@@ -1,5 +1,6 @@
 package com.technosales.net.buslocationannouncement.activity;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -22,6 +23,7 @@ import com.technosales.net.buslocationannouncement.R;
 import com.technosales.net.buslocationannouncement.mosambeesupport.BeepLEDTest;
 import com.technosales.net.buslocationannouncement.mosambeesupport.M1CardHandlerMosambee;
 import com.technosales.net.buslocationannouncement.mosambeesupport.Printer;
+import com.technosales.net.buslocationannouncement.pojo.ApiError;
 import com.technosales.net.buslocationannouncement.serverconn.RetrofitInterface;
 import com.technosales.net.buslocationannouncement.serverconn.ServerConfigNew;
 import com.technosales.net.buslocationannouncement.base.BaseActivity;
@@ -31,7 +33,11 @@ import com.technosales.net.buslocationannouncement.userregistration.IssueCardAct
 import com.technosales.net.buslocationannouncement.utils.GeneralUtils;
 import com.technosales.net.buslocationannouncement.utils.UtilStrings;
 
+import java.util.List;
+import java.util.Map;
+
 import cn.pedant.SweetAlert.SweetAlertDialog;
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -56,6 +62,7 @@ public class ReIssueCard extends BaseActivity implements View.OnClickListener {
     private TokenManager tokenManager;
     private SharedPreferences preferences;
     private String printData;
+
     private Handler handler = new Handler() {
         public void handleMessage(android.os.Message msg) {
             switch (msg.what) {
@@ -64,8 +71,9 @@ public class ReIssueCard extends BaseActivity implements View.OnClickListener {
                     break;
                 case 200:
                     if (msg.obj.toString().equalsIgnoreCase("Success")) {
+                        sweetAlertDialog.dismiss();
                         try {
-                            sweetAlertDialog.dismiss();
+                            BeepLEDTest.beepSuccess();
                             Printer.Print(ReIssueCard.this, printData,handler);
                         } catch (RemoteException e) {
                             e.printStackTrace();
@@ -76,9 +84,14 @@ public class ReIssueCard extends BaseActivity implements View.OnClickListener {
                     }
                     break;
                 case 505:
-
                     Toast.makeText(ReIssueCard.this, msg.obj.toString(), Toast.LENGTH_SHORT).show();
-                 finish();
+                    startActivity(new Intent(ReIssueCard.this, TicketAndTracking.class));
+                    finish();
+                    break;
+                case 404:
+                    recreate();
+                    Toast.makeText(ReIssueCard.this, msg.obj.toString(), Toast.LENGTH_SHORT).show();
+
                     break;
                 default:
                     break;
@@ -90,7 +103,7 @@ public class ReIssueCard extends BaseActivity implements View.OnClickListener {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.reissue_card_layout);
-        setUpToolbar("कार्ड पुनः जारी गर्नुहोस् |", true);
+        setUpToolbar("कार्ड पुनः जारी", true);
         btn_cancel = findViewById(R.id.btn_cancel);
         customer_mob_no = findViewById(R.id.customer_mob_no);
         databaseHelper = new DatabaseHelper(this);
@@ -103,7 +116,7 @@ public class ReIssueCard extends BaseActivity implements View.OnClickListener {
         tokenManager = TokenManager.getInstance(getSharedPreferences("prefs", MODE_PRIVATE));
         stopThread = false;
         int[] value = {};
-        M1CardHandlerMosambee.read_miCard(handler, value, "ReIssueCard");
+        M1CardHandlerMosambee.read_miCard(handler, value,"ReIssueCard");
 
         btn_submit.setOnClickListener(this);
         btn_cancel.setOnClickListener(this);
@@ -122,6 +135,7 @@ public class ReIssueCard extends BaseActivity implements View.OnClickListener {
                     } catch (RemoteException e) {
                         e.printStackTrace();
                     }
+
                     customer_card_no = toString;
                     card_num.setText(toString);
                 }
@@ -153,6 +167,8 @@ public class ReIssueCard extends BaseActivity implements View.OnClickListener {
     public void onBackPressed() {
         stopThread = true;
         super.onBackPressed();
+        startActivity(new Intent(this,TicketAndTracking.class));
+        finish();
     }
 
     @Override
@@ -168,7 +184,7 @@ public class ReIssueCard extends BaseActivity implements View.OnClickListener {
         call.enqueue(new Callback<ReIssueCardResponse>() {
             @Override
             public void onResponse(Call<ReIssueCardResponse> call, Response<ReIssueCardResponse> response) {
-                if (response.code() == 200) {
+                if (response.isSuccessful()) {
                     reIssueCardResponse = response.body();
 
                     String id = String.valueOf(reIssueCardResponse.getData().getCard().getId());
@@ -180,7 +196,7 @@ public class ReIssueCard extends BaseActivity implements View.OnClickListener {
                     showCardReadLayout(id, amount, referenceHash);
                 } else if (response.code() == 404) {
                     progressBar.setVisibility(View.GONE);
-                    Toast.makeText(ReIssueCard.this, "Mobile number Not Found ", Toast.LENGTH_SHORT).show();
+                    handleError(ReIssueCard.this,response.errorBody());
                 } else if (response.code() == 401) {
                     startActivity(new Intent(ReIssueCard.this, HelperLogin.class));
                     finish();
@@ -214,9 +230,23 @@ public class ReIssueCard extends BaseActivity implements View.OnClickListener {
 
                 String[] customerDetails = {customerId, customerAmt, customerHash, customerTranNo};
                 int[] customerDetailsBlock = {CUSTOMERID, CUSTOMER_AMT, CUSTOMER_HASH, CUSTOMER_TRANSACTION_NO};
-                M1CardHandlerMosambee.write_miCard(handler, customerDetails, customerDetailsBlock, "ReIssueCard-UpdateCard");
+                M1CardHandlerMosambee.write_miCard(handler, customerDetails, customerDetailsBlock,"ReIssueCard-UpdateCard");
             }
         }).show();
+    }
+    private static void handleError(Context context, ResponseBody errorBody) {
+        ApiError apiErrors = GeneralUtils.convertErrors(errorBody);
+
+        if (errorBody != null) {
+            for (Map.Entry<String, List<String>> error : apiErrors.getErrors().entrySet()) {
+                if (error.getKey().equals("message")) {
+                    Toast.makeText(context, error.getValue().get(0), Toast.LENGTH_SHORT).show();
+
+                }
+            }
+        } else {
+            Toast.makeText(context, "something went wrong", Toast.LENGTH_SHORT).show();
+        }
     }
 
 
@@ -239,9 +269,8 @@ public class ReIssueCard extends BaseActivity implements View.OnClickListener {
 
             case R.id.btn_cancel:
                 startActivity(new Intent(ReIssueCard.this, TicketAndTracking.class));
+                finish();
                 break;
         }
     }
-
-
 }

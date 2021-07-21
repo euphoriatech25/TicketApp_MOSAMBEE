@@ -17,7 +17,7 @@ import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-import static com.technosales.net.buslocationannouncement.utils.UtilStrings.TICKET_URL_NEW;
+import static com.technosales.net.buslocationannouncement.utils.UtilStrings.BASE_URL;
 
 public class ServerConfigNew {
 
@@ -32,7 +32,7 @@ public class ServerConfigNew {
                     .setLevel(HttpLoggingInterceptor.Level.BODY);
 
     private static Retrofit.Builder builder = new Retrofit.Builder()
-            .baseUrl(TICKET_URL_NEW)
+            .baseUrl(BASE_URL)
             .addConverterFactory(GsonConverterFactory.create());
 
     private static Retrofit retrofit = builder.client(httpClient.build()).build();
@@ -73,7 +73,7 @@ public class ServerConfigNew {
                 }).authenticator(CustomAuthenticator.getInstance(tokenManager)).build();
                 Retrofit.Builder builder = new Retrofit.Builder()
                 .client(client)
-                .baseUrl(TICKET_URL_NEW)
+                .baseUrl(BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create());
 
         Retrofit retrofit = builder.build();

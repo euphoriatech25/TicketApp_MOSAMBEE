@@ -15,8 +15,6 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 import static com.technosales.net.buslocationannouncement.utils.UtilStrings.CALL_REGISTER_CHECK;
-import static com.technosales.net.buslocationannouncement.utils.UtilStrings.TICKET_URL;
-import static com.technosales.net.buslocationannouncement.utils.UtilStrings.TICKET_URL_NEW;
 
 public class ServiceConfig {
 
@@ -72,7 +70,7 @@ public class ServiceConfig {
                 }).build();
         Retrofit.Builder builder = new Retrofit.Builder()
                 .client(client)
-                .baseUrl("http://202.52.240.148:8092/callserver/public/api/")
+                .baseUrl("http://202.52.240.148:8092/callserver/api/")
                 .addConverterFactory(GsonConverterFactory.create());
 
         Retrofit retrofit = builder.build();

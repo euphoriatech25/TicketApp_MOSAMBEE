@@ -9,22 +9,22 @@ public class TokenManager {
     private SharedPreferences prefs;
     private SharedPreferences.Editor editor;
 
-    private static com.technosales.net.buslocationannouncement.APIToken.TokenManager INSTANCE = null;
+    private static TokenManager INSTANCE = null;
 
     private TokenManager(SharedPreferences prefs){
         this.prefs = prefs;
         this.editor = prefs.edit();
     }
 
-    public static synchronized com.technosales.net.buslocationannouncement.APIToken.TokenManager getInstance(SharedPreferences prefs){
+    public static synchronized TokenManager getInstance(SharedPreferences prefs){
         if(INSTANCE == null){
-            INSTANCE = new com.technosales.net.buslocationannouncement.APIToken.TokenManager(prefs);
+            INSTANCE = new TokenManager(prefs);
         }
         return INSTANCE;
     }
 
     public void saveToken( HelperModel.Token token){
-        Log.i("TAG", "sdfvgzsdgvxdfgnsejtkfgnkjdfdhnutkn: "+token);
+
         editor.putString("ACCESS_TOKEN", token.getAccessToken()).commit();
         editor.putString("REFRESH_TOKEN", token.getRefreshToken()).commit();
     }
@@ -35,7 +35,7 @@ public class TokenManager {
         editor.remove("REFRESH_TOKEN").commit();
     }
 
-    public  HelperModel.Token getToken(){
+    public HelperModel.Token getToken(){
         HelperModel.Token token = new  HelperModel.Token();
         token.setAccessToken(prefs.getString("ACCESS_TOKEN", null));
         token.setRefreshToken(prefs.getString("REFRESH_TOKEN", null));

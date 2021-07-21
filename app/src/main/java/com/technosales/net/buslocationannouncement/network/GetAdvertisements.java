@@ -32,7 +32,7 @@ public class GetAdvertisements {
             @Override
             public void callback(String url, JSONObject object, AjaxStatus status) {
                 super.callback(url, object, status);
-                Log.i("insertAd", "" + object);
+//                Log.i("insertAd", "" + object);
                 if (object != null) {
                     databaseHelper.getWritableDatabase().execSQL("DELETE FROM " + DatabaseHelper.ADVERTISEMENT_TABLE);
                     JSONArray advArray = object.optJSONArray("adv");

@@ -23,9 +23,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.hornet.dateconverter.DateConverter;
 import com.hornet.dateconverter.Model;
 import com.technosales.net.buslocationannouncement.additionalfeatures.PayByCardActivity;
-import com.technosales.net.buslocationannouncement.additionalfeatures.QrCodeScanner;
 import com.technosales.net.buslocationannouncement.R;
 import com.technosales.net.buslocationannouncement.activity.TicketAndTracking;
+import com.technosales.net.buslocationannouncement.additionalfeatures.QRScanner;
 import com.technosales.net.buslocationannouncement.helper.DatabaseHelper;
 import com.technosales.net.buslocationannouncement.mosambeesupport.BeepLEDTest;
 import com.technosales.net.buslocationannouncement.mosambeesupport.Printer;
@@ -39,7 +39,6 @@ import com.technosales.net.buslocationannouncement.utils.UtilStrings;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.technosales.net.buslocationannouncement.utils.UtilStrings.ID_HELPER;
 import static com.technosales.net.buslocationannouncement.utils.UtilStrings.NULL;
 import static com.technosales.net.buslocationannouncement.utils.UtilStrings.STATUS;
 import static com.technosales.net.buslocationannouncement.utils.UtilStrings.TRANSACTION_TYPE_PAYMENT;
@@ -349,7 +348,7 @@ public class PriceAdapter extends RecyclerView.Adapter<PriceAdapter.MyViewHolder
                 ticketType = "full";
                 discountType = "(साधारण)";
             }
-            Intent intent = new Intent(context, QrCodeScanner.class);
+            Intent intent = new Intent(context, QRScanner.class);
             intent.putExtra(UtilStrings.PRICE_VALUE, priceList.price_value);
             if (ticketType != null && discountType != null) {
                 intent.putExtra(UtilStrings.TICKET_TYPE, ticketType);

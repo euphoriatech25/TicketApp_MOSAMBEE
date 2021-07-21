@@ -239,4 +239,11 @@
 
     <string name="Update_Price"><font size="25">मूल्य अपडेट</font></string>
     <string name="Card_Option"><font size="25">कार्ड विकल्प</font></string>
+
+    <string name="no_routes">Stations not assigned. Please assign Stations and retry.</string>
+    <string name="no_farelist">Amount not assigned.Please assign amount and retry.</string>
+    <string name="phone_digit_check">Please check your mobile number digit.</string>
+    <string name="please_wait">कृपया पर्खनुहोस्...</string>
+    <string name="check_your_internet">Check Your Internet Connection</string>
+
 </resources>

@@ -37,30 +37,26 @@ public class UtilStrings {
 
 
 
-    //            public static final String MAIN_URL = "http://172.16.1.131:85/route_api/public/api/";//server
-//    public static final String MAIN_URL = "http://202.52.240.149:85/route_api/public/api/";//test---8170613861
-    public static final String MAIN_URL = "http://202.52.240.149:82/route_api_v2/public/api/";//production
-    public static final String REGISTER_URL = MAIN_URL + "routeDevice";
+    public static final String MAIN_URL = "http://202.52.240.148:8092/ticketing/public/api/";//production
+    public static final String TICKET_URL = "http://202.52.240.148:8092/ticketing/public/api/";/// production
+    public static final String BASE_URL = "http://202.52.240.148:8092/ticketing/public/api/";/// production
+
+
+
+//    public static final String TICKET_PRICE_LIST = "http://117.121.237.226:83/routemanagement/api/get_fare_by_device/";
+
+
+    public static final String REGISTER_URL = MAIN_URL + "pos_machine/1/routes";
     public static final String ROUTE_STATION = MAIN_URL + "getRouteStation";
 
 
-    //            public static final String TICKET_URL = "http://172.16.1.131:85/routemanagement/api/";/// server
-
-    public static final String TICKET_URL = "http://117.121.237.226:83/routemanagement/api/";/// production
-    public static final String TICKET_URL_NEW = "http://202.52.240.148:8092/new_rm/api/";/// production
-
-    //    public static final String TICKET_URL = "http://202.52.240.149:85/routemanagement/api/";////testServer
 
 
-    public static final String TICKET_PRICE_LIST = "http://117.121.237.226:83/routemanagement/api/get_fare_by_device/";
-
-    //        public static final String TICKET_PRICE_LIST = "http://172.16.1.131:85/routemanagement/api/get_fare";
 
     public static final String UPDATE_TICKET = TICKET_URL + "update_device_info";
     public static final String RESET_DEVICE = TICKET_URL + "reset_device";
     public static final String TICKET_POST = TICKET_URL + "store_ticket";
-    public static final String TICKET_REGISTER_DEVICE = TICKET_URL + "register";
-    //    public static final String ADVERTISEMENTS_URL = "http://172.16.1.131:85/routemanagement/api/adv/getAdvertisement/";
+    public static final String TICKET_REGISTER_DEVICE = TICKET_URL + "pos_machines/login";
     public static final String ADVERTISEMENTS_URL = TICKET_URL + "adv/getAdvertisement/";
 
 
@@ -115,10 +111,16 @@ public class UtilStrings {
     public static final String network = "कृपया तपाईंको वाइफाइ जडान जाँच गर्नुहोस्";
     public static final String USERID = "user_id";
 
+    //S50卡
+    public final static int S50_CARD = 0x00;
+    //S70卡
+    public final static int S70_CARD = 0x01;
+
 
     //    new API Calls date 10/2/2020
     public static final String NEW_BASE_URL = "http://202.52.240.146:96/api/v1.0/";
     public static final String NEW_PASSENGER_REGISTER = "registration/register-card";
+    public static final String DEVICE_LOGIN = "pos_machines/login";
     public static final String NEW_ACCOUNT_TYPE = "utility/account-type";
     public static final String NEW_TRANSACTION = "transaction/transaction";
     public static final String UPDATE_DEVICE_INFO = "registration/update-device-info";
@@ -190,6 +192,13 @@ public class UtilStrings {
     public static final String TOTAL_PASSENGERS = "total_passengers";
     public static final String STATION_POS_PASSENGERS = "station_pos_passengers";
     public static final String STATION_TO = "station_to";
+    public static final String LOGIN_DEVICE = "pos_machines/login";
+    public static final String GET_STATION_LIST = "routes/{id}/stations";
+    public static final String GET_ROUTE_LIST = "pos_machines/{id}/routes";
+    public static final String GET_DEVICE_FARE_LIST = "routes/{id}/fare";
+
+    public static final String BROADCAST_ACTION = "com.technosales.net.buslocationannouncement.LocationChanged";
+
 
 //    public static final double latTest=27.6579493;
 //    public static final double lngTest=85.3225493;

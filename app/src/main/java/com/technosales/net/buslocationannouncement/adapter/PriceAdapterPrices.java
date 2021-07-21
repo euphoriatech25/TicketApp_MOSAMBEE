@@ -3,7 +3,6 @@ package com.technosales.net.buslocationannouncement.adapter;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -34,19 +33,17 @@ import com.hornet.dateconverter.Model;
 import com.technosales.net.buslocationannouncement.additionalfeatures.PayByCardActivity;
 import com.technosales.net.buslocationannouncement.R;
 import com.technosales.net.buslocationannouncement.activity.TicketAndTracking;
+import com.technosales.net.buslocationannouncement.additionalfeatures.QRScanner;
 import com.technosales.net.buslocationannouncement.helper.DatabaseHelper;
 import com.technosales.net.buslocationannouncement.mosambeesupport.BeepLEDTest;
-import com.technosales.net.buslocationannouncement.mosambeesupport.M1CardHandlerMosambee;
 import com.technosales.net.buslocationannouncement.mosambeesupport.Printer;
 import com.technosales.net.buslocationannouncement.pojo.PassengerCountList;
 import com.technosales.net.buslocationannouncement.pojo.RouteStationList;
 import com.technosales.net.buslocationannouncement.pojo.TicketInfoList;
 import com.technosales.net.buslocationannouncement.utils.GeneralUtils;
-import com.technosales.net.buslocationannouncement.additionalfeatures.QrCodeScanner;
 import com.technosales.net.buslocationannouncement.utils.TextToVoice;
 import com.technosales.net.buslocationannouncement.utils.UtilStrings;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static com.technosales.net.buslocationannouncement.utils.UtilStrings.NULL;
@@ -399,7 +396,7 @@ public class PriceAdapterPrices extends RecyclerView.Adapter<PriceAdapterPrices.
 
         helperId = preferencesHelper.getString(UtilStrings.ID_HELPER, "");
         if (helperId.length() > 0) {
-            Intent intent = new Intent(context, QrCodeScanner.class);
+            Intent intent = new Intent(context, QRScanner.class);
             if (price != null) {
                 intent.putExtra(UtilStrings.PRICE_VALUE, price);
             }

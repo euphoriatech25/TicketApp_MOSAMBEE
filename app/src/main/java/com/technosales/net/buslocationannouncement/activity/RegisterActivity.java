@@ -15,6 +15,7 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.technosales.net.buslocationannouncement.R;
 import com.technosales.net.buslocationannouncement.helper.DatabaseHelper;
 import com.technosales.net.buslocationannouncement.network.GetPricesFares;
+import com.technosales.net.buslocationannouncement.network.RegisterDevice;
 import com.technosales.net.buslocationannouncement.utils.GeneralUtils;
 import com.technosales.net.buslocationannouncement.utils.UtilStrings;
 
@@ -68,9 +69,10 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
                 if (GeneralUtils.isNetworkAvailable(this)) {
                     if (reg_device_number.getText().toString().trim().length() > 0) {
                         if (getMacAddr() != null) {
-                        new GetPricesFares(this, null).getFares(reg_device_number.getText().toString().trim(), getMacAddr(), false);
-                        sharedPreferences.edit().putString(UtilStrings.DEVICE_ID, reg_device_number.getText().toString().trim()).apply();
-                    }
+//                        new GetPricesFares(this, null).getFares(reg_device_number.getText().toString().trim(), getMacAddr(), false);
+                            RegisterDevice.RegisterDevice(this, reg_device_number.getText().toString().trim(),getMacAddr());
+                            sharedPreferences.edit().putString(UtilStrings.DEVICE_ID, reg_device_number.getText().toString().trim()).apply();
+                        }
                     } else {
                         reg_device_number.setError("Enter Device Number");
                     }

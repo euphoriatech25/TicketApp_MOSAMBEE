@@ -21,6 +21,7 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.technosales.net.buslocationannouncement.R;
 import com.technosales.net.buslocationannouncement.serverconn.ServerConfigNew;
@@ -41,6 +42,7 @@ import java.lang.annotation.Annotation;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import okhttp3.ResponseBody;
@@ -54,6 +56,21 @@ public class GeneralUtils {
         return conVal;
 
     }
+
+    public static void handleErrors(ResponseBody responseBody, Context context) {
+        ApiError apiErrors = GeneralUtils.convertErrors(responseBody);
+        if (responseBody != null) {
+            for (Map.Entry<String, List<String>> error : apiErrors.getErrors().entrySet()) {
+                if (error.getKey().equals("message")) {
+                    Toast.makeText(context, error.getValue().get(0), Toast.LENGTH_SHORT).show();
+                } else {
+                }
+            }
+        } else {
+            Toast.makeText(context, "something went wrong", Toast.LENGTH_SHORT).show();
+        }
+    }
+
     public static Bitmap mergeToPin(Bitmap firstImage, Bitmap secondImage) {
             Bitmap result = Bitmap.createBitmap(firstImage.getWidth() + secondImage.getWidth(), firstImage.getHeight(), firstImage.getConfig());
             Canvas canvas = new Canvas(result);

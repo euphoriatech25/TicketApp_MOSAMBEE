@@ -89,10 +89,14 @@ dependencies {
     implementation "com.github.bumptech.glide:glide:4.11.0"
     annotationProcessor "com.github.bumptech.glide:compiler:4.10.0"
 
-    implementation 'com.pax.market:paxstore-3rd-app-android-sdk:7.3.0'
     implementation("com.mikepenz:materialdrawer:6.0.9@aar") {
         transitive = true
     }
 
+    implementation 'org.conscrypt:conscrypt-android:2.2.1'
+
+    implementation 'me.dm7.barcodescanner:zxing:1.9.13'
+    implementation 'com.journeyapps:zxing-android-embedded:3.6.0@aar'
+    implementation 'com.google.zxing:core:3.3.3'
 
 }

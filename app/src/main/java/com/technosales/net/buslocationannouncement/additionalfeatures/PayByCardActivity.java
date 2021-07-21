@@ -51,6 +51,7 @@ import com.technosales.net.buslocationannouncement.pojo.BlockList;
 import com.technosales.net.buslocationannouncement.pojo.PassengerCountList;
 import com.technosales.net.buslocationannouncement.pojo.RouteStationList;
 import com.technosales.net.buslocationannouncement.pojo.TicketInfoList;
+import com.technosales.net.buslocationannouncement.pojo.TraModel;
 import com.technosales.net.buslocationannouncement.serverconn.Encrypt;
 import com.technosales.net.buslocationannouncement.serverconn.RetrofitInterface;
 import com.technosales.net.buslocationannouncement.serverconn.ServerConfigNew;
@@ -111,9 +112,14 @@ public class PayByCardActivity extends BaseActivity {
     String dateTime;
     boolean stopThread1, stopThread2, stopThread3, stopThread4;
     Context context;
-//    ProgressDialog pClick;
+    //    ProgressDialog pClick;
     int[] customerDetailsBlock = {CUSTOMERID, CUSTOMER_AMT, CUSTOMER_HASH, CUSTOMER_TRANSACTION_NO};
     int firstTransactionStatus = 0;
+    Dialog dialog;
+    String newRefHash;
+    String newBalance;
+    int orderPos, total_passenger;
+    byte[] value1 = GeneralUtils.decoderfun(SECRET_KEY);
     private TokenManager tokenManager;
     private String passengerId = "";
     private String passengerAmt = "";
@@ -121,7 +127,7 @@ public class PayByCardActivity extends BaseActivity {
     private String passengerTranNo = "";
     private String latestTransHash = "";
     private int TIME_DELAY = 500;
-    private TextView tv_cardNum, tv_amount, currentAmount,distance;
+    private TextView tv_cardNum, tv_amount, currentAmount, distance;
     private SharedPreferences preferences, helperPref;
     private String helperId, deviceId, amount, busName, toGetOff, source;
     private String nearest_name = "";
@@ -132,11 +138,6 @@ public class PayByCardActivity extends BaseActivity {
     private String printTransaction;
     private String ticketFirstId = "", ticketSecondId = "", ticketFirstAmount = "", ticketSecondAmount = "", ticketFirstHash = "", ticketSecondHash = "", latestFirstTranResponseHash;
     private String ticketId = "", tranCurrentHash = "";
-    Dialog dialog;
-    String newRefHash;
-    String newBalance;
-    int orderPos,total_passenger;
-    byte[] value1 = GeneralUtils.decoderfun(SECRET_KEY);
     private Handler handlerTransaction = new Handler() {
         public void handleMessage(android.os.Message msg) {
             this.obtainMessage();
@@ -235,31 +236,31 @@ public class PayByCardActivity extends BaseActivity {
                     Toast.makeText(PayByCardActivity.this, msg.obj.toString(), Toast.LENGTH_SHORT).show();
                     break;
                 case 200:
-                        if (!ticketId.equalsIgnoreCase("") && !tranCurrentHash.equalsIgnoreCase("")) {
-                            try {
-                                BeepLEDTest.beepSuccess();
-                            } catch (RemoteException e) {
-                                e.printStackTrace();
-                            }
-
-
-                            total_passenger=total_passenger+1;
-                            preferences.edit().putInt(UtilStrings.TOTAL_PASSENGERS, total_passenger).apply();
-                            PassengerCountList passengerCountList = new PassengerCountList();
-                            passengerCountList.passenger_station_position=orderPos;
-                            passengerCountList.passenger_direction=String.valueOf(preferences.getBoolean(UtilStrings.FORWARD, true));
-                            databaseHelper.insertPassengerCountList(passengerCountList);
-
-                            if (source != null && source.equalsIgnoreCase(UtilStrings.PLACE)) {
-                                price(ticketId, tranCurrentHash);
-                            } else if (source != null && source.equalsIgnoreCase(UtilStrings.PRICE)) {
-                                place(ticketId, tranCurrentHash);
-                            } else {
-                                normal(ticketId, tranCurrentHash);
-                            }
-                        } else {
+                    if (!ticketId.equalsIgnoreCase("") && !tranCurrentHash.equalsIgnoreCase("")) {
+                        try {
+                            BeepLEDTest.beepSuccess();
+                        } catch (RemoteException e) {
+                            e.printStackTrace();
                         }
-                    
+
+
+                        total_passenger = total_passenger + 1;
+                        preferences.edit().putInt(UtilStrings.TOTAL_PASSENGERS, total_passenger).apply();
+                        PassengerCountList passengerCountList = new PassengerCountList();
+                        passengerCountList.passenger_station_position = orderPos;
+                        passengerCountList.passenger_direction = String.valueOf(preferences.getBoolean(UtilStrings.FORWARD, true));
+                        databaseHelper.insertPassengerCountList(passengerCountList);
+
+                        if (source != null && source.equalsIgnoreCase(UtilStrings.PLACE)) {
+                            price(ticketId, tranCurrentHash);
+                        } else if (source != null && source.equalsIgnoreCase(UtilStrings.PRICE)) {
+                            place(ticketId, tranCurrentHash);
+                        } else {
+                            normal(ticketId, tranCurrentHash);
+                        }
+                    } else {
+                    }
+
                     break;
                 default:
                     break;
@@ -308,10 +309,10 @@ public class PayByCardActivity extends BaseActivity {
                         @Override
                         public void run() {
                             currentAmount.setText(GeneralUtils.getUnicodeNumber(passengerAmt));
-                            currentAmount.setTextColor(ContextCompat.getColor(PayByCardActivity.this,R.color.greenbb));
-                            tv_cardNum.setTextColor(ContextCompat.getColor(PayByCardActivity.this,R.color.greenbb));
-                            tv_amount.setTextColor(ContextCompat.getColor(PayByCardActivity.this,R.color.greenbb));
-                            distance.setTextColor(ContextCompat.getColor(PayByCardActivity.this,R.color.greenbb));
+                            currentAmount.setTextColor(ContextCompat.getColor(PayByCardActivity.this, R.color.greenbb));
+                            tv_cardNum.setTextColor(ContextCompat.getColor(PayByCardActivity.this, R.color.greenbb));
+                            tv_amount.setTextColor(ContextCompat.getColor(PayByCardActivity.this, R.color.greenbb));
+                            distance.setTextColor(ContextCompat.getColor(PayByCardActivity.this, R.color.greenbb));
                         }
                     });
                     getCustomerDetails();
@@ -358,8 +359,8 @@ public class PayByCardActivity extends BaseActivity {
         source = getIntent().getStringExtra(UtilStrings.SOURCE);
         dateTime = GeneralUtils.getTicketDate() + GeneralUtils.getTicketTime();
         totalDistance = getIntent().getFloatExtra(UtilStrings.TOTAL_DISTANCE, 0);
-        orderPos= getIntent().getIntExtra(UtilStrings.STATION_POS_PASSENGERS, 0);
-        total_passenger=  preferences.getInt(UtilStrings.TOTAL_PASSENGERS, 0);
+        orderPos = getIntent().getIntExtra(UtilStrings.STATION_POS_PASSENGERS, 0);
+        total_passenger = preferences.getInt(UtilStrings.TOTAL_PASSENGERS, 0);
 
 //       transafering code from below
         total_tickets = preferences.getInt(UtilStrings.TOTAL_TICKETS, 0);
@@ -368,13 +369,13 @@ public class PayByCardActivity extends BaseActivity {
         total_tickets = total_tickets + 1;
         total_collections = total_collections + Integer.parseInt(amount);
         total_collections_card = total_collections_card + Integer.parseInt(amount);
-        Log.i(TAG, "onCreate: "+toGetOff+nearest_name+station_name);
+        Log.i(TAG, "onCreate: " + toGetOff + nearest_name + station_name);
 
         station_name = getIntent().getStringExtra(UtilStrings.STATION_NAME);
         tokenManager = TokenManager.getInstance(getSharedPreferences("prefs", MODE_PRIVATE));
 
         if (amount != null) {
-            tv_amount.setText(amount+"/-");
+            tv_amount.setText(amount + "/-");
         }
 
         stopThread1 = false;
@@ -393,7 +394,6 @@ public class PayByCardActivity extends BaseActivity {
         }
 
 
-
         dialog = new Dialog(this);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
@@ -401,17 +401,17 @@ public class PayByCardActivity extends BaseActivity {
         dialog.setContentView(R.layout.customer_dialog);
 
         if (source != null && source.equalsIgnoreCase(UtilStrings.PLACE)) {
-            if(toGetOff==null){
-                distance.setText( nearest_name);
-            }else {
-                distance.setText( nearest_name + "-" + toGetOff );
+            if (toGetOff == null) {
+                distance.setText(nearest_name);
+            } else {
+                distance.setText(nearest_name + "-" + toGetOff);
             }
 
         } else if (source != null && source.equalsIgnoreCase(UtilStrings.PRICE)) {
-            if(station_name==null){
-                distance.setText( nearest_name);
-            }else {
-                distance.setText( nearest_name + "-" + station_name );
+            if (station_name == null) {
+                distance.setText(nearest_name);
+            } else {
+                distance.setText(nearest_name + "-" + station_name);
             }
 
         } else {
@@ -420,8 +420,7 @@ public class PayByCardActivity extends BaseActivity {
     }
 
     private void getCustomerDetails() {
-//        Log.i(TAG, "getCustomerDetails: " + (passengerId.equalsIgnoreCase("") && passengerAmt.equalsIgnoreCase("") && transactionHash.equalsIgnoreCase("") && passengerTranNo.equalsIgnoreCase("")));
-        if (!passengerId.equalsIgnoreCase("") && !passengerAmt.equalsIgnoreCase("") && !transactionHash.equalsIgnoreCase("") && !passengerTranNo.equalsIgnoreCase("")) {
+        if (!passengerId.equalsIgnoreCase("null") || !passengerAmt.equalsIgnoreCase("null") || !transactionHash.equalsIgnoreCase("null") || !passengerTranNo.equalsIgnoreCase("null")) {
             stopThread1 = true;
             stopThread2 = true;
 
@@ -451,7 +450,7 @@ public class PayByCardActivity extends BaseActivity {
                         public void run() {
                             if (!isFinishing()) {
                                 currentAmount.setText(GeneralUtils.getUnicodeNumber(String.valueOf(passengerAmt)));
-                                currentAmount.setTextColor(ContextCompat.getColor(PayByCardActivity.this,R.color.colorAccent));
+                                currentAmount.setTextColor(ContextCompat.getColor(PayByCardActivity.this, R.color.colorAccent));
                                 showRechargeError("तपाईंसँग पर्याप्त ब्यालेन्स छैन। कृपया रिचार्ज गर्नुहोस्।");
                             }
                         }
@@ -468,21 +467,14 @@ public class PayByCardActivity extends BaseActivity {
                 });
             }
         } else {
-            final Handler handler = new Handler(Looper.getMainLooper());
-            handler.postDelayed(new Runnable() {
+            runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            if (!isFinishing()) {
-                                showError("यो कार्ड दर्ता गरिएको छैन।");
-                            }
-                        }
-                    });
+                    if (!isFinishing()) {
+                        showError("यो कार्ड दर्ता गरिएको छैन।");
+                    }
                 }
-            }, 5000);
-
+            });
         }
     }
 
@@ -503,16 +495,17 @@ public class PayByCardActivity extends BaseActivity {
         stopThread3 = true;
 //        Log.i(TAG, "sendCardTransactionToServer: " + "reached here " + finalCusFirstTransId + " " + finalCusFirstTransAmt + " " + finalCusFirstTransHash);
         byte[] value1 = GeneralUtils.decoderfun(SECRET_KEY);
-        String amt = null;  String hash = null;
+        String amt = null;
+        String hash = null;
         try {
             amt = Encrypt.encrypt(value1, finalCusFirstTransAmt);
             finalCusFirstTransHash = finalCusFirstTransHash.replace("\n", "");
-            hash=Encrypt.encrypt(value1,finalCusFirstTransHash + finalCusFirstTransId + passengerId + finalCusFirstTransAmt);
+            hash = Encrypt.encrypt(value1, finalCusFirstTransHash + finalCusFirstTransId + passengerId + finalCusFirstTransAmt);
 
         } catch (Exception e) {
             e.printStackTrace();
         }
-//        Log.i(TAG, "sendCardTransactionToServer: " + finalCusFirstTransHash + " " + transactionHash);
+
         if (GeneralUtils.isNetworkAvailable(this)) {
             Map<String, Object> params = new HashMap<>();
             params.put("helper_id", helperId);
@@ -530,7 +523,7 @@ public class PayByCardActivity extends BaseActivity {
             params.put("offlineRefId", "null");
             params.put("status", STATUS);
             params.put("referenceId", "0");
-            params.put("referenceHash",hash );
+            params.put("referenceHash", hash);
             params.put("passenger_id", passengerId);
             params.put("device_id", getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).getString(UtilStrings.DEVICE_ID, ""));
 
@@ -603,6 +596,7 @@ public class PayByCardActivity extends BaseActivity {
                         }
                     }
                 }
+
                 @Override
                 public void onFailure(Call<TraModel> call, Throwable t) {
                     Toast.makeText(PayByCardActivity.this, t.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
@@ -633,13 +627,13 @@ public class PayByCardActivity extends BaseActivity {
         }
 //        Log.i(TAG, "sendCardTransactionToServerSecond: " + "i m in sec trans" + ticketSecondId + " " + ticketSecondAmount + " " + transactionHash);
 
-        String newHash=null;
+        String newHash = null;
         byte[] value1 = GeneralUtils.decoderfun(SECRET_KEY);
         String amt = null;
         try {
             amt = Encrypt.encrypt(value1, ticketSecondAmount);
             transactionHash = transactionHash.replace("\n", "");
-            newHash =  Encrypt.encrypt(value1,transactionHash + ticketSecondId + passengerId + ticketSecondAmount);
+            newHash = Encrypt.encrypt(value1, transactionHash + ticketSecondId + passengerId + ticketSecondAmount);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -725,49 +719,49 @@ public class PayByCardActivity extends BaseActivity {
 
     private void startTransactionProcess(String transactionHashLatest) {
         if (!validate()) {
-                String valueOfTickets = "";
-               valueOfTickets = String.format("%04d", total_tickets);
+            String valueOfTickets = "";
+            valueOfTickets = String.format("%04d", total_tickets);
 
-                ticketId = deviceId.substring(deviceId.length() - 2) + dateTime + "" + valueOfTickets;
+            ticketId = deviceId.substring(deviceId.length() - 2) + dateTime + "" + valueOfTickets;
 //                tranCurrentHash = BCrypt.withDefaults().hashToString(10, (transactionHashLatest + ticketId + passengerId + GeneralUtils.getUnicodeReverse(amount)).toCharArray());
 
             try {
                 transactionHashLatest = transactionHashLatest.replace("\n", "");
-                tranCurrentHash = Encrypt.encrypt(value1,transactionHashLatest + ticketId + passengerId + GeneralUtils.getUnicodeReverse(amount));
+                tranCurrentHash = Encrypt.encrypt(value1, transactionHashLatest + ticketId + passengerId + GeneralUtils.getUnicodeReverse(amount));
             } catch (Exception e) {
                 e.printStackTrace();
             }
 
             String newWritableHash = tranCurrentHash.substring(tranCurrentHash.length() - 9);
-            Log.i(TAG, "startTransactionProcess: "+newWritableHash);
-                reducedValue = Integer.valueOf(passengerAmt)-(Integer.valueOf(GeneralUtils.getUnicodeReverse(amount)));
+            Log.i(TAG, "startTransactionProcess: " + newWritableHash);
+            reducedValue = Integer.valueOf(passengerAmt) - (Integer.valueOf(GeneralUtils.getUnicodeReverse(amount)));
 
 //            writing details to blocks
-                newRefHash  = Base64.encodeToString(newWritableHash.getBytes(), Base64.DEFAULT);
-                newBalance  = Base64.encodeToString(String.valueOf(reducedValue).getBytes(), Base64.DEFAULT);
+            newRefHash = Base64.encodeToString(newWritableHash.getBytes(), Base64.DEFAULT);
+            newBalance = Base64.encodeToString(String.valueOf(reducedValue).getBytes(), Base64.DEFAULT);
 
             if (GeneralUtils.isNetworkAvailable(PayByCardActivity.this)) {
-                    if (!isFinishing()) {
-                        setNewTransaction(newBalance, newRefHash, ticketId, tranCurrentHash,  dialog);
-                    }
-                } else {
-                    if (passengerTranNo.equalsIgnoreCase("2")) {
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                errorCardStorageFull();
-                            }
-                        });
-                    } else {
-                        String newRefHash1 = Base64.encodeToString(transactionHashLatest.getBytes(), Base64.DEFAULT);
-
-                        if (passengerTranNo.equalsIgnoreCase("0")) {
-                            setFirstOfflineTransaction(newBalance, newRefHash1, newRefHash, ticketId, tranCurrentHash, dialog);
-                        } else if (passengerTranNo.equalsIgnoreCase("1")) {
-                            secondOfflineTransaction(newBalance, newRefHash1, newRefHash, ticketId, tranCurrentHash, dialog);
+                if (!isFinishing()) {
+                    setNewTransaction(newBalance, newRefHash, ticketId, tranCurrentHash, dialog);
+                }
+            } else {
+                if (passengerTranNo.equalsIgnoreCase("2")) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            errorCardStorageFull();
                         }
+                    });
+                } else {
+                    String newRefHash1 = Base64.encodeToString(transactionHashLatest.getBytes(), Base64.DEFAULT);
+
+                    if (passengerTranNo.equalsIgnoreCase("0")) {
+                        setFirstOfflineTransaction(newBalance, newRefHash1, newRefHash, ticketId, tranCurrentHash, dialog);
+                    } else if (passengerTranNo.equalsIgnoreCase("1")) {
+                        secondOfflineTransaction(newBalance, newRefHash1, newRefHash, ticketId, tranCurrentHash, dialog);
                     }
                 }
+            }
 
         } else {
             runOnUiThread(new Runnable() {
@@ -919,9 +913,8 @@ public class PayByCardActivity extends BaseActivity {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-
                                 Toast.makeText(PayByCardActivity.this, "यो कार्ड ब्लक गरिएको छ। ", Toast.LENGTH_SHORT).show();
-//                                startActivity(new Intent(PayByCardActivity.this, TicketAndTracking.class));
+                                startActivity(new Intent(PayByCardActivity.this, TicketAndTracking.class));
                                 finish();
                             }
                         });
@@ -1077,7 +1070,7 @@ public class PayByCardActivity extends BaseActivity {
                 } catch (RemoteException e) {
                     e.printStackTrace();
                 }
-                Intent intent=new Intent(this,TicketAndTracking.class);
+                Intent intent = new Intent(this, TicketAndTracking.class);
                 startActivity(intent);
                 finish();
             } else {
@@ -1096,7 +1089,7 @@ public class PayByCardActivity extends BaseActivity {
 
     private void price(String ticketId, String tranCurrentHash) {
         ///startProcess
-        Log.i(TAG, "onCreate: "+toGetOff+nearest_name+station_name);
+        Log.i(TAG, "onCreate: " + toGetOff + nearest_name + station_name);
 
 //        Log.i("TAG", "place: " + ticketId + " " + tranCurrentHash);
         if (helperId.length() != 0) {
@@ -1163,7 +1156,7 @@ public class PayByCardActivity extends BaseActivity {
                     e.printStackTrace();
                 }
                 dialog.dismiss();
-                Intent intent=new Intent(this,TicketAndTracking.class);
+                Intent intent = new Intent(this, TicketAndTracking.class);
                 startActivity(intent);
                 finish();
             } else {
@@ -1184,7 +1177,7 @@ public class PayByCardActivity extends BaseActivity {
     }
 
     private void place(String ticketId, String tranCurrentHash) {
-        Log.i(TAG, "onCreate: "+toGetOff+nearest_name+station_name);
+        Log.i(TAG, "onCreate: " + toGetOff + nearest_name + station_name);
 
 //        Log.i("TAG", "place: " + ticketId + " " + tranCurrentHash);
         ///startProcess
@@ -1260,7 +1253,7 @@ public class PayByCardActivity extends BaseActivity {
                     e.printStackTrace();
                 }
                 dialog.dismiss();
-                 Intent intent=new Intent(this,TicketAndTracking.class);
+                Intent intent = new Intent(this, TicketAndTracking.class);
                 startActivity(intent);
                 finish();
 

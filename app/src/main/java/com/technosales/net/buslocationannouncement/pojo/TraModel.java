@@ -1,4 +1,4 @@
-package com.technosales.net.buslocationannouncement.additionalfeatures;
+package com.technosales.net.buslocationannouncement.pojo;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;

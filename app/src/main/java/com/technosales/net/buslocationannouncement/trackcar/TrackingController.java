@@ -44,6 +44,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Random;
 
+
+
+import static com.technosales.net.buslocationannouncement.utils.UtilStrings.BROADCAST_ACTION;
+
 public class TrackingController implements PositionProvider.PositionListener, NetworkManager.NetworkHandler {
 
     private static final String TAG = com.technosales.net.buslocationannouncement.trackcar.TrackingController.class.getSimpleName();
@@ -102,6 +106,45 @@ public class TrackingController implements PositionProvider.PositionListener, Ne
 
         PowerManager powerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
         wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, getClass().getName());
+
+
+//        new Handler().postDelayed(new Runnable() {
+//            @Override
+//            public void run() {
+//                Intent intent = new Intent(BROADCAST_ACTION);
+//                intent.putExtra("locationChange", true);
+//                context.sendBroadcast(intent);
+//
+//                new Handler().postDelayed(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                     Intent intent = new Intent(BROADCAST_ACTION);
+//                        intent.putExtra("locationChange", true);
+//                        context.sendBroadcast(intent);
+//                        new Handler().postDelayed(new Runnable() {
+//                            @Override
+//                            public void run() {
+
+//                                Intent intent = new Intent(BROADCAST_ACTION);
+//                                intent.putExtra("locationChange", true);
+//                                context.sendBroadcast(intent);
+//
+//
+//                                new Handler().postDelayed(new Runnable() {
+//                                    @Override
+//                                    public void run() {
+//                                        Intent intent = new Intent(BROADCAST_ACTION);
+//                                        intent.putExtra("locationChange", true);
+//                                        context.sendBroadcast(intent);
+//                                    }
+//                                },5000);
+//                            }
+//                        },5000);
+//                    }
+//                },5000);
+//
+//            }
+//        },5000);
 
     }
 
@@ -195,15 +238,22 @@ public class TrackingController implements PositionProvider.PositionListener, Ne
                             preOrder = currentOrder;
                             preOrderId = currentOrderId;
 
-                            Log.i(TAG, "onPositionUpdate: " + routeStationList.station_name);
 
-                            Intent i1 = new Intent(context, TicketAndTracking.class);
-                            i1.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//                                i1.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-//                                i1.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-//                                i1.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-//                                i1.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                            context.startActivity(i1);
+
+                            Intent intent = new Intent(BROADCAST_ACTION);
+                            intent.putExtra("locationChange", true);
+                            context.sendBroadcast(intent);
+
+//                            ((TicketAndTracking)context).finishAffinity();
+//                            Intent i1 = new Intent(context, TicketAndTracking.class);
+//                            i1.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//                            i1.putExtra("change",true);
+////                                i1.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+////                                i1.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+////                                i1.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+////                                i1.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//                            context.startActivity(i1);
+
 
                             speakStation(routeStationList.station_name, nextStation, currentOrderId);
                         }
@@ -263,14 +313,22 @@ public class TrackingController implements PositionProvider.PositionListener, Ne
                             preOrder = currentOrder;
                             preOrderId = currentOrderId;
 
-                            Intent i1 = new Intent(context, TicketAndTracking.class);
-                            i1.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//                                i1.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-//                                i1.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-//                                i1.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-//                                i1.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                            context.startActivity(i1);
-                            speakStation(routeStationList.station_name, nextStation, currentOrderId);
+
+                            Intent intent = new Intent(BROADCAST_ACTION);
+                            intent.putExtra("locationChange", true);
+                            context.sendBroadcast(intent);
+
+
+//                            ( (TicketAndTracking)context).finishAffinity();
+//                            Intent i1 = new Intent(context, TicketAndTracking.class);
+//                            i1.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//                            i1.putExtra("change",true);
+////                                i1.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+////                                i1.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+////                                i1.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+////                                i1.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//                            context.startActivity(i1);
+//                            speakStation(routeStationList.station_name, nextStation, currentOrderId);
                         }
                         break;
                     }
@@ -502,12 +560,11 @@ public class TrackingController implements PositionProvider.PositionListener, Ne
                 }
             }
         }, GeneralUtils.getDelayTime(speakVoice.length()));
-
     }
-
 }
 
 
+//
 //    public class TrackingController implements PositionProvider.PositionListener, NetworkManager.NetworkHandler {
 //
 //        private static final String TAG = TrackingController.class.getSimpleName();
@@ -548,7 +605,6 @@ public class TrackingController implements PositionProvider.PositionListener, Ne
 ////                handlerloop.postDelayed(this, 10000);
 ////            }
 ////        };
-//
 //        private TrackingListener mListener;
 //
 //        public interface TrackingListener{

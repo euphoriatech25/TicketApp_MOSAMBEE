@@ -11,13 +11,17 @@
         android:layout_height="0dp"
         android:background="@android:color/transparent"
         android:layout_weight="1" />
-
+<LinearLayout
+    android:layout_width="wrap_content"
+    android:background="@color/colorPrimary"
+    android:layout_height="wrap_content">
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/white_color"
         android:layout_marginBottom="40dp"
         android:gravity="center"
+        android:layout_margin="10dp"
         android:orientation="horizontal">
 
         <ProgressBar
@@ -33,6 +37,16 @@
             android:text="कृपया पर्खनुहोस्..."
             android:textSize="20dp"
             android:textStyle="bold" />
+        <View
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_weight="1"/>
+        <ImageButton
+            android:id="@+id/cancel_dialog"
+            android:layout_width="30dp"
+            android:layout_marginBottom="15dp"
+            android:layout_height="30dp"
+            android:src="@drawable/ic_baseline_close_24"/>
     </LinearLayout>
-
+</LinearLayout>
 </LinearLayout>

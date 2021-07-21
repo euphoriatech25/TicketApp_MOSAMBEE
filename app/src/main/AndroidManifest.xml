@@ -43,17 +43,16 @@
             android:theme="@style/Theme.AppCompat.Light.NoActionBar">
 
         </activity>
-
+        <activity
+            android:name="com.journeyapps.barcodescanner.CaptureActivity"
+            android:screenOrientation="fullSensor"
+            tools:replace="screenOrientation" />
         <activity
             android:name=".additionalfeatures.PayByCardActivity"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
 
         <activity
-            android:name=".additionalfeatures.QrCodeScanner"
-            android:screenOrientation="portrait"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
-        <activity
-            android:name=".mosambeesupport.TestActivity"
+            android:name=".additionalfeatures.QRScanner"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
 
